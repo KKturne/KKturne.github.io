@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Race Admin">
 <title>Race Admin — Knauskoret Pula 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #080e14;
@@ -247,6 +248,21 @@
 
   /* RESET */
   .reset-seksjon { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .eksport-btn {
+    width: 100%;
+    background: #0a1a0f;
+    border: 1.5px solid #1a5a2a;
+    color: var(--green);
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-bottom: 10px;
+    transition: background .15s;
+  }
+  .eksport-btn:active { background: #0f2a18; }
   .reset-btn {
     width: 100%;
     background: #1a0808;
@@ -351,6 +367,15 @@
         Bin ID: <code style="color:var(--text)">6a36672af5f4af5e2913c2f1</code><br>
         Status: <span id="conn-status" style="color:var(--muted)">sjekker…</span>
       </div>
+    </div>
+    <div class="kort-wrap">
+      <div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:8px">📊 Eksporter resultater</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+        Laster ned en Excel-fil med to ark:<br>
+        <strong style="color:var(--text)">Sammendrag</strong> — én rad per lag<br>
+        <strong style="color:var(--text)">Events</strong> — én rad per event
+      </div>
+      <button class="eksport-btn" onclick="eksporterResultater()">📥 Last ned resultater (.xlsx)</button>
     </div>
     <div class="reset-seksjon">
       <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#e05050;margin-bottom:10px">⚠️ Faresone</div>
@@ -889,6 +914,131 @@ function renderLagOversikt(){
   document.getElementById("lag-oversikt-innhold").innerHTML = h;
 }
 
+// ── Eksporter resultater ──
+function eksporterResultater(){
+  const tracker = cachetData?.race_tracker || {};
+  const lagNavn = Object.keys(LAG_FARGER); // fast rekkefølge Lag 1–10
+
+  // Hjelpere
+  const tsStr = ts => ts ? new Date(ts).toLocaleTimeString("no-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "";
+  const msStr = ms => {
+    if(!ms || ms < 0) return "";
+    const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
+    return h>0 ? `${h}t ${m%60}m ${s%60}s` : `${m}m ${s%60}s`;
+  };
+
+  // ── ARK 1: Sammendrag ──
+  const sammendragHeader = [
+    "Plassering","Lag","Farge","Avgang","Starttid (BUEN)",
+    "Måltid","Løpstid (fra avgang)","Løpstid (fra BUEN)",
+    "Ventetid (avgang→BUEN)","Poster fullført",
+    "Detour Sergius-buen","Detour Havnepromenaden","I mål"
+  ];
+
+  // Beregn plassering: i mål etter tid → aktive etter poster → ikke startet
+  const scoret = lagNavn.map(navn => {
+    const tData = tracker[navn];
+    const events = tData?.events || [];
+    const {antall, maal} = lagFremgang(events);
+    const start = startTs(events);
+    const maalTid = maalTs(events);
+    const aTs = avgangsTs(navn);
+
+    // Detour-valg
+    const detourSergius = events.find(e=>e.type==="detour_valg" && e.detail?.bindende===false);
+    const detourHavn    = events.find(e=>e.type==="detour_valg" && e.detail?.bindende===true);
+
+    return {
+      navn, events, antall: Math.min(antall, N_POSTER), maal: !!maal,
+      start, maalTid, aTs,
+      lopstidAvgang: (maalTid && aTs)    ? maalTid - aTs    : null,
+      lopstidBuen:   (maalTid && start)  ? maalTid - start  : null,
+      ventetid:      (start && aTs && start > aTs) ? start - aTs : null,
+      detourSergius: detourSergius?.detail?.valg || "",
+      detourHavn:    detourHavn?.detail?.valg || "",
+    };
+  }).sort((a,b) => {
+    if(a.maal && b.maal) return (a.lopstidAvgang||0) - (b.lopstidAvgang||0);
+    if(a.maal) return -1; if(b.maal) return 1;
+    return b.antall - a.antall;
+  });
+
+  const sammendragRader = scoret.map((l, i) => [
+    l.maal ? i+1 : "",
+    l.navn,
+    LAG_FARGER[l.navn],
+    LAG_AVGANG[l.navn],
+    tsStr(l.start),
+    tsStr(l.maalTid),
+    msStr(l.lopstidAvgang),
+    msStr(l.lopstidBuen),
+    msStr(l.ventetid),
+    `${l.antall}/${N_POSTER}`,
+    l.detourSergius,
+    l.detourHavn,
+    l.maal ? "Ja" : "Nei"
+  ]);
+
+  // ── ARK 2: Events ──
+  const eventsHeader = [
+    "Lag","Farge","Avgang","Event-type","Post #","Post navn",
+    "Tidspunkt","Klokkeslett","Tid siden avgang","Tid siden forrige event",
+    "Detaljer","Bindende"
+  ];
+
+  const eventsRader = [];
+  lagNavn.forEach(navn => {
+    const tData = tracker[navn];
+    const events = (tData?.events || []).slice().sort((a,b)=>a.ts-b.ts);
+    const aTs = avgangsTs(navn);
+
+    events.forEach((e, i) => {
+      const forrige = i > 0 ? events[i-1] : null;
+      const diffForrige = forrige ? e.ts - forrige.ts : null;
+      const diffAvgang  = (aTs && e.ts > aTs) ? e.ts - aTs : null;
+
+      let detaljer = "";
+      let bindende = "";
+      if(e.type==="post_fullfort") detaljer = e.detail?.postNavn || "";
+      if(e.type==="arrival")       detaljer = e.detail?.postNavn || "";
+      if(e.type==="detour_valg"){
+        detaljer = e.detail?.valg || "";
+        bindende = e.detail?.bindende ? "Ja" : "Nei";
+      }
+      if(e.type==="maal") detaljer = e.detail?.postNavn || "Pula Arena — Mål";
+
+      eventsRader.push([
+        navn,
+        LAG_FARGER[navn],
+        LAG_AVGANG[navn],
+        e.type,
+        e.detail?.post ?? "",
+        e.detail?.postNavn || e.detail?.valg || "",
+        e.ts,
+        tsStr(e.ts),
+        msStr(diffAvgang),
+        msStr(diffForrige),
+        detaljer,
+        bindende
+      ]);
+    });
+  });
+
+  // ── Bygg workbook ──
+  const wb = XLSX.utils.book_new();
+
+  const ws1 = XLSX.utils.aoa_to_sheet([sammendragHeader, ...sammendragRader]);
+  ws1["!cols"] = [6,12,10,8,14,10,18,16,18,10,20,22,6].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws1, "Sammendrag");
+
+  const ws2 = XLSX.utils.aoa_to_sheet([eventsHeader, ...eventsRader]);
+  ws2["!cols"] = [12,10,8,14,6,22,14,10,16,18,22,8].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws2, "Events");
+
+  const dato = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `AmazingRace_Pula2026_${dato}.xlsx`);
+}
+
 // ── Auto-refresh ──
 function startRefresh(){
   clearInterval(refreshTimer);
@@ -914,7 +1064,7 @@ function byttTema(){
 </script>
 
 <div class="versjon-footer">
-  Race Admin <span>·</span> v0.1.5 <span>·</span> Knauskoret Pula 2026
+  Race Admin <span>·</span> v0.1.6 <span>·</span> Knauskoret Pula 2026
 </div>
 </body>
 </html>
