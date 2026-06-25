@@ -23,12 +23,27 @@
     --muted: #4a6a8a;
     --dim: #2a4a6a;
   }
+  body.lys {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --card2: #e8eef4;
+    --border: #c8d8e8;
+    --gold: #c49a00;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --text: #1a2a3a;
+    --muted: #6a8aaa;
+    --dim: #a0b8cc;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: system-ui, -apple-system, sans-serif;
     min-height: 100dvh;
+    transition: background .25s, color .25s;
   }
 
   /* HEADER */
@@ -63,7 +78,28 @@
   .refresh-btn.spinning .spin { animation: spin .8s linear infinite; display: inline-block; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* TABS */
+  .theme-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    -webkit-appearance: none;
+    transition: background .2s;
+  }
+  .hdr-knapper { display: flex; gap: 8px; align-items: center; }
+
+  /* VERSJON-FOOTER */
+  .versjon-footer {
+    text-align: center;
+    padding: 24px 16px 32px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .03em;
+  }
+  .versjon-footer span { opacity: .5; }
   .tabs {
     display: flex;
     border-bottom: 1px solid var(--border);
@@ -250,6 +286,15 @@
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
   .kort-wrap { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 14px; margin-bottom: 12px; }
+
+  /* LAG-OVERSIKT */
+  .lag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 12px; padding: 4px 0; }
+  .lag-info-kort { background: var(--card); border-radius: 14px; overflow: hidden; }
+  .lag-info-kort.til-maal { animation: rodGlod 1.4s ease-in-out infinite; }
+  @keyframes rodGlod {
+    0%,100% { box-shadow: 0 0 0px #e0051500; }
+    50%      { box-shadow: 0 0 18px #e0051588, 0 0 6px #e0051544 inset; }
+  }
 </style>
 </head>
 <body>
@@ -259,15 +304,19 @@
     <div class="hdr-title">🏁 Race Admin</div>
     <div class="hdr-sub">Knauskoret · Pula 9. oktober 2026</div>
   </div>
-  <button class="refresh-btn" onclick="hentData(true)">
-    <span class="spin">🔄</span> Oppdater
-  </button>
+  <div class="hdr-knapper">
+    <button class="theme-btn" id="theme-btn" onclick="byttTema()" title="Bytt tema">🌙</button>
+    <button class="refresh-btn" onclick="hentData(true)">
+      <span class="spin">🔄</span> Oppdater
+    </button>
+  </div>
 </div>
 
 <div class="tabs">
   <div class="tab active" onclick="byttTab('oversikt', this)">📡 Oversikt</div>
   <div class="tab" onclick="byttTab('plassering', this)">🏆 Plassering</div>
   <div class="tab" onclick="byttTab('statistikk', this)">📊 Statistikk</div>
+  <div class="tab" onclick="byttTab('lag', this)">👥 Lag</div>
   <div class="tab" onclick="byttTab('admin', this)">⚙️ Admin</div>
 </div>
 
@@ -289,6 +338,10 @@
 
   <div id="tab-statistikk" style="display:none">
     <div id="statistikk-innhold"></div>
+  </div>
+
+  <div id="tab-lag" style="display:none">
+    <div id="lag-oversikt-innhold"></div>
   </div>
 
   <div id="tab-admin" style="display:none">
@@ -441,9 +494,11 @@ async function hentData(manuelt=false){
 }
 
 function renderAlt(){
+  window._cachedTracker = cachetData?.race_tracker || {};
   renderOversikt();
   if(aktivTab==="plassering") renderPlassering();
   if(aktivTab==="statistikk") renderStatistikk();
+  if(aktivTab==="lag") renderLagOversikt();
 }
 
 function renderOversikt(){
@@ -463,11 +518,20 @@ function renderOversikt(){
   document.getElementById("s-events").textContent = totEvents;
 
   if(!lag.length){
-    document.getElementById("lag-liste").innerHTML=`
-      <div class="tom-state">
-        <div class="ikon">🏁</div>
-        <p>Ingen lag har startet ennå.<br>Data vises her når lagene begynner å løpe.</p>
+    let tomH = `<div style="margin-bottom:12px;font-size:12px;color:var(--muted);text-align:center;padding:8px 0">Venter på at lagene starter…</div>`;
+    tomH += `<div style="display:flex;flex-direction:column;gap:6px">`;
+    Object.keys(LAG_FARGER).forEach(lagNavn => {
+      const clr = LAG_FARGER[lagNavn];
+      const avgang = LAG_AVGANG[lagNavn];
+      tomH += `<div style="display:flex;align-items:center;gap:10px;background:var(--card);border-radius:10px;padding:10px 14px;border:1px solid var(--border)">
+        <div style="width:12px;height:12px;border-radius:50%;background:${clr};flex-shrink:0"></div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);flex:1">${lagNavn}</div>
+        <div style="font-size:12px;color:var(--muted)">⏰ ${avgang}</div>
+        <div style="font-size:11px;color:var(--muted)">Ikke startet</div>
       </div>`;
+    });
+    tomH += `</div>`;
+    document.getElementById("lag-liste").innerHTML = tomH;
     return;
   }
 
@@ -692,12 +756,137 @@ async function nullstillTracker(){
 function byttTab(tab, el){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   el.classList.add("active");
-  ["oversikt","plassering","statistikk","admin"].forEach(t=>{
+  ["oversikt","plassering","statistikk","lag","admin"].forEach(t=>{
     document.getElementById("tab-"+t).style.display = t===tab?"block":"none";
   });
   aktivTab = tab;
   if(tab==="plassering") renderPlassering();
   if(tab==="statistikk") renderStatistikk();
+  if(tab==="lag") renderLagOversikt();
+}
+
+// ── Lagkonstanter (synkronisert med index.html v0.9.80) ──
+const LAG_FARGER = {
+  "Lag 1":"#ef4444","Lag 2":"#f97316","Lag 3":"#eab308","Lag 4":"#22c55e",
+  "Lag 5":"#14b8a6","Lag 6":"#3b82f6","Lag 7":"#8b5cf6","Lag 8":"#ec4899",
+  "Lag 9":"#f43f5e","Lag 10":"#a78bfa"
+};
+const LAG_AVGANG = {
+  "Lag 1":"10:00","Lag 2":"10:06","Lag 3":"10:12","Lag 4":"10:18",
+  "Lag 5":"10:24","Lag 6":"10:30","Lag 7":"10:36","Lag 8":"10:42",
+  "Lag 9":"10:48","Lag 10":"10:54"
+};
+const DELTAKERE = {
+  "Ada":              {lag:"Lag 9",  status:"Kruser",stemme:"1.sopran"},
+  "Allis":            {lag:"Lag 3",  status:"Aktiv", stemme:"1.sopran"},
+  "Amanda":           {lag:"Lag 7",  status:"Aktiv", stemme:"2.sopran"},
+  "Andrea":           {lag:"Lag 1",  status:"Kruser",stemme:"2.alt"},
+  "Anette":           {lag:"Lag 1",  status:"Aktiv", stemme:"1.sopran"},
+  "Anine":            {lag:"Lag 4",  status:"Kruser",stemme:"2.sopran"},
+  "Balder":           {lag:"Lag 10", status:"Aktiv", stemme:"2.tenor"},
+  "Brage":            {lag:"Lag 7",  status:"Kruser",stemme:"1.bass"},
+  "Eila":             {lag:"Lag 10", status:"Kruser",stemme:"2.sopran"},
+  "Eirin":            {lag:"Lag 3",  status:"Aktiv", stemme:"2.alt"},
+  "Eline":            {lag:"Lag 6",  status:"Kruser",stemme:"2.sopran"},
+  "Emilie":           {lag:"Lag 6",  status:"Aktiv", stemme:"1.alt"},
+  "Emma Maja":        {lag:"Lag 8",  status:"Kruser",stemme:"2.alt"},
+  "Henrik":           {lag:"Lag 4",  status:"Aktiv", stemme:"1.tenor"},
+  "Ingerid":          {lag:"Lag 5",  status:"Kruser",stemme:"2.alt"},
+  "Iver":             {lag:"Lag 6",  status:"Kruser",stemme:"2.bass"},
+  "Jonas":            {lag:"Lag 2",  status:"Aktiv", stemme:"2.tenor"},
+  "Jørgen":           {lag:"Lag 8",  status:"Kruser",stemme:"2.tenor"},
+  "Kristoffer":       {lag:"Lag 3",  status:"Kruser",stemme:"2.bass"},
+  "Lea":              {lag:"Lag 2",  status:"Kruser",stemme:"1.alt"},
+  "Marie":            {lag:"Lag 8",  status:"Aktiv", stemme:"2.sopran"},
+  "Marius":           {lag:"Lag 9",  status:"Aktiv", stemme:"2.bass"},
+  "Nina":             {lag:"Lag 2",  status:"Aktiv", stemme:"2.alt"},
+  "OJ":               {lag:"Lag 5",  status:"Kruser",stemme:"1.bass"},
+  "Sander":           {lag:"Lag 4",  status:"Aktiv", stemme:"2.bass"},
+  "Thien":            {lag:"Lag 1",  status:"Aktiv", stemme:"2.tenor"},
+  "Torbjørn Aune":    {lag:"Lag 7",  status:"Kruser",stemme:"1.tenor"},
+  "Torbjørn Eriksen": {lag:"Lag 9",  status:"Kruser",stemme:"1.tenor"},
+  "Vera":             {lag:"Lag 5",  status:"Aktiv", stemme:"1.alt"},
+  "Vy":               {lag:"Lag 10", status:"Kruser",stemme:"2.alt"},
+};
+
+// Bygg lag→deltakerliste for rask oppslag
+const LAG_DELTAKERE = {};
+Object.entries(DELTAKERE).forEach(([navn, info]) => {
+  if(!LAG_DELTAKERE[info.lag]) LAG_DELTAKERE[info.lag] = [];
+  LAG_DELTAKERE[info.lag].push({n:navn, status:info.status, stemme:info.stemme});
+});
+
+// Avgangstidspunkt som timestamp (dato: 9. okt 2026)
+function avgangsTs(lagNavn) {
+  const kl = LAG_AVGANG[lagNavn];
+  if(!kl) return null;
+  return new Date(`2026-10-09T${kl}:00`).getTime();
+}
+
+// ── Lag-oversikt-fane ──
+function renderLagOversikt(){
+  const tracker = window._cachedTracker || {};
+
+  let h = `<div class="lag-grid">`;
+  Object.keys(LAG_FARGER).forEach(lagNavn => {
+    const clr = LAG_FARGER[lagNavn];
+    const avgang = LAG_AVGANG[lagNavn];
+    const tData = tracker[lagNavn];
+    const events = tData?.events || [];
+
+    const {antall, maal} = lagFremgang(events);
+    const antallVist = Math.min(antall, N_POSTER);
+    const start = startTs(events);
+    const maalTid = maalTs(events);
+    const aTs = avgangsTs(lagNavn);
+    const harBravo = events.some(e=>e.type==="post_fullfort" && e.detail?.post===5);
+    const tilMaal = harBravo && !maal;
+
+    // Reell løpstid: fra avgang (startpistol), ikke fra første event
+    const reellStart = aTs || start;
+    const lopstid = maalTid && reellStart ? fmtDurLong(maalTid - reellStart)
+      : reellStart && Date.now() > reellStart ? `Pågår ${fmtDurLong(Date.now() - reellStart)}`
+      : null;
+
+    // Ventetid fra avgang til BUEN-event
+    const ventetid = (start && aTs && start > aTs) ? fmtDur(start - aTs) : null;
+
+    const statusFarge = maal ? "var(--green)" : tilMaal ? "#e00515" : antall>0 ? clr : "var(--muted)";
+    const statusTekst = maal ? "🏆 I mål"
+      : tilMaal ? "🚨 Springer til mål!"
+      : antall===0 ? "Ikke startet"
+      : `Post ${antallVist}/${N_POSTER}`;
+
+    // Deltakere for dette laget
+    const dliste = LAG_DELTAKERE[lagNavn] || [];
+    const deltakerHtml = dliste.map(d => `
+      <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:10px;font-weight:800;background:${d.status==='Aktiv'?clr+'33':'var(--card2)'};color:${d.status==='Aktiv'?clr:'var(--muted)'};border-radius:4px;padding:1px 6px;min-width:30px;text-align:center">${d.status==='Aktiv'?'A':'K'}</span>
+        <span style="font-size:13px;color:var(--text);flex:1">${d.n}</span>
+        <span style="font-size:10px;color:var(--muted)">${d.stemme}</span>
+      </div>`).join("");
+
+    h += `<div class="lag-info-kort${tilMaal?" til-maal":""}" style="border:2px solid ${clr}44">
+      <div style="background:${clr}22;padding:12px 14px;border-bottom:1px solid ${clr}33">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="width:16px;height:16px;border-radius:50%;background:${clr};flex-shrink:0"></div>
+          <div style="font-size:16px;font-weight:900;color:${clr};flex:1">${lagNavn}</div>
+          <div style="font-size:12px;color:${clr}cc;font-weight:700">⏰ ${avgang}</div>
+        </div>
+        <div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${Math.round((antallVist/N_POSTER)*100)}%;background:${statusFarge};border-radius:2px;transition:width .4s"></div>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:${statusFarge};font-weight:700">
+          ${statusTekst}${lopstid?" · "+lopstid:""}
+        </div>
+        ${ventetid?`<div style="font-size:10px;color:var(--muted);margin-top:3px">+${ventetid} til første post</div>`:""}
+      </div>
+      <div style="padding:6px 14px 10px">${deltakerHtml}</div>
+    </div>`;
+  });
+
+  h += `</div>`;
+  document.getElementById("lag-oversikt-innhold").innerHTML = h;
 }
 
 // ── Auto-refresh ──
@@ -709,6 +898,23 @@ function startRefresh(){
 // ── Init ──
 hentData(true);
 startRefresh();
+
+// ── Tema ──
+function byttTema(){
+  const lys = document.body.classList.toggle("lys");
+  document.getElementById("theme-btn").textContent = lys ? "☀️" : "🌙";
+  localStorage.setItem("ra_tema", lys ? "lys" : "mork");
+}
+(function(){
+  if(localStorage.getItem("ra_tema")==="lys"){
+    document.body.classList.add("lys");
+    document.getElementById("theme-btn").textContent = "☀️";
+  }
+})();
 </script>
+
+<div class="versjon-footer">
+  Race Admin <span>·</span> v0.1.5 <span>·</span> Knauskoret Pula 2026
+</div>
 </body>
 </html>
