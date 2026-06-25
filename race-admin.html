@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Race Admin">
+<title>Race Admin — Knauskoret Pula 2026</title>
+<style>
+  :root {
+    --bg: #080e14;
+    --card: #0f1a24;
+    --card2: #162030;
+    --border: #1e3040;
+    --gold: #f5c518;
+    --green: #22c55e;
+    --red: #e00515;
+    --blue: #60a0f0;
+    --purple: #c084fc;
+    --text: #e8e0d4;
+    --muted: #4a6a8a;
+    --dim: #2a4a6a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100dvh;
+  }
+
+  /* HEADER */
+  .hdr {
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .hdr-title { font-size: 15px; font-weight: 800; color: var(--gold); letter-spacing: -.3px; }
+  .hdr-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .refresh-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-appearance: none;
+  }
+  .refresh-btn.spinning { opacity: .6; pointer-events: none; }
+  .refresh-btn.spinning .spin { animation: spin .8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: #0a1520;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    flex-shrink: 0;
+  }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* MAIN */
+  .main { padding: 16px; max-width: 640px; margin: 0 auto; }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12px;
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+  }
+  .stat-pill .val { font-size: 22px; font-weight: 800; color: var(--gold); display: block; }
+  .stat-pill .lbl { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  /* LAG-KORT */
+  .lag-kort {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .lag-hdr {
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .lag-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .lag-navn { font-size: 15px; font-weight: 800; flex: 1; }
+  .lag-status { font-size: 12px; color: var(--muted); }
+  .lag-progress {
+    height: 4px;
+    background: var(--card2);
+    margin: 0 14px 12px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .lag-progress-fill { height: 100%; border-radius: 2px; transition: width .4s; }
+  .lag-tidslinje { padding: 0 14px 14px; display: none; }
+  .lag-kort.open .lag-tidslinje { display: block; }
+  .lag-kort.open .lag-hdr { border-bottom: 1px solid var(--border); }
+  .event-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 7px 0;
+    border-bottom: 1px solid #0f1e2c;
+    font-size: 12px;
+  }
+  .event-row:last-child { border-bottom: none; }
+  .event-ico { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .event-tekst { color: #bbb; flex: 1; }
+  .event-ts { color: var(--muted); white-space: nowrap; font-size: 11px; }
+  .event-diff { color: #2a6a4a; font-size: 11px; margin-top: 1px; }
+
+  /* MÅL-KNAPP */
+  .maal-btn {
+    width: 100%;
+    background: #0a1a0a;
+    border: 1.5px solid var(--green);
+    color: var(--green);
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 10px;
+    -webkit-appearance: none;
+  }
+  .maal-btn:active { opacity: .7; }
+
+  /* PLASSERINGSTABELL */
+  .plassering-tabell { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .plassering-tabell th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .plassering-tabell td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #0f1e2c;
+    vertical-align: middle;
+  }
+  .plassering-tabell tr:last-child td { border-bottom: none; }
+  .plass-nr { font-size: 18px; font-weight: 800; color: var(--muted); width: 32px; }
+  .plass-nr.p1 { color: #ffd700; }
+  .plass-nr.p2 { color: #c0c0c0; }
+  .plass-nr.p3 { color: #cd7f32; }
+  .dot-sm { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+  /* STATISTIKK */
+  .stat-seksjon { margin-bottom: 24px; }
+  .stat-seksjon-tittel {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .bar-lbl { font-size: 12px; color: var(--text); min-width: 110px; }
+  .bar-track { flex: 1; height: 8px; background: var(--card2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width .6s; }
+  .bar-val { font-size: 12px; color: var(--muted); min-width: 50px; text-align: right; }
+
+  /* RESET */
+  .reset-seksjon { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .reset-btn {
+    width: 100%;
+    background: #1a0808;
+    border: 1.5px solid #5a1a1a;
+    color: #e05050;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+
+  /* TOMT STATE */
+  .tom-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--muted);
+  }
+  .tom-state .ikon { font-size: 48px; margin-bottom: 12px; }
+  .tom-state p { font-size: 14px; line-height: 1.6; }
+
+  /* AUTO-REFRESH INDIKATOR */
+  .refresh-ind {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    padding: 8px;
+  }
+  .refresh-ind .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 5px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .kort-wrap { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 14px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">🏁 Race Admin</div>
+    <div class="hdr-sub">Knauskoret · Pula 9. oktober 2026</div>
+  </div>
+  <button class="refresh-btn" onclick="hentData(true)">
+    <span class="spin">🔄</span> Oppdater
+  </button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="byttTab('oversikt', this)">📡 Oversikt</div>
+  <div class="tab" onclick="byttTab('plassering', this)">🏆 Plassering</div>
+  <div class="tab" onclick="byttTab('statistikk', this)">📊 Statistikk</div>
+  <div class="tab" onclick="byttTab('admin', this)">⚙️ Admin</div>
+</div>
+
+<div class="main">
+  <div id="tab-oversikt">
+    <div class="refresh-ind"><span class="dot"></span>Auto-oppdatering hvert 30 sek</div>
+    <div class="status-bar" id="status-bar">
+      <div class="stat-pill"><span class="val" id="s-lag">–</span><span class="lbl">Lag</span></div>
+      <div class="stat-pill"><span class="val" id="s-maal">–</span><span class="lbl">I mål</span></div>
+      <div class="stat-pill"><span class="val" id="s-aktive">–</span><span class="lbl">Aktive</span></div>
+      <div class="stat-pill"><span class="val" id="s-events">–</span><span class="lbl">Events</span></div>
+    </div>
+    <div id="lag-liste"></div>
+  </div>
+
+  <div id="tab-plassering" style="display:none">
+    <div id="plassering-innhold"></div>
+  </div>
+
+  <div id="tab-statistikk" style="display:none">
+    <div id="statistikk-innhold"></div>
+  </div>
+
+  <div id="tab-admin" style="display:none">
+    <div class="kort-wrap">
+      <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:8px">📡 JSONBin-tilkobling</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.7">
+        Bin ID: <code style="color:var(--text)">6a36672af5f4af5e2913c2f1</code><br>
+        Status: <span id="conn-status" style="color:var(--muted)">sjekker…</span>
+      </div>
+    </div>
+    <div class="reset-seksjon">
+      <div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#e05050;margin-bottom:10px">⚠️ Faresone</div>
+      <button class="reset-btn" onclick="nullstillTracker()">🗑 Nullstill all race-tracker-data</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">Brukes etter testkjøringer — kan ikke angres</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BIN = "6a36672af5f4af5e2913c2f1";
+const KEY = "$2a$10$On.B9FR9GJ81fyDwAKsbzuL81xI6InKhu8d008hvY4DVgSEhCbYTa";
+const API = `https://api.jsonbin.io/v3/b/${BIN}`;
+
+const POST_NAVN = [
+  "Pula Arena (start)",
+  "Sergius-buen",
+  "Tržnica",
+  "Forum & Auguststempelet",
+  "Kaštel-festningen",
+  "Havnepromenaden"
+];
+const POST_IKON = ["🏟","🏛","🛒","🏛","🏰","🌊"];
+const N_POSTER = 6;
+
+let cachetData = null;
+let refreshTimer = null;
+let aktivTab = "oversikt";
+
+// ── JSONBin ──
+async function jbGet(){
+  const r = await fetch(`${API}/latest`, {headers:{"X-Master-Key":KEY}});
+  const j = await r.json();
+  return j.record;
+}
+async function jbSave(data){
+  await fetch(API, {
+    method:"PUT",
+    headers:{"Content-Type":"application/json","X-Master-Key":KEY},
+    body: JSON.stringify(data)
+  });
+}
+
+// ── Utils ──
+function fmt(ts){
+  return new Date(ts).toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+}
+function fmtDur(ms){
+  if(ms < 0) return "–";
+  const m = Math.floor(ms/60000);
+  const s = Math.floor((ms%60000)/1000);
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+function fmtDurLong(ms){
+  if(ms < 0) return "–";
+  const h = Math.floor(ms/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  const s = Math.floor((ms%60000)/1000);
+  if(h > 0) return `${h}t ${m}m`;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
+function eventIko(type){
+  if(type==="post_fullfort") return "✅";
+  if(type==="arrival") return "📍";
+  if(type==="detour_valg") return "🎭";
+  if(type==="maal") return "🏆";
+  return "•";
+}
+function eventTekst(e){
+  if(e.type==="post_fullfort") return e.detail?.postNavn || "Post fullført";
+  if(e.type==="arrival") return `Ankomst: ${e.detail?.postNavn||""}`;
+  if(e.type==="detour_valg") return `Valgte: ${e.detail?.valg||""}${e.detail?.bindende===false?" (kan byttes)":""}`;
+  if(e.type==="maal") return "🏆 FULLFØRT LØPET!";
+  return e.type;
+}
+
+// ── Fremgang-beregning per lag ──
+function lagFremgang(events){
+  const poster = events.filter(e=>e.type==="post_fullfort");
+  const maal = events.find(e=>e.type==="maal");
+  return { antall: poster.length, maal: !!maal };
+}
+
+function startTs(events){
+  // Starttid = tidspunkt BUEN ble fullført (post 0)
+  const buen = events.find(e=>e.type==="post_fullfort" && e.detail?.post===0);
+  return buen ? buen.ts : (events[0]?.ts || null);
+}
+function maalTs(events){
+  const m = events.find(e=>e.type==="maal");
+  return m ? m.ts : null;
+}
+
+// ── Etappeberegning ──
+// Returnerer array med {post, navn, fra, til, varighet} for hvert fullførte steg
+function etapper(events){
+  const res = [];
+  const poster = events.filter(e=>e.type==="post_fullfort").sort((a,b)=>a.ts-b.ts);
+  for(let i=0;i<poster.length;i++){
+    const fra = i===0 ? poster[i].ts : poster[i-1].ts;
+    const til = poster[i].ts;
+    res.push({
+      post: poster[i].detail?.post ?? i,
+      navn: poster[i].detail?.postNavn || POST_NAVN[i],
+      fra, til,
+      varighet: til - fra
+    });
+  }
+  // Siste etappe: fra siste post til mål
+  const mE = events.find(e=>e.type==="maal");
+  if(mE && poster.length > 0){
+    const sistePost = poster[poster.length-1];
+    res.push({
+      post: N_POSTER,
+      navn: "Mål (Pula Arena)",
+      fra: sistePost.ts,
+      til: mE.ts,
+      varighet: mE.ts - sistePost.ts
+    });
+  }
+  return res;
+}
+
+// ── Hent og render ──
+async function hentData(manuelt=false){
+  const btn = document.querySelector(".refresh-btn");
+  if(btn) btn.classList.add("spinning");
+  try{
+    const data = await jbGet();
+    cachetData = data;
+    document.getElementById("conn-status").textContent = "✅ Tilkoblet";
+    document.getElementById("conn-status").style.color = "var(--green)";
+    renderAlt();
+  } catch(e){
+    document.getElementById("conn-status").textContent = "❌ Feil — sjekk nett";
+    document.getElementById("conn-status").style.color = "var(--red)";
+  } finally {
+    if(btn) btn.classList.remove("spinning");
+  }
+}
+
+function renderAlt(){
+  renderOversikt();
+  if(aktivTab==="plassering") renderPlassering();
+  if(aktivTab==="statistikk") renderStatistikk();
+}
+
+function renderOversikt(){
+  const tracker = cachetData?.race_tracker || {};
+  const lag = Object.keys(tracker);
+
+  // Status-piller
+  const maalLag = lag.filter(n=>tracker[n].events?.find(e=>e.type==="maal"));
+  const aktiveLag = lag.filter(n=>{
+    const ev = tracker[n].events||[];
+    return ev.length > 0 && !ev.find(e=>e.type==="maal");
+  });
+  const totEvents = lag.reduce((s,n)=>s+(tracker[n].events?.length||0),0);
+  document.getElementById("s-lag").textContent = lag.length;
+  document.getElementById("s-maal").textContent = maalLag.length;
+  document.getElementById("s-aktive").textContent = aktiveLag.length;
+  document.getElementById("s-events").textContent = totEvents;
+
+  if(!lag.length){
+    document.getElementById("lag-liste").innerHTML=`
+      <div class="tom-state">
+        <div class="ikon">🏁</div>
+        <p>Ingen lag har startet ennå.<br>Data vises her når lagene begynner å løpe.</p>
+      </div>`;
+    return;
+  }
+
+  // Sorter: i mål (med tid) → aktive (etter fremgang) → ikke startet
+  lag.sort((a,b)=>{
+    const ae = tracker[a].events||[], be = tracker[b].events||[];
+    const am = ae.find(e=>e.type==="maal"), bm = be.find(e=>e.type==="maal");
+    if(am && bm){ // begge i mål → sorter etter total tid
+      const at=maalTs(ae)-startTs(ae), bt=maalTs(be)-startTs(be);
+      return at-bt;
+    }
+    if(am) return -1; if(bm) return 1;
+    const aF=lagFremgang(ae).antall, bF=lagFremgang(be).antall;
+    return bF-aF;
+  });
+
+  let h="";
+  lag.forEach(lagNavn=>{
+    const info = tracker[lagNavn];
+    const events = info.events||[];
+    const clrLag = info.clr||"#888";
+    const {antall, maal} = lagFremgang(events);
+    const pst = Math.round((antall/N_POSTER)*100);
+    const start = startTs(events);
+    const maalTid = maalTs(events);
+    const lopstid = start && maalTid ? fmtDurLong(maalTid-start) : start ? `Pågår ${fmtDurLong(Date.now()-start)}` : "";
+
+    h+=`<div class="lag-kort" id="kort-${lagNavn.replace(/\s/g,'_')}">
+      <div class="lag-hdr" onclick="toggleKort('${lagNavn.replace(/\s/g,'_')}')">
+        <div class="lag-dot" style="background:${clrLag}"></div>
+        <div>
+          <div class="lag-navn">${lagNavn}</div>
+          <div class="lag-status">${maal?"🏆 I mål":antall===0?"Ikke startet":`Post ${antall}/${N_POSTER}`}${lopstid?" · "+lopstid:""}</div>
+        </div>
+        <div style="font-size:18px">${maal?"🏆":antall>0?"🏃":""}</div>
+      </div>
+      <div class="lag-progress">
+        <div class="lag-progress-fill" style="width:${pst}%;background:${maal?"var(--green)":clrLag}"></div>
+      </div>
+      <div class="lag-tidslinje">`;
+
+    // Tidslinje
+    events.forEach((e,i)=>{
+      const forrige = i>0?events[i-1]:null;
+      const diff = forrige ? fmtDur(e.ts-forrige.ts) : null;
+      h+=`<div class="event-row">
+        <span class="event-ico">${eventIko(e.type)}</span>
+        <div class="event-tekst">${eventTekst(e)}${diff?`<div class="event-diff">+${diff} siden forrige</div>`:""}</div>
+        <span class="event-ts">${fmt(e.ts)}</span>
+      </div>`;
+    });
+
+    if(!maal){
+      h+=`<button class="maal-btn" onclick="loggMaal('${lagNavn}', event)">🏆 Logg mål for ${lagNavn}</button>`;
+    }
+    h+=`</div></div>`; // .lag-tidslinje + .lag-kort
+  });
+
+  document.getElementById("lag-liste").innerHTML = h;
+}
+
+function renderPlassering(){
+  const tracker = cachetData?.race_tracker || {};
+  const lag = Object.keys(tracker);
+  if(!lag.length){
+    document.getElementById("plassering-innhold").innerHTML=`<div class="tom-state"><div class="ikon">🏆</div><p>Ingen lag har data ennå.</p></div>`;
+    return;
+  }
+
+  // Score: primært poster fullført, sekundært total tid (lavere = bedre)
+  const scoret = lag.map(navn=>{
+    const events = tracker[navn].events||[];
+    const {antall,maal} = lagFremgang(events);
+    const start = startTs(events);
+    const maalTid = maalTs(events);
+    const tid = (start && maalTid) ? maalTid-start : null;
+    return {navn, clr:tracker[navn].clr||"#888", antall, maal, tid, events};
+  }).sort((a,b)=>{
+    if(a.maal && b.maal) return a.tid-b.tid;
+    if(a.maal) return -1; if(b.maal) return 1;
+    if(a.antall!==b.antall) return b.antall-a.antall;
+    return 0;
+  });
+
+  let h=`<table class="plassering-tabell"><thead><tr>
+    <th>#</th><th>Lag</th><th>Poster</th><th>Tid</th>
+  </tr></thead><tbody>`;
+  scoret.forEach((lag,i)=>{
+    const plassKlasse = i===0?"p1":i===1?"p2":i===2?"p3":"";
+    const tidTekst = lag.maal ? fmtDurLong(lag.tid) : lag.antall>0 ? `${lag.antall}/${N_POSTER} poster` : "–";
+    h+=`<tr>
+      <td class="plass-nr ${plassKlasse}">${i+1}</td>
+      <td><span class="dot-sm" style="background:${lag.clr}"></span>${lag.navn}${lag.maal?" 🏆":""}</td>
+      <td>${lag.antall}/${N_POSTER}</td>
+      <td style="color:${lag.maal?"var(--green)":"var(--muted)"}">${tidTekst}</td>
+    </tr>`;
+  });
+  h+=`</tbody></table>`;
+  document.getElementById("plassering-innhold").innerHTML = `<div class="kort-wrap">${h}</div>`;
+}
+
+function renderStatistikk(){
+  const tracker = cachetData?.race_tracker || {};
+  const lag = Object.keys(tracker);
+  if(!lag.length){
+    document.getElementById("statistikk-innhold").innerHTML=`<div class="tom-state"><div class="ikon">📊</div><p>Ingen data ennå.</p></div>`;
+    return;
+  }
+
+  let h="";
+
+  // ── Gjennomsnittlig etappevarighet per post ──
+  const etappeTider = Array.from({length:N_POSTER+1},()=>[]); // +1 for siste etappe til mål
+  lag.forEach(navn=>{
+    const events = tracker[navn].events||[];
+    etapper(events).forEach(e=>{
+      if(e.post <= N_POSTER) etappeTider[e.post].push(e.varighet);
+    });
+  });
+  const maxEtappe = Math.max(...etappeTider.flat().filter(Boolean), 1);
+
+  h+=`<div class="stat-seksjon">
+    <div class="stat-seksjon-tittel">Gjennomsnittlig tid per etappe</div>`;
+  etappeTider.forEach((tider,i)=>{
+    if(!tider.length) return;
+    const snitt = tider.reduce((a,b)=>a+b,0)/tider.length;
+    const navn = i<N_POSTER?POST_NAVN[i]:"Siste etappe → Mål";
+    const ikon = i<N_POSTER?POST_IKON[i]:"🏁";
+    h+=`<div class="bar-row">
+      <div class="bar-lbl">${ikon} ${navn.split(" ")[0]}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(snitt/maxEtappe*100)}%;background:var(--gold)"></div></div>
+      <div class="bar-val">${fmtDurLong(snitt)}</div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // ── Detour-valg (Sergius-buen og Havnepromenaden) ──
+  const detourTelling = {};
+  lag.forEach(navn=>{
+    const events = tracker[navn].events||[];
+    events.filter(e=>e.type==="detour_valg").forEach(e=>{
+      const key = e.detail?.valg||"?";
+      detourTelling[key] = (detourTelling[key]||0)+1;
+    });
+  });
+  if(Object.keys(detourTelling).length){
+    const totDetour = Object.values(detourTelling).reduce((a,b)=>a+b,0);
+    h+=`<div class="stat-seksjon">
+      <div class="stat-seksjon-tittel">Detour-valg</div>`;
+    Object.entries(detourTelling).sort((a,b)=>b[1]-a[1]).forEach(([valg,n])=>{
+      h+=`<div class="bar-row">
+        <div class="bar-lbl">${valg}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/totDetour*100)}%;background:var(--purple)"></div></div>
+        <div class="bar-val">${n} lag (${Math.round(n/totDetour*100)}%)</div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+
+  // ── Totalider ──
+  const fullforte = lag.filter(n=>{
+    const ev=tracker[n].events||[];
+    return startTs(ev) && maalTs(ev);
+  });
+  if(fullforte.length){
+    h+=`<div class="stat-seksjon">
+      <div class="stat-seksjon-tittel">Totaltider (fullførte lag)</div>`;
+    const maxTid = Math.max(...fullforte.map(n=>{
+      const ev=tracker[n].events||[];
+      return maalTs(ev)-startTs(ev);
+    }),1);
+    fullforte.sort((a,b)=>{
+      const ae=tracker[a].events||[],be=tracker[b].events||[];
+      return (maalTs(ae)-startTs(ae))-(maalTs(be)-startTs(be));
+    }).forEach(navn=>{
+      const ev=tracker[navn].events||[];
+      const tid=maalTs(ev)-startTs(ev);
+      h+=`<div class="bar-row">
+        <div class="bar-lbl"><span class="dot-sm" style="background:${tracker[navn].clr||'#888'}"></span>${navn}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.round(tid/maxTid*100)}%;background:var(--green)"></div></div>
+        <div class="bar-val">${fmtDurLong(tid)}</div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+
+  document.getElementById("statistikk-innhold").innerHTML = h || `<div class="tom-state"><div class="ikon">📊</div><p>Ikke nok data ennå.</p></div>`;
+}
+
+// ── Interaksjon ──
+function toggleKort(id){
+  const kort = document.getElementById("kort-"+id);
+  if(kort) kort.classList.toggle("open");
+}
+
+async function loggMaal(lagNavn, evt){
+  evt.stopPropagation();
+  if(!confirm(`Logg mål for «${lagNavn}»?\n\nDette registrerer tidspunktet de krysset målstreken.`)) return;
+  try{
+    const data = cachetData || await jbGet();
+    if(!data.race_tracker) data.race_tracker = {};
+    if(!data.race_tracker[lagNavn]) data.race_tracker[lagNavn]={clr:"#888",events:[]};
+    data.race_tracker[lagNavn].events.push({type:"maal",detail:{postNavn:"Pula Arena — Mål"},ts:Date.now()});
+    await jbSave(data);
+    cachetData = data;
+    renderAlt();
+  }catch(e){ alert("Feil — sjekk nettet"); }
+}
+
+async function nullstillTracker(){
+  if(!confirm("Nullstill ALL race-tracker-data?\n\nDette sletter alle lag og events. Kan ikke angres.")) return;
+  try{
+    const data = cachetData || await jbGet();
+    data.race_tracker = {};
+    await jbSave(data);
+    cachetData = data;
+    renderAlt();
+    alert("Nullstilt!");
+  }catch(e){ alert("Feil — sjekk nettet"); }
+}
+
+function byttTab(tab, el){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  el.classList.add("active");
+  ["oversikt","plassering","statistikk","admin"].forEach(t=>{
+    document.getElementById("tab-"+t).style.display = t===tab?"block":"none";
+  });
+  aktivTab = tab;
+  if(tab==="plassering") renderPlassering();
+  if(tab==="statistikk") renderStatistikk();
+}
+
+// ── Auto-refresh ──
+function startRefresh(){
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(()=>hentData(false), 30000);
+}
+
+// ── Init ──
+hentData(true);
+startRefresh();
+</script>
+</body>
+</html>
