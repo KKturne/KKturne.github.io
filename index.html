@@ -11,8 +11,10 @@
 <meta name="description" content="Knauskorets turneprogram for Pula 2026">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>KKTurneprogram v26.06.24-12</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<title>KKTurneprogram v26.06.24-14</title>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root{--bg:#F4EFE6;--card:#fff;--dark:#1C2B35;--acc:#B85228;--gold:#C4982B;--green:#2D5A3D;--blue:#1A4070;--text:#1a1a1a;--muted:#888;--bdr:#E2D8CC}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -205,9 +207,6 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:block}
 .txt-in{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:17px;padding:14px 16px;margin-bottom:20px;outline:none;-webkit-appearance:none}
 .txt-in:focus{border-color:var(--red)}
-.color-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
-.c-btn{height:46px;border-radius:10px;border:2.5px solid transparent;cursor:pointer;transition:border-color .12s,transform .1s;-webkit-appearance:none}
-.c-btn.sel{border-color:#fff;transform:scale(1.1)}
 .go-btn{width:100%;background:var(--red);color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:700;padding:16px;cursor:pointer;-webkit-appearance:none}
 .go-btn:disabled{background:var(--border);color:var(--muted);cursor:default}
 #s-race{flex-direction:column;height:100dvh}
@@ -553,25 +552,84 @@ body.shake-mode{animation:app-shake .5s infinite}
   <div class="spl-stars" id="spl-stars"></div>
   <div id="spl-confetti"></div>
 
-  <!-- PASSWORD VIEW -->
+  <!-- TIPPELEK VIEW -->
   <div id="pw-view">
     <div class="spl-logo">🎵</div>
     <div class="spl-h">Knauskoret</div>
     <div class="spl-t">Turné 2026</div>
+
+    <!-- NEDTELLING -->
+    <div id="spl-countdown-wrap" style="margin:16px 0;text-align:center">
+      <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px">Avsløring om</div>
+      <div id="spl-countdown" style="font-size:clamp(22px,7vw,36px);font-weight:900;color:#fff;letter-spacing:.04em;font-variant-numeric:tabular-nums">–</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:4px">Fredag 2. oktober kl. 06:00</div>
+    </div>
+
     <div class="spl-box">
-      <div class="spl-navn-wrap">
-        <div class="spl-navn-lbl">Ditt fornavn</div>
-        <input class="spl-navn-in" id="spl-navn" type="text" placeholder="Kun fornavn..."
-          autocomplete="given-name" autocorrect="off" autocapitalize="words" maxlength="20"
-          inputmode="text"
-          onkeydown="if(event.key==='Enter')document.getElementById('spl-in').focus()">
+      <!-- STEG 1: NAVN -->
+      <div id="spl-step-navn">
+        <div class="spl-navn-wrap">
+          <div class="spl-navn-lbl">Ditt fornavn</div>
+          <input class="spl-navn-in" id="spl-navn" type="text" placeholder="Kun fornavn..."
+            autocomplete="given-name" autocorrect="off" autocapitalize="words" maxlength="20"
+            inputmode="text"
+            onkeydown="if(event.key==='Enter')splGåTilKart()">
+        </div>
+        <button class="spl-go" onclick="splGåTilKart()" style="margin-top:4px">Tipp destinasjonen 🗺️</button>
+        <div class="spl-err" id="spl-err-navn"></div>
       </div>
-      <input class="spl-in" id="spl-in" type="text" placeholder="PASSORD"
-        autocomplete="off" autocorrect="off" autocapitalize="characters" maxlength="12"
-        inputmode="text"
-        onkeydown="if(event.key==='Enter')trySplash()">
-      <button class="spl-go" onclick="trySplash()">Lås opp →</button>
-      <div class="spl-err" id="spl-err"></div>
+
+      <!-- STEG 2: KART -->
+      <div id="spl-step-kart" style="display:none">
+        <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:10px;text-align:center">
+          Trykk på kartet der du tror vi drar! 📍
+        </div>
+        <div id="spl-kart" style="width:100%;height:260px;border-radius:14px;overflow:hidden;border:2px solid rgba(255,255,255,.2);position:relative">
+          <div id="spl-kart-map" style="width:100%;height:100%"></div>
+          <div id="spl-pin-info" style="display:none;position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)"></div>
+        </div>
+        <div id="spl-gjett-status" style="text-align:center;font-size:12px;color:rgba(255,255,255,.5);margin:10px 0 6px">
+          Ingen pin satt ennå
+        </div>
+        <button id="spl-lås-btn" class="spl-go" onclick="splLåsGjett()" style="display:none">
+          🔒 Lås inn gjett
+        </button>
+        <div id="spl-err-kart" class="spl-err"></div>
+
+        <!-- STEG 3: PASSORD (kun synlig etter nedtelling) -->
+        <div id="spl-pw-wrap" style="display:none;margin-top:16px;border-top:1px solid rgba(255,255,255,.15);padding-top:16px">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;text-align:center">Avsløringen er klar!</div>
+          <input class="spl-in" id="spl-in" type="text" placeholder="PASSORD"
+            autocomplete="off" autocorrect="off" autocapitalize="characters" maxlength="12"
+            inputmode="text"
+            onkeydown="if(event.key==='Enter')trySplash()">
+          <button class="spl-go" onclick="trySplash()" style="margin-top:8px">Avslør destinasjonen 🎉</button>
+          <div class="spl-err" id="spl-err"></div>
+        </div>
+      </div>
+
+      <!-- STEG 4: LÅST GJETT (allerede gjettet) -->
+      <div id="spl-step-låst" style="display:none">
+        <div style="text-align:center;font-size:30px;margin-bottom:8px">🔒</div>
+        <div style="text-align:center;font-size:14px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:4px">Gjett låst!</div>
+        <div id="spl-låst-info" style="text-align:center;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:16px"></div>
+
+        <!-- PASSORD (kun synlig etter nedtelling) -->
+        <div id="spl-pw-wrap-låst" style="display:none;border-top:1px solid rgba(255,255,255,.15);padding-top:16px">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;text-align:center">Avsløringen er klar!</div>
+          <input class="spl-in" id="spl-in-låst" type="text" placeholder="PASSORD"
+            autocomplete="off" autocorrect="off" autocapitalize="characters" maxlength="12"
+            inputmode="text"
+            onkeydown="if(event.key==='Enter')trySplash()">
+          <button class="spl-go" onclick="trySplash()" style="margin-top:8px">Avslør destinasjonen 🎉</button>
+          <div class="spl-err" id="spl-err-låst"></div>
+        </div>
+      </div>
+
+      <!-- KOMITÉKNAPP -->
+      <button onclick="splKomiteBypass()" style="margin-top:18px;background:transparent;border:none;color:rgba(255,255,255,.25);font-size:11px;cursor:pointer;font-family:inherit;padding:6px;-webkit-tap-highlight-color:transparent;letter-spacing:.04em">
+        Turnékomitémeny →
+      </button>
     </div>
   </div>
 
@@ -685,7 +743,7 @@ body.shake-mode{animation:app-shake .5s infinite}
     <div class="hdr-left">
       <div class="hdr-title">Knauskoret på turné</div>
       <div class="hdr-sub">Pula, Kroatia · 2.–11. oktober 2026</div>
-      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.06.24-12</div>
+      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.06.24-14</div>
     </div>
     <div class="hdr-icon" id="hdr-logo" onclick="logoTap()"><svg style="height:40px;width:auto;display:block" id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 496"><image width="500" height="496" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAHwCAYAAABQR52cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAydpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDEwLjAtYzAwMCA3OS5kMDRjYzE2OTgsIDIwMjUvMDcvMDItMTI6MTg6MTMgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCAyNy4yIChXaW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1ODg1MjRDQjY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1ODg1MjRDQzY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjU4ODUyNEM5Njk4NTExRjE5RDlDREY3NkZFMjg2QURCIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU4ODUyNENBNjk4NTExRjE5RDlDREY3NkZFMjg2QURCIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+cg9cLwAAIwpJREFUeNrs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"/></svg></div>
     <button class="dm-btn" id="dm-btn" onclick="toggleDark()" title="Mørk/lys modus">🌙</button>
@@ -704,7 +762,11 @@ const JB_KEY    = "$2a$10$On.B9FR9GJ81fyDwAKsbzuL81xI6InKhu8d008hvY4DVgSEhCbYTa"
 const JB_URL    = `https://api.jsonbin.io/v3/b/${JB_BIN_ID}`;
 
 // Hent hele datastrukturen fra JSONBin
-async function jbGet(){
+let _jbCache = null, _jbCacheTs = 0;
+const JB_CACHE_TTL = 30000; // 30 sekunder
+
+async function jbGet(bustCache=false){
+  if(!bustCache && _jbCache && Date.now()-_jbCacheTs < JB_CACHE_TTL) return _jbCache;
   try {
     const res = await fetch(`${JB_URL}/latest`, {
       headers: { "X-Master-Key": JB_KEY },
@@ -712,8 +774,10 @@ async function jbGet(){
     });
     if(!res.ok) return null;
     const data = await res.json();
-    return data.record || null;
-  } catch(e){ return null; }
+    _jbCache = data.record || null;
+    _jbCacheTs = Date.now();
+    return _jbCache;
+  } catch(e){ return _jbCache; } // returner cachet data ved nettfeil
 }
 
 // Lagre hele datastrukturen til JSONBin
@@ -724,6 +788,7 @@ async function jbSave(record){
       headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
       body: JSON.stringify(record)
     });
+    if(res.ok){ _jbCache = record; _jbCacheTs = Date.now(); } // oppdater cache
     return res.ok;
   } catch(e){ return false; }
 }
@@ -780,28 +845,24 @@ const DRIKK_KORT={
   sannhet:[
     "Hva er det pinligste du har gjort på en fest?",
     "Hvem i rommet vil du helst kysse?",
-    "Hvem i rommet ville du helst ha ligget med?",
     "Hva er din verste vane?",
     "Hva er det rareste du har gjort for kjærligheten?",
     "Har du noen gang løyet til noen i koret? Hva sa du?",
-    "Hva er din største hemmelighet fra korhelg, øvingshelg eller turné?",
+    "Hva er din største hemmelighet fra en turnékveld?",
     "Hvem i koret tror du er best i senga?",
     "Hva er det første du gjør på hotellet når du ankommer?",
     "Hva er det styggeste du tenker om deg selv?",
     "Beskriv din drømmekropp — men den tilhører en i rommet",
     "Hva er den dristigste tingen du har gjort uten å bli tatt?",
     "Hvilken sang fra korets repertoar beskriver sexlivet ditt?",
-    "Hvis du måtte bytte stemmegruppe, hva ville du valgt? Og hva ville du IKKE valgt?",
-    "Hvilken KK-låt (bortsett fra Pulemedley) beskriver sexlivet ditt best?",
   ],
   tor:[
-    "Du er nødt til å ringe den siste personen du chattet med og si 'jeg savner deg'.",
+    "Du er nødt til å ringe den siste personen du chatten med og si 'jeg savner deg'.",
     "Du er nødt til å danse alene midt på gulvet i 30 sekunder.",
-    "Du er nødt til å danse som Hjalmar mens resten synger refrenget!",
     "Du er nødt til å kysse hånden til personen til venstre for deg.",
     "Du er nødt til å si noe genuint søtt til personen til høyre for deg.",
     "Du er nødt til å late som du er en operasanger i 20 sekunder.",
-    "Du er nødt til å bytte et plagg med personen overfor deg til neste gang det er din tur.",
+    "Du er nødt til å bytte en plagg med personen overfor deg til neste kort.",
     "Du er nødt til å skrive en flørtemelding til den siste personen du ringte.",
     "Du er nødt til å gjøre 10 push-ups nå. Alle teller høyt.",
     "Du er nødt til å imitere en annen i rommet til de gjetter hvem det er.",
@@ -822,12 +883,6 @@ const DRIKK_KORT={
     "FMK: Din favorittforfatter, favorittskuespiller og favorittsanger",
     "FMK: Brann, Rosenborg, Vålerenga",
     "FMK: Pizzadeig, hvitløksbrød, bruschetta",
-    "FMK: 2.tenorene",
-    "FMK: 2.bassene",
-    "FMK: 2.sopranene",
-    "FMK: Elise, Jonas og Emilie",
-    "FMK: Fotball-VM, Eurovision, OL",
-    "FMK: 2.altene (Nina, Eirin og Emma Maja)",
   ],
   pekelek:[
     "Pek på den som mest sannsynlig sovner på festen",
@@ -850,30 +905,21 @@ const DRIKK_KORT={
   regel:[
     "Ny regel: Man må si 'skål' på kroatisk (živjeli!) før alle shots resten av kvelden",
     "Ny regel: Ingen kan si navnet til noen i rommet — bare 'du'. Bryter du regelen: shot",
-    "Ny regel: Alle bytter navn med den til høyre for seg. Sier du feil, eller reagerer på feil navn, må du drikke",
     "Ny regel: Alle drikker med venstre hånd. Høyre hånd = shot",
     "Ny regel: Ingen kan si 'drikke', 'shot' eller 'alkohol'. Bryt = shot",
     "Ny regel: Alle svar på spørsmål må leveres på kroatisk. Prøv å klare det.",
-    "Ny regel: Alle svar MÅ inneholde et kroatisk ord.",
-    "Ny regel: Ingen kan sitte. Alle må stå eller sitte på gulvet helt til runden kommer tilbake til denne personen igjen",
     "Ny regel: Ingen kan sitte. Alle må stå eller sitte på gulvet resten av runden",
-    "Ny regel: Ikke lov å le! Alle som ler må drikke",
     "Ny regel: Hver gang noen ler, drikker alle",
     "Ny regel: Alle samtaler må starte med 'Etter nøye overveielse...'",
     "Ny regel: Alle må peke på seg selv når de prater om seg selv",
-    "Alle regler er nullstilte, men den som trakk denne regelen får velge en å beholde.",
     "Slett alle regler. Ny runde starter blankt 🎉",
   ],
   hotseat:[
-    "HOT SEAT 🔥 — Du får velge hvem som skal sitte i Hot Seat! Alle stiller ett spørsmål de EKTE vil ha svar på. Den som sitter i Hot Seat må si STOPP etter 60 sekunder. Hvert påbegynte 5.sekund over/under tiden = 1 slurk.",
+    "HOT SEAT 🔥 — Velg hvem som setter seg i den varme stolen. Alle stiller ett spørsmål de EKTE vil ha svar på.",
     "HOT SEAT 🔥 — Personen i stolen svarer ærlig på tre spørsmål. Lyver de: dobbel straff.",
-    "HOT SEAT 🔥 — Du må sitte i Hot Seat! Alle stiller ett spørsmål de EKTE vil ha svar på. Den som sitter i Hot Seat må si STOPP etter 60 sekunder. Hvert påbegynte 5.sekund over/under tiden = 1 slurk.",
     "HOT SEAT 🔥 — Rommet har 60 sekunder til å stille alt de vil vite om personen i stolen.",
-    "HOT SEAT 🔥 — Chain reaction! Du sitter i Hot Seat, og etter å ha svart på minst 1 spørsmål får man velge hvem som overtar. Den som sitter i Hot Seat må si STOPP etter 60 sekunder fra starten av runden. Hvert påbegynte 5.sekund over/under tiden = 1 slurk til alle som har sittet i stolen denne gangen.",
     "HOT SEAT 🔥 — Personen velger selv hvem som overtar stolen etter dem. Chain reaction!",
-    "HOT SEAT 🔥 — Spørsmål til den som sitter i stolen: hva tror du hver enkelt egentlig synes om deg?",
     "HOT SEAT 🔥 — Spørsmål fra stolen: hva tror du de andre egentlig synes om deg?",
-    "HOT SEAT 🔥 — Personen i stolen rangerer alle andre i rommet etter et hemmelig kriterium de selv velger. Hvis man vil vite kriteriet, kan man ta en shot og få det hvisket fra personen i Hot Seat",
     "HOT SEAT 🔥 — Personen i stolen rangerer alle andre i rommet etter ett kriterium de selv velger.",
     "HOT SEAT 🔥 — Personen avslører den morsomste historien de har fra en tidligere turnékveld.",
   ],
@@ -1052,17 +1098,22 @@ const GLOSER=[
 ];
 
 const FAKTA=[
-  {n:"01",t:"Pula Arena",b:"Bygd mellom 27 f.Kr. og 68 e.Kr., rommer ca. 20 000 tilskuere. Et av de seks best bevarte romerske amfiteatrene i verden — og det eneste med alle fire sidetårn intakt. Brukes den dag i dag til konserter om sommeren."},
-  {n:"02",t:"Bik betyr okse",b:"Det kroatiske ordet for okse er bik (uttales «beek»). Dere vil møte en spesielt berømt okse i stein på turen. Husk det."},
-  {n:"03",t:"Istriske trøfler",b:"Istria produserer noen av verdens mest ettertraktede hvite trøfler (tartufi bianchi). Tartufo-chips i Tržnica er nesten for billig til å tro på."},
-  {n:"04",t:"Malvazija — hvitvin du bør prøve",b:"Malvazija Istarska er den vanligste og beste hvitvinen fra Istria. Frisk, fruktig og perfekt til sjømat. Teran er den lokale rødvinen — fyldigere og mer tannisk."},
-  {n:"05",t:"Fuži og maneštra",b:"Fuži er en håndrullet pastaform typisk for Istria — laget av egg og mel, formet som hule rør. Maneštra er en tradisjonsrik istrisk grønnsakssuppe. Begge er obligatorisk."},
-  {n:"06",t:"Kroatia og euro",b:"Kroatia ble EU-medlem i 2013 og byttet til euro 1. januar 2023. Den gamle valutaen het kuna (HRK). 1 euro tilsvarte omtrent 7,53 kuna."},
-  {n:"07",t:"Venezia-forbindelsen",b:"Istria var veneziansk provins i nesten 500 år (1267–1797). Arkitekturen, mattradisjoner og stedsnavn bærer fortsatt tydelig veneziansk preg — noe du vil se i Rovinj og Pula sentrum."},
-  {n:"08",t:"Adriaterhavets gjennomsiktighet",b:"Adriaterhavet er kjent for eksepsjonelt klart vann — sikt på opptil 50 meter er ikke uvanlig. Det er oppkalt etter den antikke byen Hadria i nord-Italia."},
-  {n:"09",t:"Pula het egentlig Pietas Julia",b:"Byens opprinnelige latinske navn var Pietas Julia, grunnlagt av Julius Cæsars kolonister. I dag bor rundt 60 000 mennesker i Pula."},
-  {n:"10",t:"Kaštel-festningen",b:"Den venezianske festningen Kaštel ble ferdigstilt i 1630 på ruinene av en romersk festning. Kaštel betyr borg eller festning på kroatisk og kroatisk. Den reiste seg 29 meter over havet."}
+  {n:"01",t:"Pula Arena",b:"Bygd mellom 27 f.Kr. og 68 e.Kr., rommer ca. 20 000 tilskuere. Et av de seks best bevarte romerske amfiteatrene i verden — og det eneste med alle fire sidetårn intakt. Tårnene ble opprinnelig brukt til å heve et stort solseilsystem (velarium) som beskyttet tilskuerne mot solen. Under scenen finnes underjordiske kammer der gladiatorer forberedte seg og ville dyr ble holdt. Brukes fortsatt til konserter om sommeren."},
+  {n:"02",t:"James Joyce bodde her",b:"Den irske forfatteren James Joyce bodde i Pula i 1904–1905 og underviste i engelsk. Han påbegynte arbeidet med Dublinere mens han satt her. I dag sitter en bronsestatue av ham utenfor Uliks Kafé — akkurat i bygget der han underviste. Café Uliks er oppkalt etter hans mesterverk Ulysses."},
+  {n:"03",t:"Istriske trøfler",b:"Istria produserer noen av verdens mest ettertraktede hvite trøfler (tartufi bianchi), særlig fra skoger rundt Motovun. Tartufo-chips i Tržnica er nesten for billig til å tro på."},
+  {n:"04",t:"Malvazija — hvitvin du bør prøve",b:"Malvazija Istarska er den vanligste og beste hvitvinen fra Istria. Frisk, fruktig og perfekt til sjømat. Teran er den lokale rødvinen — fyldigere og mer tannisk. Istria har vært vinproduserende region i over 2 000 år."},
+  {n:"05",t:"Fuži og maneštra",b:"Fuži er en håndrullet pastaform typisk for Istria — laget av egg og mel, formet som hule rør. Maneštra er en tradisjonsrik istrisk grønnsakssuppe som har vært laget her siden romertiden. Begge er obligatorisk."},
+  {n:"06",t:"Kroatia og euro",b:"Kroatia ble EU-medlem i 2013 og byttet til euro 1. januar 2023. Den gamle valutaen het kuna (HRK). Kroatia er også det nyeste landet i Schengen-området, med inntreden 1. januar 2023."},
+  {n:"07",t:"Venezia-forbindelsen",b:"Istria var veneziansk provins i nesten 500 år (1267–1797). Arkitekturen, mattradisjoner og stedsnavn bærer fortsatt tydelig veneziansk preg. Pula har deretter vært under Napoleons Frankrike, Østerrike-Ungarn og Italia — før det ble kroatisk i 1947."},
+  {n:"08",t:"Adriaterhavets gjennomsiktighet",b:"Adriaterhavet er kjent for eksepsjonelt klart vann — sikt på opptil 50 meter er ikke uvanlig. Sjøen er grunn og varm (opptil 28°C om sommeren) sammenlignet med resten av Middelhavet. Oppkalt etter den antikke byen Hadria i nord-Italia."},
+  {n:"09",t:"Historien om byens navn",b:"Byens opprinnelige navn var Pola, trolig fra det illyriske ordet for «festning». Romerne kalte den Colonia Pietas Iulia Pola — oppkalt etter Julius Cæsar. I følge gresk mytologi ble byen grunnlagt av Kolkherne som jaget Jason og Argonautene etter at de stjal det gyldne skinn."},
+  {n:"10",t:"Kaštel-festningen",b:"Den venezianske festningen Kaštel ble ferdigstilt i 1630 på ruinene av en romersk festning. 29 meter over havet — høyeste punkt i Pula sentrum. Inni finner du Istrias maritime og historiske museum. Fra taket ser du hele byen og havet."},
+  {n:"11",t:"Pula Film Festival",b:"Siden 1954 har Pula vært Kroatias filmhovedstad om sommeren. Den berømte Pula Film Festival arrangeres inne i selve arenaen — du ser film under åpen himmel, omgitt av 2 000 år gammel romersk stein. En av Europas eldste filmfestivaler."},
+  {n:"12",t:"Romernes vannsystem",b:"Romerne bygde et avansert akveduktsystem til Pula allerede på 100-tallet e.Kr. Deler av dette systemet er fortsatt synlige i dag, inkludert en stor stengt cisterne nær Forum. Pula var en av de best forsynte byene i hele det romerske riket."},
+  {n:"13",t:"Brijuni-øyene",b:"Rett utenfor Pula ligger Brijuni-nasjonalparken — 14 øyer med romerske ruiner, safari-dyr (gitt i gave til president Tito av ulike statsoverhoder), og en åpen-luft teaterscene bygd inne i et gammelt østerriksk fort. Øglefossiler er funnet her. Tito brukte Brijuni som sin private sommerresidensen i over 30 år."},
+  {n:"14",t:"Cape Kamenjak — det best bevarte naturreservatet",b:"Noen kilometer sør for Pula ligger Cape Kamenjak, et av Adriaterkystens best bevarte naturreservater. Ingen hoteller, ingen restauranter, bare 30 km med vill kystlinje, krystallklart vann og pinjetrær. Lokalt kjent hemmelig paradis. Safari-bar fyller opp med lokale drikkevarer."},
 ];
+
 
 const BINGO=[
   "Spør om gratis shot mot å synge en sang 🎤","Selfie med alle på turnéen 🤳","Få en fremmed til å følge Knauskoret på Insta 📲","Jonas flørter med en fremmed 😏","Gi en fremmed en high five ✋",
@@ -2048,7 +2099,6 @@ const ORAKEL_SVAR = [
   "YAY! Du må ta en shot 🥃",
   "Søppel-KK er ikke i tvil 🗑️",
   "BLAST OFF!! 🚀",
-  "Marius er enig. Det betyr noe 😏",
 ];
 function orakelRandomNavn(){
   return KOR_ALLE[Math.floor(Math.random()*KOR_ALLE.length)];
@@ -3716,19 +3766,6 @@ const DELTAKERE = {
   "Vy":               {lag:"Lag 10", status:"Kruser", stemme:"2.alt"},
 };
 
-function arFinnNavn(input){
-  // Eksakt match
-  if(DELTAKERE[input]) return input;
-  // Case-insensitiv match
-  const lower = input.toLowerCase().trim();
-  for(const navn of Object.keys(DELTAKERE)){
-    if(navn.toLowerCase() === lower) return navn;
-    // Fornavn-match for dobbeltnavn (f.eks. "Emma" matcher "Emma Maja")
-    if(navn.toLowerCase().startsWith(lower + " ")) return navn;
-  }
-  return null;
-}
-
 function arFinnLag(){
   const input = document.getElementById("nm-input").value.trim();
   if(!input){ document.getElementById("lag-feil").style.display="block"; document.getElementById("lag-feil").textContent="Skriv inn fornavnet ditt."; return; }
@@ -3961,21 +3998,6 @@ function arShowManualSetup(){
   }
 }
 
-function arSelectClr(b){
-  document.querySelectorAll(".c-btn").forEach(x=>x.classList.remove("sel"));
-  b.classList.add("sel");clr=b.dataset.c;checkReady();
-}
-function checkReady(){
-  // Ikke lenger i bruk i ny flyt, men beholdes for kompatibilitet
-}
-
-function startRace(){
-  // Brukes kun fra manuelt komitéoppsett
-  const nmEl = document.getElementById("nm");
-  if(nmEl) nm = nmEl.value.trim();
-  curCp=0;arrivals={};save();go("s-race");renderRace();
-}
-
 function save(){localStorage.setItem("ar26",JSON.stringify({nm,clr,cp:curCp,arr:arrivals}));}
 
 // ── RACE TRACKER ──
@@ -3983,11 +4005,11 @@ async function trackEvent(type, detail){
   if(!nm) return;
   if(!isLagleder) return; // kun lagleder sender til tracker
   try{
-    const data = (await jbGet()) || {varsel:{},chat:{meldinger:[],svar:[]},race_tracker:{}};
+    const data = (await jbGet(true)) || {varsel:{},chat:{meldinger:[],svar:[]},race_tracker:{}};
     if(!data.race_tracker) data.race_tracker = {};
     const key = nm.trim();
     if(!data.race_tracker[key]) data.race_tracker[key] = {clr, events:[]};
-    data.race_tracker[key].clr = clr; // oppdater farge i tilfelle den har endret seg
+    data.race_tracker[key].clr = clr;
     data.race_tracker[key].events.push({type, detail, ts: Date.now()});
     await jbSave(data);
   }catch(e){ /* stille feiler — tracking er nice-to-have */ }
@@ -4754,6 +4776,35 @@ function openSettings(){
   doOpenSettings();
 }
 
+async function lastGjettRangering(){
+  const liste = document.getElementById("gjett-rang-liste");
+  if(!liste) return;
+  liste.innerHTML = '<div style="color:#4A6A8A;text-align:center;padding:8px">Henter…</div>';
+  try{
+    const data = await jbGet(true);
+    const gjett = data?.gjett || {};
+    const lag = Object.keys(gjett);
+    if(!lag.length){ liste.innerHTML='<div style="color:#4A6A8A;text-align:center;padding:8px">Ingen gjett ennå</div>'; return; }
+    const med_dist = lag.map(navn=>{
+      const g = gjett[navn];
+      const km = Math.round(splAvstand(g.lat, g.lng, PULA.lat, PULA.lng));
+      return {navn, km, lat:g.lat, lng:g.lng, ts:g.ts};
+    }).sort((a,b)=>a.km-b.km);
+    const medaljer = ["🥇","🥈","🥉"];
+    liste.innerHTML = med_dist.map((g,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#0C1624;border-radius:10px;border:1px solid #1E3A5A">
+        <span style="font-size:18px;flex-shrink:0">${medaljer[i]||`${i+1}.`}</span>
+        <div style="flex:1">
+          <div style="font-weight:800;color:#e8ddd0">${g.navn}</div>
+          <div style="font-size:11px;color:#4A6A8A">${g.km.toLocaleString("nb")} km unna · ${new Date(g.ts).toLocaleString("nb-NO",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</div>
+        </div>
+        <span style="font-size:13px;font-weight:800;color:${i===0?"#f5c518":"#7AA0B0"}">${g.km} km</span>
+      </div>`).join("");
+  }catch(e){
+    liste.innerHTML='<div style="color:#e00515;text-align:center;padding:8px">Feil — sjekk nett</div>';
+  }
+}
+
 function doOpenSettings(){
   document.getElementById("settings").classList.add("on");
   // Sett riktig visuell state på IDEPA-switchen
@@ -4871,58 +4922,159 @@ function resetAll(){
 }
 
 // ── SPLASH ──
-const SPL_PW = "BLATUR"; // ← bytt til ønsket passord
+const SPL_PW = "BLATUR";
+const AVSLORINGSDATO = new Date("2026-10-02T06:00:00");
+const PULA = {lat: 44.8666, lng: 13.8496};
 
 (function initSplash(){
-  // Generate stars
   const starsEl = document.getElementById("spl-stars");
-  for(let i=0;i<60;i++){
-    const s=document.createElement("div");
-    s.className="spl-star";
+  if(starsEl) for(let i=0;i<60;i++){
+    const s=document.createElement("div"); s.className="spl-star";
     const sz=Math.random()*2.5+.5;
     s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*4}s`;
     starsEl.appendChild(s);
   }
-  // Alltid vis splash for navn-innskriving
-  // Men hvis navn OG splash er sett: auto-fyll og skjul splash direkte
   const lagretNavn = localStorage.getItem("kn_bruker_navn");
   const splashSett = localStorage.getItem("kn_splash") === "1";
-  if(lagretNavn){
-    aiChatNavn = lagretNavn;
-    const navnInp = document.getElementById("spl-navn");
-    if(navnInp) navnInp.value = lagretNavn;
-  }
+  if(lagretNavn){ aiChatNavn = lagretNavn; const n=document.getElementById("spl-navn"); if(n) n.value=lagretNavn; }
   if(lagretNavn && splashSett){
-    // Har sett splash og har navn — hopp over direkte
     document.getElementById("splash").classList.add("gone");
     maybeShowOnboard();
     setTimeout(maybeShowInstallBanner, 1200);
-  } else if(splashSett && !lagretNavn){
-    // Har sett splash men mangler navn (ny fil) — vis bare navnefeltet
-    setTimeout(()=>{
-      const navnInp = document.getElementById("spl-navn");
-      if(navnInp) navnInp.focus();
-    }, 400);
+    return;
   }
+  splStartNedtelling();
 })();
 
+// ── NEDTELLING ──
+let _splCountdownTimer = null;
+function splStartNedtelling(){
+  function oppdater(){
+    const diff = AVSLORINGSDATO - new Date();
+    const el = document.getElementById("spl-countdown");
+    if(!el) return;
+    if(diff <= 0){
+      el.textContent = "🎉 Klar!";
+      splVisPassordFelt();
+      clearInterval(_splCountdownTimer);
+      return;
+    }
+    const d = Math.floor(diff/86400000);
+    const h = Math.floor((diff%86400000)/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    const s = Math.floor((diff%60000)/1000);
+    el.textContent = `${d}d ${String(h).padStart(2,"0")}t ${String(m).padStart(2,"0")}m ${String(s).padStart(2,"0")}s`;
+  }
+  oppdater();
+  _splCountdownTimer = setInterval(oppdater, 1000);
+}
+function splErAvslørt(){ return new Date() >= AVSLORINGSDATO; }
+function splVisPassordFelt(){
+  const s1 = document.getElementById("spl-step-kart");
+  const s2 = document.getElementById("spl-step-låst");
+  if(s1 && s1.style.display!=="none") { const p=document.getElementById("spl-pw-wrap"); if(p) p.style.display="block"; }
+  if(s2 && s2.style.display!=="none") { const p=document.getElementById("spl-pw-wrap-låst"); if(p) p.style.display="block"; }
+}
+
+// ── KART ──
+let splMap=null, splPin=null, splGjettLat=null, splGjettLng=null;
+function splInitKart(){
+  if(splMap) return;
+  splMap = L.map("spl-kart-map",{center:[50,15],zoom:4,zoomControl:true,attributionControl:false});
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:10}).addTo(splMap);
+  splMap.on("click",function(e){ splSettPin(e.latlng.lat, e.latlng.lng); });
+}
+function splSettPin(lat,lng){
+  splGjettLat=lat; splGjettLng=lng;
+  if(splPin) splMap.removeLayer(splPin);
+  splPin = L.marker([lat,lng],{icon:L.divIcon({className:"",html:'<div style="font-size:28px;transform:translate(-50%,-100%)">📍</div>',iconSize:[0,0]})}).addTo(splMap);
+  const km = splAvstand(lat,lng,PULA.lat,PULA.lng);
+  const info = document.getElementById("spl-pin-info");
+  if(info){info.style.display="block"; info.textContent=`📍 Pin satt — ${Math.round(km)} km fra Pula`;}
+  const st = document.getElementById("spl-gjett-status");
+  if(st) st.textContent=`Pin satt! Trykk «Lås inn gjett» når du er klar.`;
+  const b = document.getElementById("spl-lås-btn");
+  if(b) b.style.display="block";
+}
+function splAvstand(lat1,lng1,lat2,lng2){
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ── STEG-NAVIGASJON ──
+function splGåTilKart(){
+  const navn=(document.getElementById("spl-navn")||{}).value?.trim()||"";
+  if(!navn){ const e=document.getElementById("spl-err-navn"); if(e){e.textContent="Skriv inn fornavnet ditt!"; setTimeout(()=>e.textContent="",2500);} return; }
+  const lagret = splHentLagretGjett(navn);
+  if(lagret && lagret.låst){
+    document.getElementById("spl-step-navn").style.display="none";
+    document.getElementById("spl-step-låst").style.display="block";
+    const km=splAvstand(lagret.lat,lagret.lng,PULA.lat,PULA.lng);
+    const info=document.getElementById("spl-låst-info");
+    if(info) info.textContent=`Du gjettet ${Math.round(km)} km unna riktig svar`;
+    if(splErAvslørt()) { const p=document.getElementById("spl-pw-wrap-låst"); if(p) p.style.display="block"; }
+    return;
+  }
+  document.getElementById("spl-step-navn").style.display="none";
+  document.getElementById("spl-step-kart").style.display="block";
+  if(splErAvslørt()) { const p=document.getElementById("spl-pw-wrap"); if(p) p.style.display="block"; }
+  setTimeout(()=>{ splInitKart(); setTimeout(()=>splMap?.invalidateSize(),100); },50);
+}
+
+async function splLåsGjett(){
+  if(!splGjettLat||!splGjettLng){ const e=document.getElementById("spl-err-kart"); if(e){e.textContent="Sett en pin på kartet først!"; setTimeout(()=>e.textContent="",2500);} return; }
+  const navn=(document.getElementById("spl-navn")||{}).value?.trim()||"";
+  if(!navn) return;
+  const btn=document.getElementById("spl-lås-btn");
+  if(btn){btn.textContent="Lagrer…";btn.disabled=true;}
+  const gjett={lat:splGjettLat,lng:splGjettLng,låst:true,ts:Date.now(),navn};
+  localStorage.setItem("kn_gjett_"+navn.toLowerCase(),JSON.stringify(gjett));
+  try{
+    const data=(await jbGet(true))||{};
+    if(!data.gjett) data.gjett={};
+    data.gjett[navn]={lat:splGjettLat,lng:splGjettLng,ts:Date.now()};
+    await jbSave(data);
+  }catch(e){}
+  document.getElementById("spl-step-kart").style.display="none";
+  document.getElementById("spl-step-låst").style.display="block";
+  const km=splAvstand(splGjettLat,splGjettLng,PULA.lat,PULA.lng);
+  const info=document.getElementById("spl-låst-info");
+  if(info) info.textContent=`Du gjettet ${Math.round(km)} km unna riktig svar`;
+  if(splErAvslørt()) { const p=document.getElementById("spl-pw-wrap-låst"); if(p) p.style.display="block"; }
+}
+
+function splHentLagretGjett(navn){
+  try{ return JSON.parse(localStorage.getItem("kn_gjett_"+navn.toLowerCase())||"null"); }catch(e){ return null; }
+}
+
+function splKomiteBypass(){
+  const pw=prompt("Komitépassord:");
+  if(!pw) return;
+  if(pw.trim().toUpperCase()==="IDEPA"){ clearInterval(_splCountdownTimer); enterApp(); }
+}
+
 function trySplash(){
-  const inp  = document.getElementById("spl-in");
+  // Les passord fra aktivt felt (kart-steg eller låst-steg)
+  const inn1 = document.getElementById("spl-in");
+  const inn2 = document.getElementById("spl-in-låst");
+  const inp = (inn2 && inn2.offsetParent) ? inn2 : inn1;
+  const errId = (inn2 && inn2.offsetParent) ? "spl-err-låst" : "spl-err";
   const navnInp = document.getElementById("spl-navn");
-  const err  = document.getElementById("spl-err");
-  const navn = navnInp ? navnInp.value.trim() : "";
-  if(!navn){ 
-    if(navnInp){ navnInp.style.animation="spl-shake .3s"; setTimeout(()=>navnInp.style.animation="",350); }
-    err.textContent="Skriv inn navnet ditt først!";
-    setTimeout(()=>err.textContent="",2200);
+  const err = document.getElementById(errId);
+
+  const navn = navnInp ? navnInp.value.trim() : (splHentLagretGjett(aiChatNavn||"")?.navn || aiChatNavn || "");
+  if(!inp || !inp.value.trim()){
+    if(err){ err.textContent="Skriv inn passordet!"; setTimeout(()=>err.textContent="",2200); }
     return;
   }
   const val=inp.value.trim().toUpperCase();
   if(val===SPL_PW){
-    // Lagre navn
-    aiChatNavn = navn.charAt(0).toUpperCase() + navn.slice(1);
+    const finalNavn = navn || aiChatNavn || "";
+    aiChatNavn = finalNavn.charAt(0).toUpperCase() + finalNavn.slice(1);
     localStorage.setItem("kn_bruker_navn", aiChatNavn);
-    setTimeout(osSporBrukernavn, 2000); // knytt navn til OneSignal etter init
+    setTimeout(osSporBrukernavn, 2000);
+    clearInterval(_splCountdownTimer);
     document.getElementById("pw-view").style.display="none";
     const rv=document.getElementById("rv");
     rv.style.display="flex";
@@ -4931,8 +5083,7 @@ function trySplash(){
     inp.value="";
     inp.style.animation="spl-shake .3s";
     setTimeout(()=>inp.style.animation="",350);
-    err.textContent="Feil passord — prøv igjen";
-    setTimeout(()=>err.textContent="",2200);
+    if(err){ err.textContent="Feil passord — prøv igjen"; setTimeout(()=>err.textContent="",2200); }
   }
 }
 
@@ -5245,12 +5396,26 @@ function closeOnboard(fromBack){
     </button>
   </div>
 
+  <div class="set-grp-h">🗺️ Tippelek — oversikt</div>
+  <div style="background:#1C2B38;border-radius:12px;margin-bottom:8px;border:1px solid #243444;overflow:hidden">
+    <div onclick="toggleKol('gjett-rang')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent">
+      <div style="font-size:14px;font-weight:800;color:#e8ddd0">Vis rangeringen</div>
+      <span class="kol-ico closed" id="ki-gjett-rang" style="color:#7AA0B0">▼</span>
+    </div>
+    <div class="kol-body closed" id="kb-gjett-rang">
+      <div style="padding:0 16px 12px">
+        <button onclick="lastGjettRangering()" style="width:100%;background:#0C1624;border:1.5px solid #C4982B;color:#C4982B;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px">🔄 Hent siste gjett</button>
+        <div id="gjett-rang-liste" style="display:flex;flex-direction:column;gap:8px;font-size:13px"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="set-grp-h">⚠️ Faresone</div>
   <div class="set-row danger" onclick="resetAll()">
     <div><div class="set-row-h">Nullstill hele appen</div><div class="set-row-s">Fjerner all fremgang og laster siden på nytt</div></div>
     <div class="set-row-ico">&#9888;&#65039;</div>
   </div>
-  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#4A6A8A;letter-spacing:.05em">KKTurneprogram v26.06.24-12</div>
+  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#4A6A8A;letter-spacing:.05em">KKTurneprogram v26.06.24-14</div>
 </div>
 
 
