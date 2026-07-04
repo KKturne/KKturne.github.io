@@ -83,12 +83,17 @@
 
 <div class="topbar">
   <button class="back-btn" onclick="history.back()">← Tilbake</button>
-  <div class="title">🕹️ Breakout</div>
+  <div class="title">⭐ <span id="level-display">1</span> &nbsp; 🕹️</div>
   <div class="score-display">Poeng: <span id="score">0</span></div>
 </div>
 
 <canvas id="game-canvas"></canvas>
 <div id="nedtelling-overlay"></div>
+<div id="level-overlay" style="display:none;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.88);gap:16px;z-index:12">
+  <div id="level-tittel" style="font-size:48px;font-weight:900;color:#f5c518;text-align:center"></div>
+  <div id="level-sub" style="font-size:16px;color:#aaa;text-align:center">Ballen er raskere nå!</div>
+  <button class="play-btn" onclick="startNestLevel()">Start level →</button>
+</div>
 <div id="powerup-banner"></div>
 
 <div id="highscore-wrap">
@@ -136,6 +141,7 @@ let aktivPowerup = null, powerupTimer = null;
 let fallendePowerups = [];
 let orgPaddleW, ballFestetTilPaddle;
 let forstGang = true;
+let level = 1;
 
 // ── KLAR FOR RUNDE (nedtelling) ──
 function klargjorRunde(){
@@ -145,7 +151,7 @@ function klargjorRunde(){
   if(forstGang){
     // Første gang: initialiser hele spillet
     forstGang = false;
-    poeng = 0; liv = 3;
+    poeng = 0; liv = 3; level = 1;
     document.getElementById("score").textContent = "0";
     aktivPowerup = null; fallendePowerups = [];
     if(powerupTimer) clearTimeout(powerupTimer);
@@ -249,15 +255,22 @@ function tegn(){
     ctx.fillRect(b.x+3, b.y+3, b.w-6, 3);
   });
 
-  // Fallende powerups — emoji vises KUN når de faller
+  // Fallende powerups — med gløde-effekt
   ctx.save();
   ctx.globalAlpha = 1;
   ctx.shadowBlur = 0;
-  ctx.font = "26px serif";
-  ctx.textAlign = "center";
   ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
   fallendePowerups.forEach(p => {
-    ctx.fillText(p.type==="zebra" ? "🦓" : p.type==="elefant" ? "🐘" : "🍐", p.x, p.y);
+    const emoji = p.type==="zebra" ? "🦓" : p.type==="elefant" ? "🐘" : "🍐";
+    // Glow-ring bak emojien
+    const glow = p.type==="zebra" ? "#fff" : p.type==="elefant" ? "#ec4899" : "#84cc16";
+    ctx.shadowColor = glow;
+    ctx.shadowBlur = 18;
+    ctx.font = "28px serif";
+    ctx.fillStyle = "#fff";
+    ctx.fillText(emoji, p.x, p.y);
+    ctx.shadowBlur = 0;
   });
   ctx.restore();
 
@@ -346,13 +359,26 @@ function oppdater(){
     return p.y<H+30;
   });
 
-  // Ny runde
+  // Level fullfort!
   if(igjen===0){
-    lagMurstein();
-    poeng+=50; document.getElementById("score").textContent=poeng;
-    ball.dx*=1.1; ball.dy*=1.1;
-    ball.x=W/2; ball.y=H/2;
-    fallendePowerups=[];
+    kjorer = false;
+    if(animId) cancelAnimationFrame(animId);
+    fallendePowerups = [];
+    level++;
+    // Øk ballhastigheten permanent for neste level
+    const fartFaktor = 1 + (level - 1) * 0.12;
+    const nyFart = Math.max(2, canvas.width * GRUNFART_FAKTOR) * fartFaktor;
+    ball._nesteFart = nyFart;
+    poeng += 50 * level;
+    document.getElementById("score").textContent = poeng;
+    // Konfetti!
+    const levelFarger = ["#f5c518","#22c55e","#3b82f6","#ec4899","#8b5cf6","#ef4444"];
+    launchKonfetti(levelFarger, 80);
+    // Vis level-overlay
+    document.getElementById("level-tittel").textContent = `⭐ Level ${level}!`;
+    document.getElementById("level-sub").textContent = `+${50*level} bonuspoeng · Ballen er ${Math.round((fartFaktor-1)*100)}% raskere!`;
+    document.getElementById("level-display").textContent = level;
+    document.getElementById("level-overlay").style.display = "flex";
   }
 
   // Ball ute
@@ -368,6 +394,30 @@ function oppdater(){
     document.getElementById("overlay").classList.remove("hidden");
     forstGang=false;
   }
+}
+
+function startNestLevel(){
+  document.getElementById("level-overlay").style.display = "none";
+  // Ny fart basert på level
+  const nyFart = ball._nesteFart || Math.max(2, canvas.width * GRUNFART_FAKTOR);
+  lagMurstein();
+  fallendePowerups = [];
+  paddle.w = orgPaddleW;
+  aktivPowerup = null;
+  if(powerupTimer) clearTimeout(powerupTimer);
+  skjulBanner();
+  // Sett ball tilbake til paddle med ny fart
+  ball.x = paddle.x + paddle.w/2;
+  ball.y = paddle.y - ball.r - 1;
+  ball.dx = nyFart * (Math.random() > .5 ? 1 : -1);
+  ball.dy = -nyFart;
+  ballFestetTilPaddle = true;
+  startNedtelling(3, ()=>{
+    ballFestetTilPaddle = false;
+    kjorer = true;
+    if(animId) cancelAnimationFrame(animId);
+    loop();
+  });
 }
 
 // ── POWERUPS ──
@@ -438,7 +488,8 @@ async function gameOver(){
     await fetch(JB_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JB_KEY},body:JSON.stringify(data)});
   }catch(e){}
 
-  forstGang=true;
+  forstGang=true; level=1;
+  document.getElementById("level-overlay").style.display = "none";
   document.getElementById("overlay-title").textContent=`${poeng} poeng 🎉`;
   document.getElementById("overlay-sub").textContent="Ingen liv igjen!";
   document.getElementById("overlay-btn").textContent="Spill igjen?";
