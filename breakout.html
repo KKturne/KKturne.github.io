@@ -8,110 +8,75 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #050a10;
-    color: #fff;
+    background: #050a10; color: #fff;
     font-family: system-ui, -apple-system, sans-serif;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-    touch-action: none;
+    height: 100dvh; display: flex; flex-direction: column;
+    align-items: center; overflow: hidden; touch-action: none;
   }
-
-  /* TOPPLINJE */
   .topbar {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-    flex-shrink: 0;
-    background: #050a10;
-    border-bottom: 1px solid #111;
+    width: 100%; display: flex; align-items: center;
+    justify-content: space-between; padding: 10px 16px;
+    flex-shrink: 0; background: #050a10; border-bottom: 1px solid #111;
   }
   .back-btn {
-    background: #111;
-    border: 1px solid #222;
-    color: #aaa;
-    border-radius: 8px;
-    padding: 7px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-    -webkit-tap-highlight-color: transparent;
+    background: #111; border: 1px solid #222; color: #aaa;
+    border-radius: 8px; padding: 7px 14px; font-size: 13px;
+    cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent;
   }
   .back-btn:active { opacity: .7; }
   .title { font-size: 14px; font-weight: 800; color: #fff; }
   .score-display { font-size: 14px; font-weight: 800; color: #f5c518; }
-
-  /* CANVAS */
-  #game-canvas {
-    display: block;
-    touch-action: none;
-    flex-shrink: 0;
-  }
-
-  /* OVERLAY (game over / start) */
+  #game-canvas { display: block; touch-action: none; flex-shrink: 0; }
   #overlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,.85);
-    gap: 16px;
-    z-index: 10;
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,.88); gap: 14px; z-index: 10;
   }
   #overlay.hidden { display: none; }
-  .overlay-title { font-size: 32px; font-weight: 900; text-align: center; }
-  .overlay-sub { font-size: 16px; color: #aaa; text-align: center; }
+  .overlay-title { font-size: 30px; font-weight: 900; text-align: center; }
+  .overlay-sub { font-size: 14px; color: #aaa; text-align: center; padding: 0 24px; }
   .play-btn {
-    background: #f5c518;
-    color: #000;
-    border: none;
-    border-radius: 14px;
-    padding: 14px 36px;
-    font-size: 18px;
-    font-weight: 800;
-    cursor: pointer;
-    font-family: inherit;
-    -webkit-tap-highlight-color: transparent;
-    margin-top: 8px;
+    background: #f5c518; color: #000; border: none; border-radius: 14px;
+    padding: 14px 36px; font-size: 18px; font-weight: 800;
+    cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; margin-top: 4px;
   }
   .play-btn:active { transform: scale(.95); }
-
-  /* HIGHSCORE */
+  #nedtelling-overlay {
+    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.6); z-index: 15;
+    font-size: 80px; font-weight: 900; color: #f5c518;
+  }
+  #powerup-banner {
+    position: fixed; top: 54px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,.8); border-radius: 20px; padding: 6px 18px;
+    font-size: 14px; font-weight: 800; display: none; z-index: 20;
+    backdrop-filter: blur(4px); border: 1.5px solid rgba(255,255,255,.15);
+    white-space: nowrap;
+  }
   #highscore-wrap {
-    width: 100%;
-    max-width: 400px;
-    padding: 12px 16px;
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    width: 100%; max-width: 420px; padding: 10px 16px;
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
-  .hs-tittel {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: #333;
-    margin-bottom: 8px;
-    text-align: center;
+  .hs-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
+  .hs-tab {
+    flex: 1; text-align: center; font-size: 11px; font-weight: 800;
+    letter-spacing: .08em; text-transform: uppercase; color: #333;
+    padding: 6px; border-radius: 8px; cursor: pointer; background: #0d0d0d;
+    -webkit-tap-highlight-color: transparent;
   }
+  .hs-tab.active { color: #f5c518; background: #1a1500; }
   .hs-rad {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: #0d0d0d;
-    border-radius: 10px;
-    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; background: #0d0d0d; border-radius: 10px; margin-bottom: 4px;
   }
   .hs-plass { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
   .hs-navn { flex: 1; color: #ccc; font-size: 13px; }
   .hs-poeng { font-weight: 800; color: #f5c518; font-size: 13px; }
+  .konfetti-bit {
+    position: fixed; top: -10px; border-radius: 2px;
+    animation: kfall linear forwards; pointer-events: none; z-index: 9999;
+  }
+  @keyframes kfall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 </style>
 </head>
 <body>
@@ -123,81 +88,145 @@
 </div>
 
 <canvas id="game-canvas"></canvas>
+<div id="nedtelling-overlay"></div>
+<div id="powerup-banner"></div>
 
 <div id="highscore-wrap">
-  <div class="hs-tittel">🏆 Toppliste</div>
+  <div class="hs-tabs">
+    <div class="hs-tab active" id="tab-dag" onclick="byttHsTab('dag')">📅 I dag</div>
+    <div class="hs-tab" id="tab-all" onclick="byttHsTab('all')">🏆 Turné</div>
+  </div>
   <div id="hs-liste"><div style="color:#222;text-align:center;padding:8px;font-size:13px">Laster…</div></div>
 </div>
 
 <div id="overlay">
   <div class="overlay-title" id="overlay-title">🕹️ Breakout</div>
-  <div class="overlay-sub" id="overlay-sub">Bruk fingeren eller musen til å styre paddelen</div>
-  <button class="play-btn" onclick="startSpill()">Start spillet</button>
+  <div class="overlay-sub" id="overlay-sub">Styr paddelen med fingeren · Unngå 🍐!</div>
+  <button class="play-btn" id="overlay-btn" onclick="klargjorRunde()">Start spillet</button>
 </div>
 
 <script>
 const JB_URL = "https://api.jsonbin.io/v3/b/6a36672af5f4af5e2913c2f1";
 const JB_KEY = "$2a$10$On.B9FR9GJ81fyDwAKsbzuL81xI6InKhu8d008hvY4DVgSEhCbYTa";
-
-// Hent spillernavn fra localStorage (satt av hovedappen)
 const SPILLERNAVN = localStorage.getItem("kn_bruker_navn") || "Anonym";
+const IDAG = new Date().toISOString().slice(0,10);
 
-// ── CANVAS SETUP ──
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 
+// ── RESIZE ──
 function resizeCanvas(){
-  const topbar = document.querySelector(".topbar");
-  const hs = document.getElementById("highscore-wrap");
-  const topH = topbar.offsetHeight;
+  const topH = document.querySelector(".topbar").offsetHeight;
   const hsH = Math.min(window.innerHeight * 0.22, 160);
-  hs.style.height = hsH + "px";
+  document.getElementById("highscore-wrap").style.height = hsH + "px";
   canvas.width = Math.min(window.innerWidth, 480);
   canvas.height = window.innerHeight - topH - hsH;
 }
 resizeCanvas();
-window.addEventListener("resize", ()=>{ resizeCanvas(); if(!kjorer) tegn(); });
+window.addEventListener("resize", resizeCanvas);
+
+// ── KONSTANTER ──
+const FARGER = ["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#8b5cf6","#ec4899","#14b8a6"];
+const POWERUP_TYPER = ["zebra","elefant","pirum"];
+const GRUNFART_FAKTOR = 0.004; // tregere start (var 0.007)
 
 // ── SPILLVARIABLER ──
-const FARGER = ["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#8b5cf6","#ec4899","#14b8a6"];
 let ball, paddle, bricks, poeng, liv, kjorer, animId;
+let aktivPowerup = null, powerupTimer = null;
+let fallendePowerups = [];
+let orgPaddleW, ballFestetTilPaddle;
+let forstGang = true;
 
-function startSpill(){
-  document.getElementById("overlay").classList.add("hidden");
-  poeng = 0;
-  liv = 3;
-  document.getElementById("score").textContent = "0";
+// ── KLAR FOR RUNDE (nedtelling) ──
+function klargjorRunde(){
+  const ov = document.getElementById("overlay");
+  ov.classList.add("hidden");
 
+  if(forstGang){
+    // Første gang: initialiser hele spillet
+    forstGang = false;
+    poeng = 0; liv = 3;
+    document.getElementById("score").textContent = "0";
+    aktivPowerup = null; fallendePowerups = [];
+    if(powerupTimer) clearTimeout(powerupTimer);
+    lagSpillfeltet();
+  } else {
+    // Ny runde etter liv-tap: reset ball og paddle, behold poeng og bricks
+    const W = canvas.width, H = canvas.height;
+    const fart = Math.max(2, W * GRUNFART_FAKTOR);
+    ball.x = paddle.x + paddle.w/2;
+    ball.y = paddle.y - ball.r - 1;
+    ball.dx = fart * (Math.random() > .5 ? 1 : -1);
+    ball.dy = -fart;
+    fallendePowerups = [];
+    paddle.w = orgPaddleW;
+    aktivPowerup = null;
+    if(powerupTimer) clearTimeout(powerupTimer);
+    skjulBanner();
+  }
+
+  // Start nedtelling 3-2-1
+  startNedtelling(3, ()=>{
+    ballFestetTilPaddle = false;
+    kjorer = true;
+    if(animId) cancelAnimationFrame(animId);
+    loop();
+  });
+}
+
+function startNedtelling(fra, callback){
+  const el = document.getElementById("nedtelling-overlay");
+  el.style.display = "flex";
+  let teller = fra;
+  el.textContent = teller;
+  const iv = setInterval(()=>{
+    teller--;
+    if(teller <= 0){
+      clearInterval(iv);
+      el.style.display = "none";
+      callback();
+    } else {
+      el.textContent = teller;
+    }
+  }, 1000);
+}
+
+function lagSpillfeltet(){
   const W = canvas.width, H = canvas.height;
   const pW = Math.floor(W * 0.22);
-  const bR = Math.max(6, Math.floor(W * 0.02));
-  const fart = Math.max(3, W * 0.007);
+  orgPaddleW = pW;
+  const bR = Math.max(6, Math.floor(W * 0.018));
+  const fart = Math.max(2, W * GRUNFART_FAKTOR);
 
   paddle = { x: W/2 - pW/2, y: H - 18, w: pW, h: 10 };
-  ball = { x: W/2, y: H/2, r: bR, dx: fart * (Math.random() > .5 ? 1 : -1), dy: -fart };
+  ball = { x: W/2, y: paddle.y - bR - 1, r: bR, dx: fart * (Math.random() > .5 ? 1 : -1), dy: -fart };
+  ballFestetTilPaddle = true; // ballen starter festet til paddle
 
-  // Murstein
+  lagMurstein();
+  // Tegn en statisk frame mens vi venter på nedtelling
+  tegn();
+}
+
+function lagMurstein(){
+  const W = canvas.width, H = canvas.height;
   const cols = 8, rows = 5;
   const bW = Math.floor((W - 24) / cols) - 4;
   const bH = Math.max(14, Math.floor(H * 0.055));
   bricks = [];
   for(let r = 0; r < rows; r++){
     for(let c = 0; c < cols; c++){
+      const hasPowerup = Math.random() < 0.20;
       bricks.push({
-        x: 12 + c * (bW + 4),
-        y: 44 + r * (bH + 5),
-        w: bW, h: bH,
-        farge: FARGER[r % FARGER.length],
-        aktiv: true
+        x: 12 + c*(bW+4), y: 44 + r*(bH+5), w: bW, h: bH,
+        farge: FARGER[r % FARGER.length], aktiv: true,
+        powerup: hasPowerup ? POWERUP_TYPER[Math.floor(Math.random()*POWERUP_TYPER.length)] : null,
+        visPowerup: false // vises IKKE mens blokken er hel
       });
     }
   }
-
-  kjorer = true;
-  if(animId) cancelAnimationFrame(animId);
-  loop();
 }
 
+// ── GAME LOOP ──
 function loop(){
   if(!kjorer) return;
   tegn();
@@ -205,161 +234,270 @@ function loop(){
   animId = requestAnimationFrame(loop);
 }
 
+// ── TEGN ──
 function tegn(){
   const W = canvas.width, H = canvas.height;
   ctx.fillStyle = "#050a10";
   ctx.fillRect(0, 0, W, H);
 
-  // Murstein
+  // Murstein — INGEN emoji mens blokken er hel
   bricks.forEach(b => {
     if(!b.aktiv) return;
     ctx.fillStyle = b.farge;
-    ctx.beginPath();
-    ctx.roundRect(b.x, b.y, b.w, b.h, 4);
-    ctx.fill();
+    ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 4); ctx.fill();
     ctx.fillStyle = "rgba(255,255,255,.18)";
     ctx.fillRect(b.x+3, b.y+3, b.w-6, 3);
   });
 
-  // Paddle
-  const grad = ctx.createLinearGradient(paddle.x, 0, paddle.x + paddle.w, 0);
-  grad.addColorStop(0, "#f5c518");
-  grad.addColorStop(1, "#e0a800");
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 5);
-  ctx.fill();
-
-  // Ball med glow
-  ctx.shadowColor = "#fff";
-  ctx.shadowBlur = 8;
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-  ctx.fillStyle = "#fff";
-  ctx.fill();
+  // Fallende powerups — emoji vises KUN når de faller
+  ctx.save();
+  ctx.globalAlpha = 1;
   ctx.shadowBlur = 0;
+  ctx.font = "26px serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  fallendePowerups.forEach(p => {
+    ctx.fillText(p.type==="zebra" ? "🦓" : p.type==="elefant" ? "🐘" : "🍐", p.x, p.y);
+  });
+  ctx.restore();
+
+  // Paddle
+  let pF1="#f5c518", pF2="#e0a800";
+  if(aktivPowerup==="zebra"){ pF1="#fff"; pF2="#ccc"; }
+  else if(aktivPowerup==="elefant"){ pF1="#ec4899"; pF2="#be185d"; }
+  else if(aktivPowerup==="pirum"){ pF1="#84cc16"; pF2="#4d7c0f"; }
+  const grad = ctx.createLinearGradient(paddle.x, 0, paddle.x+paddle.w, 0);
+  grad.addColorStop(0, pF1); grad.addColorStop(1, pF2);
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 5); ctx.fill();
+
+  // Ball
+  ctx.shadowColor="#fff"; ctx.shadowBlur=8;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+  ctx.fillStyle = aktivPowerup==="elefant" ? "#ec4899" : "#fff";
+  ctx.fill();
+  ctx.shadowBlur=0;
 
   // Liv
-  ctx.font = `${Math.max(14, Math.floor(H * 0.032))}px serif`;
-  for(let i = 0; i < liv; i++) ctx.fillText("❤️", 10 + i * 24, 28);
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur = 0;
+  ctx.font = `${Math.max(14, Math.floor(H*0.032))}px serif`;
+  ctx.textBaseline = "alphabetic";
+  for(let i=0; i<liv; i++) ctx.fillText("❤️", 10+i*24, 28);
+  ctx.restore();
 }
 
+// ── OPPDATER ──
 function oppdater(){
   const W = canvas.width, H = canvas.height;
 
-  ball.x += ball.dx;
-  ball.y += ball.dy;
-
-  // Vegger
-  if(ball.x - ball.r < 0){ ball.x = ball.r; ball.dx = Math.abs(ball.dx); }
-  if(ball.x + ball.r > W){ ball.x = W - ball.r; ball.dx = -Math.abs(ball.dx); }
-  if(ball.y - ball.r < 0){ ball.y = ball.r; ball.dy = Math.abs(ball.dy); }
-
-  // Paddle-kollisjon
-  if(ball.y + ball.r >= paddle.y &&
-     ball.y + ball.r <= paddle.y + paddle.h + Math.abs(ball.dy) + 2 &&
-     ball.x >= paddle.x - ball.r && ball.x <= paddle.x + paddle.w + ball.r){
-    const hit = (ball.x - paddle.x) / paddle.w; // 0–1
-    const vinkel = (hit - 0.5) * Math.PI * 0.65;
-    const fart = Math.sqrt(ball.dx**2 + ball.dy**2);
-    ball.dx = fart * Math.sin(vinkel);
-    ball.dy = -Math.abs(fart * Math.cos(vinkel));
+  // Ball festet til paddle? Følg paddelen men beveg deg ikke
+  if(ballFestetTilPaddle){
+    ball.x = paddle.x + paddle.w/2;
     ball.y = paddle.y - ball.r - 1;
+    return;
   }
 
-  // Murstein-kollisjon
-  let igjen = 0;
-  bricks.forEach(b => {
+  ball.x += ball.dx; ball.y += ball.dy;
+
+  // Vegger
+  if(ball.x-ball.r<0){ ball.x=ball.r; ball.dx=Math.abs(ball.dx); }
+  if(ball.x+ball.r>W){ ball.x=W-ball.r; ball.dx=-Math.abs(ball.dx); }
+  if(ball.y-ball.r<0){ ball.y=ball.r; ball.dy=Math.abs(ball.dy); }
+
+  // Paddle-kollisjon
+  if(ball.y+ball.r>=paddle.y &&
+     ball.y+ball.r<=paddle.y+paddle.h+Math.abs(ball.dy)+2 &&
+     ball.x>=paddle.x-ball.r && ball.x<=paddle.x+paddle.w+ball.r){
+    const hit=(ball.x-paddle.x)/paddle.w;
+    const vinkel=(hit-0.5)*Math.PI*0.65;
+    const fart=Math.sqrt(ball.dx**2+ball.dy**2);
+    ball.dx=fart*Math.sin(vinkel);
+    ball.dy=-Math.abs(fart*Math.cos(vinkel));
+    ball.y=paddle.y-ball.r-1;
+  }
+
+  // Murstein
+  let igjen=0;
+  bricks.forEach(b=>{
     if(!b.aktiv) return;
     igjen++;
-    if(ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
-       ball.y + ball.r > b.y && ball.y - ball.r < b.y + b.h){
-      b.aktiv = false;
-      ball.dy *= -1;
-      poeng += 10;
-      document.getElementById("score").textContent = poeng;
+    if(ball.x+ball.r>b.x && ball.x-ball.r<b.x+b.w &&
+       ball.y+ball.r>b.y && ball.y-ball.r<b.y+b.h){
+      b.aktiv=false; ball.dy*=-1;
+      poeng+=10; document.getElementById("score").textContent=poeng;
       igjen--;
+      if(b.powerup){
+        // Emoji faller saktere: dy=1.2 (var 3)
+        fallendePowerups.push({x:b.x+b.w/2, y:b.y+b.h/2, dy:1.2, type:b.powerup});
+      }
     }
   });
 
-  // Alle borte → ny runde med økt fart
-  if(igjen === 0){
-    bricks.forEach(b => b.aktiv = true);
-    poeng += 50;
-    document.getElementById("score").textContent = poeng;
-    ball.dx *= 1.12;
-    ball.dy *= 1.12;
-    ball.x = W/2; ball.y = H/2;
+  // Powerup-bevegelse og plukking
+  fallendePowerups=fallendePowerups.filter(p=>{
+    p.y+=p.dy;
+    if(p.y>=paddle.y && p.y<=paddle.y+paddle.h+p.dy &&
+       p.x>=paddle.x && p.x<=paddle.x+paddle.w){
+      aktiverPowerup(p.type); return false;
+    }
+    return p.y<H+30;
+  });
+
+  // Ny runde
+  if(igjen===0){
+    lagMurstein();
+    poeng+=50; document.getElementById("score").textContent=poeng;
+    ball.dx*=1.1; ball.dy*=1.1;
+    ball.x=W/2; ball.y=H/2;
+    fallendePowerups=[];
   }
 
-  // Ball falt ut
-  if(ball.y - ball.r > H){
+  // Ball ute
+  if(ball.y-ball.r>H){
     liv--;
-    if(liv <= 0){ gameOver(); return; }
-    ball.x = W/2; ball.y = H/2;
-    const fart = Math.max(3, W * 0.007);
-    ball.dx = fart * (Math.random() > .5 ? 1 : -1);
-    ball.dy = -fart;
+    kjorer=false;
+    if(animId) cancelAnimationFrame(animId);
+    if(liv<=0){ gameOver(); return; }
+    // Vis overlay for neste runde
+    document.getElementById("overlay-title").textContent="❤️ ".repeat(liv).trim()+" liv igjen";
+    document.getElementById("overlay-sub").textContent="Klar for neste forsøk?";
+    document.getElementById("overlay-btn").textContent="Start runde";
+    document.getElementById("overlay").classList.remove("hidden");
+    forstGang=false;
   }
 }
 
-async function gameOver(){
-  kjorer = false;
-  if(animId) cancelAnimationFrame(animId);
-
-  // Lagre highscore
-  try{
-    const r = await fetch(JB_URL+"/latest", {headers:{"X-Master-Key":JB_KEY}});
-    const data = (await r.json()).record || {};
-    if(!data.breakout) data.breakout = {};
-    const gammel = data.breakout[SPILLERNAVN] || 0;
-    if(poeng > gammel){
-      data.breakout[SPILLERNAVN] = poeng;
-      await fetch(JB_URL, {method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JB_KEY},body:JSON.stringify(data)});
+// ── POWERUPS ──
+function aktiverPowerup(type){
+  if(powerupTimer) clearTimeout(powerupTimer);
+  aktivPowerup=type;
+  if(type==="zebra"){
+    paddle.w=orgPaddleW*2;
+    visBanner("🦓 ZEBRA! Bred paddle i 8 sek","#fff");
+    launchKonfetti(["#000","#fff","#333","#eee","#111","#ddd"],60);
+  } else if(type==="elefant"){
+    const fart=Math.sqrt(ball.dx**2+ball.dy**2);
+    ball.dx=(ball.dx/fart)*fart*0.55; ball.dy=(ball.dy/fart)*fart*0.55;
+    visBanner("🐘 ELEFANT! Treg ball i 10 sek","#ec4899");
+    launchKonfetti(["#ec4899","#f9a8d4","#fde68a","#bfdbfe"],60);
+  } else if(type==="pirum"){
+    paddle.w=Math.floor(orgPaddleW*0.45);
+    visBanner("🍐 PIRUM! Paddle halveres 😬","#84cc16");
+    launchKonfetti(["#4d7c0f","#713f12","#92400e"],40);
+    for(let i=0;i<8;i++) setTimeout(()=>slippEmoji(Math.random()>.5?"🍆":"🍺"),i*150);
+  }
+  paddle.x=Math.min(paddle.x, canvas.width-paddle.w);
+  const varighet=type==="elefant"?10000:8000;
+  powerupTimer=setTimeout(()=>{
+    if(type==="elefant"){
+      const fart=Math.sqrt(ball.dx**2+ball.dy**2);
+      const orgF=Math.max(2,canvas.width*GRUNFART_FAKTOR);
+      ball.dx=(ball.dx/fart)*orgF; ball.dy=(ball.dy/fart)*orgF;
     }
+    paddle.w=orgPaddleW; aktivPowerup=null; skjulBanner();
+  }, varighet);
+}
+
+function visBanner(t,f){ const b=document.getElementById("powerup-banner"); b.textContent=t; b.style.color=f; b.style.display="block"; }
+function skjulBanner(){ document.getElementById("powerup-banner").style.display="none"; }
+function slippEmoji(e){
+  const el=document.createElement("div");
+  el.style.cssText=`position:fixed;font-size:28px;left:${Math.random()*90}vw;top:-40px;animation:kfall ${1.5+Math.random()}s linear forwards;z-index:9999;pointer-events:none`;
+  el.textContent=e; document.body.appendChild(el); setTimeout(()=>el.remove(),3000);
+}
+function launchKonfetti(farger,antall){
+  for(let i=0;i<antall;i++) setTimeout(()=>{
+    const el=document.createElement("div");
+    const sz=6+Math.random()*8; el.className="konfetti-bit";
+    el.style.cssText=`left:${Math.random()*100}vw;width:${sz}px;height:${sz}px;background:${farger[Math.floor(Math.random()*farger.length)]};animation-duration:${1.2+Math.random()*1.5}s;animation-delay:${Math.random()*0.3}s;transform:rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(el); setTimeout(()=>el.remove(),3000);
+  }, i*20);
+}
+
+// ── GAME OVER ──
+async function gameOver(){
+  if(animId) cancelAnimationFrame(animId);
+  if(powerupTimer) clearTimeout(powerupTimer);
+  skjulBanner();
+  try{
+    const r=await fetch(JB_URL+"/latest",{headers:{"X-Master-Key":JB_KEY}});
+    const data=(await r.json()).record||{};
+    if(!data.breakout) data.breakout={};
+    const sd=data.breakout[SPILLERNAVN]||{best:0,daglig:{}};
+    if(typeof sd==="number"){
+      data.breakout[SPILLERNAVN]={best:Math.max(sd,poeng),daglig:{[IDAG]:poeng}};
+    } else {
+      if(poeng>(sd.best||0)) sd.best=poeng;
+      if(!sd.daglig) sd.daglig={};
+      if(poeng>(sd.daglig[IDAG]||0)) sd.daglig[IDAG]=poeng;
+      data.breakout[SPILLERNAVN]=sd;
+    }
+    await fetch(JB_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JB_KEY},body:JSON.stringify(data)});
   }catch(e){}
 
-  document.getElementById("overlay-title").textContent = poeng > 0 ? `${poeng} poeng 🎉` : "Game Over 😅";
-  document.getElementById("overlay-sub").textContent = liv === 0 ? "Ingen liv igjen!" : "";
+  forstGang=true;
+  document.getElementById("overlay-title").textContent=`${poeng} poeng 🎉`;
+  document.getElementById("overlay-sub").textContent="Ingen liv igjen!";
+  document.getElementById("overlay-btn").textContent="Spill igjen?";
   document.getElementById("overlay").classList.remove("hidden");
   lastHighscore();
 }
 
+// ── HIGHSCORE ──
+let aktivHsTab="dag";
+function byttHsTab(tab){
+  aktivHsTab=tab;
+  document.getElementById("tab-dag").classList.toggle("active",tab==="dag");
+  document.getElementById("tab-all").classList.toggle("active",tab==="all");
+  lastHighscore();
+}
 async function lastHighscore(){
-  const liste = document.getElementById("hs-liste");
+  const liste=document.getElementById("hs-liste");
+  liste.innerHTML='<div style="color:#222;text-align:center;padding:8px;font-size:13px">Laster…</div>';
   try{
-    const r = await fetch(JB_URL+"/latest", {headers:{"X-Master-Key":JB_KEY}});
-    const data = (await r.json()).record || {};
-    const scores = data.breakout || {};
-    const sortert = Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    const medaljer = ["🥇","🥈","🥉"];
-    if(!sortert.length){ liste.innerHTML = '<div style="color:#222;text-align:center;padding:8px;font-size:13px">Ingen rekorder ennå</div>'; return; }
-    liste.innerHTML = sortert.map(([navn,poeng],i)=>`
+    const r=await fetch(JB_URL+"/latest",{headers:{"X-Master-Key":JB_KEY}});
+    const data=(await r.json()).record||{};
+    const breakout=data.breakout||{};
+    const medaljer=["🥇","🥈","🥉"];
+    const sortert=Object.entries(breakout).map(([n,v])=>{
+      const s=aktivHsTab==="dag"
+        ? (typeof v==="number"?v:(v.daglig?.[IDAG]||0))
+        : (typeof v==="number"?v:(v.best||0));
+      return [n,s];
+    }).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    if(!sortert.length){
+      liste.innerHTML=`<div style="color:#222;text-align:center;padding:8px;font-size:13px">${aktivHsTab==="dag"?"Ingen har spilt i dag ennå":"Ingen rekorder ennå"}</div>`;
+      return;
+    }
+    liste.innerHTML=sortert.map(([n,p],i)=>`
       <div class="hs-rad">
         <span class="hs-plass">${medaljer[i]||i+1+"."}</span>
-        <span class="hs-navn">${navn}${navn===SPILLERNAVN?" (deg)":""}</span>
-        <span class="hs-poeng">${poeng}</span>
+        <span class="hs-navn">${n}${n===SPILLERNAVN?" (deg)":""}</span>
+        <span class="hs-poeng">${p}</span>
       </div>`).join("");
   }catch(e){
-    liste.innerHTML = '<div style="color:#222;text-align:center;padding:8px;font-size:13px">Kunne ikke hente rekorder</div>';
+    liste.innerHTML='<div style="color:#222;text-align:center;padding:8px;font-size:13px">Kunne ikke hente rekorder</div>';
   }
 }
 
 // ── KONTROLLER ──
-canvas.addEventListener("mousemove", e => {
-  const rect = canvas.getBoundingClientRect();
-  paddle.x = (e.clientX - rect.left) - paddle.w / 2;
-  paddle.x = Math.max(0, Math.min(canvas.width - paddle.w, paddle.x));
+canvas.addEventListener("mousemove", e=>{
+  const rect=canvas.getBoundingClientRect();
+  paddle.x=(e.clientX-rect.left)-paddle.w/2;
+  paddle.x=Math.max(0,Math.min(canvas.width-paddle.w,paddle.x));
+  if(ballFestetTilPaddle){ ball.x=paddle.x+paddle.w/2; }
 });
-
-canvas.addEventListener("touchmove", e => {
+canvas.addEventListener("touchmove", e=>{
   e.preventDefault();
-  const rect = canvas.getBoundingClientRect();
-  paddle.x = (e.touches[0].clientX - rect.left) - paddle.w / 2;
-  paddle.x = Math.max(0, Math.min(canvas.width - paddle.w, paddle.x));
-}, {passive: false});
+  const rect=canvas.getBoundingClientRect();
+  paddle.x=(e.touches[0].clientX-rect.left)-paddle.w/2;
+  paddle.x=Math.max(0,Math.min(canvas.width-paddle.w,paddle.x));
+  if(ballFestetTilPaddle){ ball.x=paddle.x+paddle.w/2; }
+},{passive:false});
 
-// Last highscore ved oppstart
 lastHighscore();
 </script>
 </body>
