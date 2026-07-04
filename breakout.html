@@ -60,7 +60,7 @@
   .hs-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
   .hs-tab {
     flex: 1; text-align: center; font-size: 11px; font-weight: 800;
-    letter-spacing: .08em; text-transform: uppercase; color: #333;
+    letter-spacing: .08em; text-transform: uppercase; color: #666;
     padding: 6px; border-radius: 8px; cursor: pointer; background: #0d0d0d;
     -webkit-tap-highlight-color: transparent;
   }
@@ -101,7 +101,9 @@
     <div class="hs-tab active" id="tab-dag" onclick="byttHsTab('dag')">📅 I dag</div>
     <div class="hs-tab" id="tab-all" onclick="byttHsTab('all')">🏆 Turné</div>
   </div>
-  <div id="hs-liste"><div style="color:#222;text-align:center;padding:8px;font-size:13px">Laster…</div></div>
+  <div id="hs-liste"><div style="color:#888;text-align:center;padding:8px;font-size:13px">Laster…</div></div>
+  <div id="admin-wrap" style="display:none;margin-top:8px;display:flex;flex-direction:column;gap:4px"></div>
+  <button onclick="toggleAdmin()" style="margin-top:10px;background:transparent;border:none;color:#666;font-size:11px;cursor:pointer;font-family:inherit;width:100%;text-align:center;padding:4px">⚙ Administrer scores</button>
 </div>
 
 <div id="overlay">
@@ -133,7 +135,7 @@ window.addEventListener("resize", resizeCanvas);
 // ── KONSTANTER ──
 const FARGER = ["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#8b5cf6","#ec4899","#14b8a6"];
 const POWERUP_TYPER = ["zebra","elefant","pirum"];
-const GRUNFART_FAKTOR = 0.004; // tregere start (var 0.007)
+const GRUNFART_FAKTOR = 0.0055; // mellomting mellom 0.004 og 0.007
 
 // ── SPILLVARIABLER ──
 let ball, paddle, bricks, poeng, liv, kjorer, animId;
@@ -497,6 +499,42 @@ async function gameOver(){
   lastHighscore();
 }
 
+let adminApen = false;
+function toggleAdmin(){
+  if(!adminApen){
+    const pw = prompt("Passord:");
+    if(!pw || pw.trim().toUpperCase() !== "BIGBOSS") return;
+    adminApen = true;
+  } else {
+    adminApen = false;
+  }
+  lastHighscore();
+}
+
+async function slettScore(navn){
+  if(!confirm(`Slette all score for «${navn}»?`)) return;
+  try{
+    const r = await fetch(JB_URL+"/latest",{headers:{"X-Master-Key":JB_KEY}});
+    const data = (await r.json()).record || {};
+    if(data.breakout && data.breakout[navn]){
+      delete data.breakout[navn];
+      await fetch(JB_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JB_KEY},body:JSON.stringify(data)});
+    }
+  }catch(e){ alert("Feil — sjekk nett"); }
+  lastHighscore();
+}
+
+async function nullstillAlleScores(){
+  if(!confirm("Nullstill ALLE breakout-scores? Kan ikke angres!")) return;
+  try{
+    const r = await fetch(JB_URL+"/latest",{headers:{"X-Master-Key":JB_KEY}});
+    const data = (await r.json()).record || {};
+    data.breakout = {};
+    await fetch(JB_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JB_KEY},body:JSON.stringify(data)});
+  }catch(e){ alert("Feil — sjekk nett"); }
+  lastHighscore();
+}
+
 // ── HIGHSCORE ──
 let aktivHsTab="dag";
 function byttHsTab(tab){
@@ -507,7 +545,7 @@ function byttHsTab(tab){
 }
 async function lastHighscore(){
   const liste=document.getElementById("hs-liste");
-  liste.innerHTML='<div style="color:#222;text-align:center;padding:8px;font-size:13px">Laster…</div>';
+  liste.innerHTML='<div style="color:#888;text-align:center;padding:8px;font-size:13px">Laster…</div>';
   try{
     const r=await fetch(JB_URL+"/latest",{headers:{"X-Master-Key":JB_KEY}});
     const data=(await r.json()).record||{};
@@ -520,7 +558,7 @@ async function lastHighscore(){
       return [n,s];
     }).filter(([,s])=>s>0).sort((a,b)=>b[1]-a[1]).slice(0,8);
     if(!sortert.length){
-      liste.innerHTML=`<div style="color:#222;text-align:center;padding:8px;font-size:13px">${aktivHsTab==="dag"?"Ingen har spilt i dag ennå":"Ingen rekorder ennå"}</div>`;
+      liste.innerHTML=`<div style="color:#888;text-align:center;padding:8px;font-size:13px">${aktivHsTab==="dag"?"Ingen har spilt i dag ennå":"Ingen rekorder ennå"}</div>`;
       return;
     }
     liste.innerHTML=sortert.map(([n,p],i)=>`
@@ -528,9 +566,16 @@ async function lastHighscore(){
         <span class="hs-plass">${medaljer[i]||i+1+"."}</span>
         <span class="hs-navn">${n}${n===SPILLERNAVN?" (deg)":""}</span>
         <span class="hs-poeng">${p}</span>
+        ${adminApen?`<button onclick="slettScore('${n}')" style="background:#1a0808;border:1px solid #5a1a1a;color:#e05050;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit">Slett</button>`:""}
       </div>`).join("");
+    // Vis nullstill-alle-knapp i admin-modus
+    const adminWrap = document.getElementById("admin-wrap");
+    if(adminWrap){
+      adminWrap.style.display = adminApen ? "flex" : "none";
+      if(adminApen) adminWrap.innerHTML = `<button onclick="nullstillAlleScores()" style="background:#1a0808;border:1px solid #5a1a1a;color:#e05050;border-radius:8px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit;width:100%">🗑 Nullstill alle scores</button>`;
+    }
   }catch(e){
-    liste.innerHTML='<div style="color:#222;text-align:center;padding:8px;font-size:13px">Kunne ikke hente rekorder</div>';
+    liste.innerHTML='<div style="color:#888;text-align:center;padding:8px;font-size:13px">Kunne ikke hente rekorder</div>';
   }
 }
 
