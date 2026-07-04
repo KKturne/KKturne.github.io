@@ -117,7 +117,7 @@
   </div>
   <div id="overlay" class="game-overlay-base">
     <div class="overlay-title" id="overlay-title">🕹️ Breakout</div>
-    <div class="overlay-sub" id="overlay-sub">Styr paddelen med fingeren · Unngå 🍐!</div>
+    <div class="overlay-sub" id="overlay-sub">Styr paddelen med fingeren · Unngå Pirum!</div>
     <button class="play-btn" id="overlay-btn" onclick="klargjorRunde()">Start spillet</button>
   </div>
 </div>
@@ -143,6 +143,12 @@ const IDAG = new Date().toISOString().slice(0,10);
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 const gameWrap = document.getElementById("game-wrap");
+
+// Pirum-logo (64x64 anbefalt)
+const pirumImg = new Image();
+pirumImg.src = "pirum.png";
+let pirumLastet = false;
+pirumImg.onload = () => { pirumLastet = true; };
 
 // ── KONSTANTER ──
 const FARGER = ["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#8b5cf6","#ec4899","#14b8a6"];
@@ -298,14 +304,23 @@ function tegn(){
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
   fallendePowerups.forEach(p => {
-    const emoji = p.type==="zebra" ? "🦓" : p.type==="elefant" ? "🐘" : "🍐";
-    // Glow-ring bak emojien
     const glow = p.type==="zebra" ? "#fff" : p.type==="elefant" ? "#ec4899" : "#84cc16";
     ctx.shadowColor = glow;
     ctx.shadowBlur = 18;
-    ctx.font = "28px serif";
-    ctx.fillStyle = "#fff";
-    ctx.fillText(emoji, p.x, p.y);
+    if(p.type === "pirum" && pirumLastet){
+      const sz = 30;
+      ctx.drawImage(pirumImg, p.x - sz/2, p.y - sz/2, sz, sz);
+    } else if(p.type === "pirum"){
+      // Fallback mens bildet laster
+      ctx.font = "28px serif";
+      ctx.fillStyle = "#fff";
+      ctx.fillText("🍐", p.x, p.y);
+    } else {
+      const emoji = p.type==="zebra" ? "🦓" : "🐘";
+      ctx.font = "28px serif";
+      ctx.fillStyle = "#fff";
+      ctx.fillText(emoji, p.x, p.y);
+    }
     ctx.shadowBlur = 0;
   });
   ctx.restore();
@@ -471,7 +486,7 @@ function aktiverPowerup(type){
     launchKonfetti(["#ec4899","#f9a8d4","#fde68a","#bfdbfe"],60);
   } else if(type==="pirum"){
     paddle.w=Math.floor(orgPaddleW*0.45);
-    visBanner("🍐 PIRUM! Paddle halveres 😬","#84cc16");
+    visBanner("🍐 PIRUM! Paddle halveres 😬","#84cc16"); // emoji i banner er OK, kun canvas-tegning bruker bildet
     launchKonfetti(["#4d7c0f","#713f12","#92400e"],40);
     for(let i=0;i<8;i++) setTimeout(()=>slippEmoji(Math.random()>.5?"🍆":"🍺"),i*150);
   }
