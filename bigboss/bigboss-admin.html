@@ -623,6 +623,18 @@ if(sessionStorage.getItem("bb_admin_ok") === "1"){
 // konkurrerende registrering på samme scope, noe som ikke er tillatt.
 
 // ── PUSH-VARSLER (OneSignal, kun til denne telefonen) ──
+// Siste utvei: fang opp helt uventede feil (f.eks. hvis selve OneSignal-scriptet
+// fra CDN feiler å laste) som ellers ville vært usynlige for brukeren, siden vi
+// ikke har tilgang til telefonens DevTools-konsoll.
+window.addEventListener("error", (e)=>{
+  if(e && e.message && e.message.toLowerCase().includes("onesignal")){
+    window.bbOneSignalInitFeilet = true;
+    window.bbOneSignalInitFeilTekst = e.message;
+    const statusEl = document.getElementById("bb-push-status");
+    if(statusEl) statusEl.textContent = "❌ Global feil: " + e.message;
+  }
+});
+
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 window.bbOneSignalInitFeilet = false;
 OneSignalDeferred.push(async function(OneSignal){
@@ -641,9 +653,9 @@ OneSignalDeferred.push(async function(OneSignal){
     // Denne flagget lar bbAktiverPush oppdage det og vise en tydelig feilmelding
     // i stedet for å bare henge på "Ber om tillatelse..." uten forklaring.
     window.bbOneSignalInitFeilet = true;
-    const feilTekst = (e && e.message) ? e.message : String(e);
+    window.bbOneSignalInitFeilTekst = (e && e.message) ? e.message : String(e);
     const statusEl = document.getElementById("bb-push-status");
-    if(statusEl) statusEl.textContent = "❌ OneSignal-feil: " + feilTekst;
+    if(statusEl) statusEl.textContent = "❌ OneSignal-feil: " + window.bbOneSignalInitFeilTekst;
     console.log("OneSignal.init() feilet:", e);
   }
 });
@@ -693,7 +705,8 @@ function bbAktiverPush(){
     return;
   }
   if(window.bbOneSignalInitFeilet){
-    if(statusEl) statusEl.textContent = "❌ OneSignal kunne ikke starte tidligere — last siden på nytt og prøv igjen";
+    const detaljer = window.bbOneSignalInitFeilTekst || "ukjent feil";
+    if(statusEl) statusEl.textContent = "❌ OneSignal-feil: " + detaljer;
     return;
   }
   if(statusEl) statusEl.textContent = "Ber om tillatelse...";
