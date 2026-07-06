@@ -641,8 +641,9 @@ OneSignalDeferred.push(async function(OneSignal){
     // Denne flagget lar bbAktiverPush oppdage det og vise en tydelig feilmelding
     // i stedet for å bare henge på "Ber om tillatelse..." uten forklaring.
     window.bbOneSignalInitFeilet = true;
+    const feilTekst = (e && e.message) ? e.message : String(e);
     const statusEl = document.getElementById("bb-push-status");
-    if(statusEl) statusEl.textContent = "❌ OneSignal kunne ikke starte — prøv å laste siden på nytt";
+    if(statusEl) statusEl.textContent = "❌ OneSignal-feil: " + feilTekst;
     console.log("OneSignal.init() feilet:", e);
   }
 });
