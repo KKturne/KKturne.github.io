@@ -145,6 +145,34 @@
   .person-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
   .empty-msg { font-size: 12px; color: var(--muted); text-align: center; padding: 8px 0; }
 
+  .main-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 57px;
+    z-index: 90;
+  }
+  .main-tab-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 10px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+  .main-tab-btn.active {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+  }
+
   .stat-tab-btn {
     background: var(--card2);
     border: 1px solid var(--border);
@@ -230,8 +258,13 @@
     </div>
   </div>
 
-  <div style="padding:16px 16px 0">
-    <div class="sec-lbl">🔔 Varsler — KnausBot &amp; feilede koder</div>
+  <div class="main-tabs">
+    <button id="main-tab-varsler" class="main-tab-btn active" onclick="bbByttHovedfane('varsler')">🔔 Varsler</button>
+    <button id="main-tab-stats" class="main-tab-btn" onclick="bbByttHovedfane('stats')">📈 Statistikk</button>
+    <button id="main-tab-knausbot" class="main-tab-btn" onclick="bbByttHovedfane('knausbot')">🤖 KnausBot</button>
+  </div>
+
+  <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
         <span id="bb-varsel-refresh-ico" class="spin">&#128260;</span> Sjekk nå
@@ -241,8 +274,9 @@
     <div id="bb-varsler-wrap" style="margin-bottom:20px">
       <div class="empty-msg">Trykk «Sjekk nå» for å hente varsler</div>
     </div>
+  </div>
 
-    <div class="sec-lbl">📈 Dev mode — bruksstatistikk</div>
+  <div id="main-sec-stats" class="main-sec" style="display:none;padding:16px 16px 0">
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="stats-tab-oversikt" class="stat-tab-btn active" onclick="statByttFane('oversikt')" style="flex:1">📊 Oversikt</button>
       <button id="stats-tab-person" class="stat-tab-btn" onclick="statByttFane('person')" style="flex:1">👤 Per person</button>
@@ -259,8 +293,9 @@
     <div id="dev-person-wrap" style="display:none">
       <div class="empty-msg">Trykk «Oppdater statistikk» først</div>
     </div>
+  </div>
 
-    <div class="sec-lbl">🤖 KnausBot-innboks</div>
+  <div id="main-sec-knausbot" class="main-sec" style="display:none;padding:16px 16px 0">
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button class="refresh-btn" onclick="hentAIInnboks()" style="flex:1;justify-content:center">
         &#128260; Hent meldinger
@@ -423,9 +458,17 @@ function bbMerkAlleLest(){
 }
 
 function bbVisVarslerPanel(){
-  // Scroll til varsel-seksjonen (den ligger øverst i innholdet)
-  const wrap = document.getElementById("bb-varsler-wrap");
-  if(wrap) wrap.scrollIntoView({behavior:"smooth", block:"start"});
+  bbByttHovedfane("varsler");
+}
+
+function bbByttHovedfane(fane){
+  const faner = ["varsler", "stats", "knausbot"];
+  faner.forEach(f=>{
+    const btn = document.getElementById("main-tab-"+f);
+    const sec = document.getElementById("main-sec-"+f);
+    if(btn) btn.classList.toggle("active", f===fane);
+    if(sec) sec.style.display = f===fane ? "block" : "none";
+  });
 }
 
 function bbStartPolling(){
