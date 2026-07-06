@@ -41,7 +41,7 @@
     justify-content: center;
     overflow: hidden;
   }
-  #game-canvas { display: block; touch-action: none; max-width: 100%; max-height: 100%; }
+  #game-canvas { display: block; touch-action: none; max-width: 100%; max-height: 100%; transition: filter .3s, transform .1s; }
   #overlay.hidden { display: none; }
   .game-overlay-base {
     position: absolute; inset: 0; display: flex; flex-direction: column;
@@ -150,9 +150,15 @@ pirumImg.src = "pirum.png";
 let pirumLastet = false;
 pirumImg.onload = () => { pirumLastet = true; };
 
+// Fisk-likør (64x64 anbefalt)
+const fiskImg = new Image();
+fiskImg.src = "fisk.png";
+let fiskLastet = false;
+fiskImg.onload = () => { fiskLastet = true; };
+
 // ── KONSTANTER ──
 const FARGER = ["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#8b5cf6","#ec4899","#14b8a6"];
-const POWERUP_TYPER = ["zebra","elefant","pirum"];
+const POWERUP_TYPER = ["zebra","elefant","pirum","fisk"];
 const GRUNFART_FAKTOR = 0.0055; // mellomting mellom 0.004 og 0.007
 
 // ── SPILLVARIABLER (deklarert FØR noen funksjonskall) ──
@@ -211,6 +217,7 @@ function klargjorRunde(){
     aktivPowerup = null;
     if(powerupTimer) clearTimeout(powerupTimer);
     skjulBanner();
+    nullstillFiskVisuelt();
   }
 
   // Start nedtelling 3-2-1
@@ -272,6 +279,9 @@ function lagMurstein(){
       });
     }
   }
+  // Garantert 1x søppelbøtte-superpowerup per level, i en tilfeldig murstein
+  const tilfeldigIdx = Math.floor(Math.random() * bricks.length);
+  bricks[tilfeldigIdx].powerup = "soppel";
 }
 
 // ── GAME LOOP ──
@@ -279,7 +289,28 @@ function loop(){
   if(!kjorer) return;
   tegn();
   oppdater();
+  oppdaterFiskEffekt();
   animId = requestAnimationFrame(loop);
+}
+
+// ── FISK-EFFEKT: canvas "vakler" visuelt via CSS mens aktiv ──
+function nullstillFiskVisuelt(){
+  canvas.style.transform = "";
+  canvas.style.filter = "";
+}
+
+function oppdaterFiskEffekt(){
+  if(aktivPowerup === "fisk"){
+    const t = Date.now() / 300;
+    const rot = Math.sin(t) * 2.5; // grader
+    const skewX = Math.sin(t * 0.7) * 1.5;
+    const blurAmt = 0.6 + Math.abs(Math.sin(t * 1.3)) * 0.6;
+    canvas.style.transform = `rotate(${rot}deg) skewX(${skewX}deg)`;
+    canvas.style.filter = `blur(${blurAmt}px) saturate(1.4) hue-rotate(${Math.sin(t*0.5)*15}deg)`;
+  } else if(canvas.style.transform){
+    canvas.style.transform = "";
+    canvas.style.filter = "";
+  }
 }
 
 // ── TEGN ──
@@ -304,9 +335,9 @@ function tegn(){
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
   fallendePowerups.forEach(p => {
-    const glow = p.type==="zebra" ? "#fff" : p.type==="elefant" ? "#ec4899" : "#84cc16";
+    const glow = p.type==="zebra" ? "#fff" : p.type==="elefant" ? "#ec4899" : p.type==="soppel" ? "#f5c518" : p.type==="fisk" ? "#06b6d4" : "#84cc16";
     ctx.shadowColor = glow;
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = p.type==="soppel" ? 26 : 18; // ekstra sterk glow på super-powerup
     if(p.type === "pirum" && pirumLastet){
       const sz = 30;
       ctx.drawImage(pirumImg, p.x - sz/2, p.y - sz/2, sz, sz);
@@ -315,9 +346,16 @@ function tegn(){
       ctx.font = "28px serif";
       ctx.fillStyle = "#fff";
       ctx.fillText("🍐", p.x, p.y);
-    } else {
-      const emoji = p.type==="zebra" ? "🦓" : "🐘";
+    } else if(p.type === "fisk" && fiskLastet){
+      const sz = 30;
+      ctx.drawImage(fiskImg, p.x - sz/2, p.y - sz/2, sz, sz);
+    } else if(p.type === "fisk"){
       ctx.font = "28px serif";
+      ctx.fillStyle = "#fff";
+      ctx.fillText("🍺", p.x, p.y);
+    } else {
+      const emoji = p.type==="zebra" ? "🦓" : p.type==="elefant" ? "🐘" : "🗑️";
+      ctx.font = p.type==="soppel" ? "32px serif" : "28px serif";
       ctx.fillStyle = "#fff";
       ctx.fillText(emoji, p.x, p.y);
     }
@@ -391,7 +429,8 @@ function oppdater(){
     if(ball.x+ball.r>b.x && ball.x-ball.r<b.x+b.w &&
        ball.y+ball.r>b.y && ball.y-ball.r<b.y+b.h){
       b.aktiv=false; ball.dy*=-1;
-      poeng+=10; document.getElementById("score").textContent=poeng;
+      const murPoeng = aktivPowerup==="fisk" ? 20 : 10; // dobbelt poeng når full
+      poeng+=murPoeng; document.getElementById("score").textContent=poeng;
       igjen--;
       if(b.powerup){
         // Emoji faller saktere: dy=1.2 (var 3)
@@ -412,24 +451,7 @@ function oppdater(){
 
   // Level fullfort!
   if(igjen===0){
-    kjorer = false;
-    if(animId) cancelAnimationFrame(animId);
-    fallendePowerups = [];
-    level++;
-    // Øk ballhastigheten permanent for neste level
-    const fartFaktor = 1 + (level - 1) * 0.12;
-    const nyFart = Math.max(2, canvas.width * GRUNFART_FAKTOR) * fartFaktor;
-    ball._nesteFart = nyFart;
-    poeng += 50 * level;
-    document.getElementById("score").textContent = poeng;
-    // Konfetti!
-    const levelFarger = ["#f5c518","#22c55e","#3b82f6","#ec4899","#8b5cf6","#ef4444"];
-    launchKonfetti(levelFarger, 80);
-    // Vis level-overlay
-    document.getElementById("level-tittel").textContent = `⭐ Level ${level}!`;
-    document.getElementById("level-sub").textContent = `+${50*level} bonuspoeng · Ballen er ${Math.round((fartFaktor-1)*100)}% raskere!`;
-    document.getElementById("level-display").textContent = level;
-    document.getElementById("level-overlay").style.display = "flex";
+    fullforLevel();
   }
 
   // Ball ute
@@ -457,6 +479,7 @@ function startNestLevel(){
   aktivPowerup = null;
   if(powerupTimer) clearTimeout(powerupTimer);
   skjulBanner();
+  nullstillFiskVisuelt();
   // Sett ball tilbake til paddle med ny fart
   ball.x = paddle.x + paddle.w/2;
   ball.y = paddle.y - ball.r - 1;
@@ -471,8 +494,41 @@ function startNestLevel(){
   });
 }
 
+// ── LEVEL FULLFORT (delt mellom naturlig fullføring og søppeltømming) ──
+function fullforLevel(){
+  kjorer = false;
+  if(animId) cancelAnimationFrame(animId);
+  fallendePowerups = [];
+  level++;
+  const fartFaktor = 1 + (level - 1) * 0.12;
+  const nyFart = Math.max(2, canvas.width * GRUNFART_FAKTOR) * fartFaktor;
+  ball._nesteFart = nyFart;
+  poeng += 50 * level;
+  document.getElementById("score").textContent = poeng;
+  const levelFarger = ["#f5c518","#22c55e","#3b82f6","#ec4899","#8b5cf6","#ef4444"];
+  launchKonfetti(levelFarger, 80);
+  document.getElementById("level-tittel").textContent = `⭐ Level ${level}!`;
+  document.getElementById("level-sub").textContent = `+${50*level} bonuspoeng · Ballen er ${Math.round((fartFaktor-1)*100)}% raskere!`;
+  document.getElementById("level-display").textContent = level;
+  document.getElementById("level-overlay").style.display = "flex";
+}
+
 // ── POWERUPS ──
 function aktiverPowerup(type){
+  if(type==="soppel"){
+    // SUPER-POWERUP: rydder alle murstein, gir stor poengbonus, går rett til neste level
+    let ryddet=0;
+    bricks.forEach(b=>{ if(b.aktiv){ b.aktiv=false; ryddet++; } });
+    const bonus = ryddet * 15;
+    poeng += bonus;
+    document.getElementById("score").textContent = poeng;
+    visBanner(`🗑️ SØPPELTØMMING! +${bonus} poeng`,"#f5c518");
+    launchKonfetti(["#f5c518","#fff","#ffd700","#fffacd","#fff8dc"],90);
+    // Trigger level-fullført-logikken umiddelbart
+    setTimeout(fullforLevel, 400);
+    return;
+  }
+
   if(powerupTimer) clearTimeout(powerupTimer);
   aktivPowerup=type;
   if(type==="zebra"){
@@ -486,19 +542,26 @@ function aktiverPowerup(type){
     launchKonfetti(["#ec4899","#f9a8d4","#fde68a","#bfdbfe"],60);
   } else if(type==="pirum"){
     paddle.w=Math.floor(orgPaddleW*0.45);
-    visBanner("🍐 PIRUM! Paddle halveres 😬","#84cc16"); // emoji i banner er OK, kun canvas-tegning bruker bildet
+    // Pirum gir poeng — strategisk risiko/belønning!
+    poeng += 30;
+    document.getElementById("score").textContent = poeng;
+    visBanner("🍐 PIRUM! +30 poeng, men paddle halveres 😬","#84cc16");
     launchKonfetti(["#4d7c0f","#713f12","#92400e"],40);
     for(let i=0;i<8;i++) setTimeout(()=>slippEmoji(Math.random()>.5?"🍆":"🍺"),i*150);
+  } else if(type==="fisk"){
+    // FISK-LIKØR: skjermen "vakler" som om man er full, men gir bonuspoeng per murstein
+    visBanner("🐟 FISK! Du er full i 15 sek — dobbelt poeng!","#06b6d4");
+    launchKonfetti(["#06b6d4","#0891b2","#67e8f9","#a5f3fc"],50);
   }
   paddle.x=Math.min(paddle.x, canvas.width-paddle.w);
-  const varighet=type==="elefant"?10000:8000;
+  const varighet=type==="elefant"?10000:(type==="fisk"?15000:8000);
   powerupTimer=setTimeout(()=>{
     if(type==="elefant"){
       const fart=Math.sqrt(ball.dx**2+ball.dy**2);
       const orgF=Math.max(2,canvas.width*GRUNFART_FAKTOR);
       ball.dx=(ball.dx/fart)*orgF; ball.dy=(ball.dy/fart)*orgF;
     }
-    paddle.w=orgPaddleW; aktivPowerup=null; skjulBanner();
+    paddle.w=orgPaddleW; aktivPowerup=null; skjulBanner(); nullstillFiskVisuelt();
   }, varighet);
 }
 
@@ -523,6 +586,7 @@ async function gameOver(){
   if(animId) cancelAnimationFrame(animId);
   if(powerupTimer) clearTimeout(powerupTimer);
   skjulBanner();
+  nullstillFiskVisuelt();
   try{
     const r=await fetch(JB_URL+"/latest",{headers:{"X-Master-Key":JB_KEY}});
     const data=(await r.json()).record||{};
