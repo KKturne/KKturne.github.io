@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BigBoss Admin">
+<link rel="manifest" href="./bigboss-manifest.json">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<title>BigBoss Admin — Knauskoret Pula 2026</title>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<style>
+  :root {
+    --bg: #080e14;
+    --card: #0f1a24;
+    --card2: #162030;
+    --border: #1e3040;
+    --gold: #f5c518;
+    --green: #22c55e;
+    --red: #e00515;
+    --blue: #60a0f0;
+    --purple: #c084fc;
+    --text: #e8e0d4;
+    --muted: #4a6a8a;
+    --dim: #2a4a6a;
+  }
+  body.lys {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --card2: #e8eef4;
+    --border: #c8d8e8;
+    --gold: #c49a00;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --text: #1a2a3a;
+    --muted: #6a8aaa;
+    --dim: #a0b8cc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100dvh;
+    transition: background .25s, color .25s;
+  }
+
+  /* HEADER */
+  .hdr {
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .hdr-title { font-size: 15px; font-weight: 800; color: var(--gold); letter-spacing: -.3px; }
+  .hdr-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .refresh-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-appearance: none;
+  }
+  .refresh-btn.spinning { opacity: .6; pointer-events: none; }
+  .refresh-btn.spinning .spin { animation: spin .8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .theme-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  /* PASSWORD GATE */
+  #pw-gate {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 18px;
+    text-align: center;
+  }
+  #pw-gate .ico { font-size: 44px; }
+  #pw-gate .lbl { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  #pw-gate-form { display: flex; gap: 8px; width: 100%; max-width: 300px; }
+  #pw-gate-in {
+    flex: 1;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 11px 14px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  #pw-gate-btn {
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  #pw-gate-err { font-size: 12px; color: var(--red); min-height: 16px; }
+
+  /* MAIN CONTENT */
+  #app-main { display: none; padding: 16px; max-width: 640px; margin: 0 auto; }
+  .sec-lbl { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 20px 0 12px; }
+  .sec-lbl:first-child { margin-top: 0; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .stat-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat-box { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 900; color: var(--gold); }
+  .stat-lbl { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .list-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .list-row:last-child { border-bottom: none; }
+  .list-row .v { font-weight: 800; color: var(--gold); }
+  .person-card { background: var(--card2); border-radius: 8px; padding: 9px 11px; margin-bottom: 6px; }
+  .person-name { font-weight: 800; font-size: 12.5px; }
+  .person-count { font-weight: 800; color: var(--gold); font-size: 12.5px; }
+  .person-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .empty-msg { font-size: 12px; color: var(--muted); text-align: center; padding: 8px 0; }
+
+  .main-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 57px;
+    z-index: 90;
+  }
+  .main-tab-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 10px 6px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+  .main-tab-btn.active {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+  }
+
+  .stat-tab-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .stat-tab-btn.active {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+  }
+  .bb-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .bb-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+  .bb-toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: var(--border);
+    transition: background .2s;
+    cursor: pointer;
+    display: block;
+  }
+  .bb-toggle input:checked + .bb-toggle-track {
+    background: var(--gold);
+  }
+  .bb-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .2s;
+    pointer-events: none;
+  }
+  .bb-toggle input:checked ~ .bb-toggle-track .bb-toggle-thumb {
+    transform: translateX(20px);
+  }
+  .person-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .person-nav-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .person-nav-btn:disabled { opacity: .3; cursor: default; }
+  .person-nav-lbl { font-size: 12px; color: var(--muted); text-align: center; flex: 1; }
+  .person-detail-name { font-size: 18px; font-weight: 900; color: var(--gold); text-align: center; margin-bottom: 4px; }
+
+  /* KNAUSBOT INNBOKS (mirrors index.html boss-conv styling) */
+  .boss-conv-list { display: flex; flex-direction: column; gap: 6px; }
+  .boss-conv-item { display: flex; align-items: center; gap: 10px; background: var(--card2); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+  .boss-conv-item.new { border: 1px solid var(--gold); }
+  .boss-conv-name { font-weight: 800; font-size: 13px; }
+  .boss-conv-preview { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .boss-conv-badge { background: var(--gold); color: #111; font-size: 9.5px; font-weight: 900; border-radius: 6px; padding: 2px 6px; flex-shrink: 0; }
+  .boss-conv-time { font-size: 10.5px; color: var(--muted); flex-shrink: 0; }
+  .boss-chat-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .boss-chat-hdr { display: flex; align-items: center; gap: 10px; }
+  .boss-chat-back { background: transparent; border: none; color: var(--text); font-size: 18px; cursor: pointer; }
+  .boss-chat-navn { font-weight: 800; font-size: 14px; flex: 1; }
+  .boss-msg-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; padding: 4px; }
+  .boss-msg-user, .boss-msg-bot { border-radius: 10px; padding: 8px 10px; max-width: 85%; }
+  .boss-msg-user { background: var(--card2); align-self: flex-start; }
+  .boss-msg-bot { background: var(--gold); color: #111; align-self: flex-end; }
+  .boss-msg-fra { font-size: 10px; font-weight: 800; opacity: .7; margin-bottom: 2px; }
+  .boss-msg-txt { font-size: 13px; line-height: 1.4; }
+  .boss-msg-time { font-size: 9.5px; opacity: .6; margin-top: 3px; text-align: right; }
+  .ai-reply-in { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; padding: 9px 10px; outline: none; flex: 1; -webkit-appearance: none; }
+  .ai-reply-btn { background: var(--gold); color: #111; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 800; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="pw-gate">
+  <div class="ico">👑</div>
+  <div class="lbl">BigBoss Admin</div>
+  <form id="pw-gate-form" onsubmit="return sjekkAdminPw(event)">
+    <input id="pw-gate-in" type="text" placeholder="KODE" autocapitalize="characters" autocomplete="off" maxlength="12">
+    <button id="pw-gate-btn" type="submit">&#8594;</button>
+  </form>
+  <div id="pw-gate-err"></div>
+</div>
+
+<div id="app-main">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">👑 BigBoss Admin</div>
+      <div class="hdr-sub">Knauskoret Pula 2026</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px">
+      <button id="bb-varsel-btn" class="theme-btn" onclick="bbVisVarslerPanel()" title="Varsler" style="position:relative">
+        🔔<span id="bb-varsel-badge" style="display:none;position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:9px;font-weight:900;border-radius:8px;min-width:15px;height:15px;line-height:15px;text-align:center;padding:0 3px"></span>
+      </button>
+      <button id="theme-btn" class="theme-btn" onclick="byttTema()" title="Mørk/lys modus">🌙</button>
+    </div>
+  </div>
+
+  <div class="main-tabs">
+    <button id="main-tab-varsler" class="main-tab-btn active" onclick="bbByttHovedfane('varsler')">🔔 Varsler</button>
+    <button id="main-tab-stats" class="main-tab-btn" onclick="bbByttHovedfane('stats')">📈 Statistikk</button>
+    <button id="main-tab-knausbot" class="main-tab-btn" onclick="bbByttHovedfane('knausbot')">🤖 KnausBot</button>
+    <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 Logg</button>
+  </div>
+
+  <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
+    <div class="card" id="bb-push-card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:800">🔔 Push-varsler til denne telefonen</div>
+          <div id="bb-push-status" style="font-size:11px;color:var(--muted);margin-top:2px">Sjekker status...</div>
+        </div>
+        <button id="bb-push-btn" class="refresh-btn" onclick="bbAktiverPush()" style="flex-shrink:0;font-size:11.5px;padding:9px 12px">Aktiver</button>
+      </div>
+    </div>
+    <div class="card" id="bb-varsel-innst-card" style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;margin-bottom:10px">⚙️ Varseltyper (push)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:12.5px;font-weight:700">🤖 KnausBot-meldinger</div>
+        </div>
+        <label class="bb-toggle">
+          <input type="checkbox" id="bb-innst-knausbot" checked onchange="bbLagreVarselInnst()">
+          <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0">
+        <div>
+          <div style="font-size:12.5px;font-weight:700">🔒 Feilede passordforsøk</div>
+        </div>
+        <label class="bb-toggle">
+          <input type="checkbox" id="bb-innst-feilpw" checked onchange="bbLagreVarselInnst()">
+          <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div id="bb-innst-status" style="font-size:10.5px;color:var(--muted);margin-top:8px;min-height:14px"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
+        <span id="bb-varsel-refresh-ico" class="spin">&#128260;</span> Sjekk nå
+      </button>
+      <button class="refresh-btn" onclick="bbMerkAlleLest()" style="flex-shrink:0">✓ Merk alle lest</button>
+    </div>
+    <div id="bb-varsler-wrap" style="margin-bottom:20px">
+      <div class="empty-msg">Trykk «Sjekk nå» for å hente varsler</div>
+    </div>
+  </div>
+
+  <div id="main-sec-stats" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="stats-tab-oversikt" class="stat-tab-btn active" onclick="statByttFane('oversikt')" style="flex:1">📊 Oversikt</button>
+      <button id="stats-tab-person" class="stat-tab-btn" onclick="statByttFane('person')" style="flex:1">👤 Per person</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="dev-stats-btn" class="refresh-btn" onclick="statVisDevPanel()" style="flex:1;justify-content:center">
+        <span id="dev-stats-btn-ico" class="spin">&#128260;</span>
+        <span id="dev-stats-btn-txt">Oppdater statistikk</span>
+      </button>
+    </div>
+    <div id="dev-stats-wrap">
+      <div class="empty-msg">Trykk for å hente statistikk</div>
+    </div>
+    <div id="dev-person-wrap" style="display:none">
+      <div class="empty-msg">Trykk «Oppdater statistikk» først</div>
+    </div>
+  </div>
+
+  <div id="main-sec-knausbot" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button class="refresh-btn" onclick="hentAIInnboks()" style="flex:1;justify-content:center">
+        &#128260; Hent meldinger
+      </button>
+    </div>
+    <div id="ai-innboks-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk for å hente meldinger</div>
+    </div>
+  </div>
+
+  <div id="main-sec-logg" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Oversikt over alle komité-varsler sendt via komitémenyen — hvem, når, og hvilke kanaler som ble brukt.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-logg-refresh-btn" class="refresh-btn" onclick="bbHentKomiteLogg()" style="flex:1;justify-content:center">
+        <span id="bb-logg-refresh-ico" class="spin">&#128260;</span> Hent logg
+      </button>
+    </div>
+    <div id="bb-komite-logg-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── JSONBIN-TILKOBLING ──
+const JB_BIN_ID = "6a36672af5f4af5e2913c2f1";
+const JB_KEY    = "$2a$10$On.B9FR9GJ81fyDwAKsbzuL81xI6InKhu8d008hvY4DVgSEhCbYTa";
+const JB_URL    = `https://api.jsonbin.io/v3/b/${JB_BIN_ID}`;
+
+let _jbCache = null, _jbCacheTs = 0;
+const JB_CACHE_TTL = 30000;
+
+async function jbGet(bustCache=false){
+  if(!bustCache && _jbCache && Date.now()-_jbCacheTs < JB_CACHE_TTL) return _jbCache;
+  try {
+    const res = await fetch(`${JB_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    _jbCache = data.record || null;
+    _jbCacheTs = Date.now();
+    return _jbCache;
+  } catch(e){ return _jbCache; }
+}
+
+async function jbSave(record){
+  try {
+    const res = await fetch(JB_URL, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
+      body: JSON.stringify(record)
+    });
+    if(res.ok){ _jbCache = record; _jbCacheTs = Date.now(); }
+    return res.ok;
+  } catch(e){ return false; }
+}
+
+function escHTML(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function tidsstempel(){
+  const n = new Date();
+  return `${n.getHours().toString().padStart(2,"0")}:${n.getMinutes().toString().padStart(2,"0")}`;
+}
+function statFormatDato(iso){
+  if(!iso) return "aldri";
+  return new Date(iso).toLocaleString("nb-NO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+}
+
+// ── VARSLINGSSYSTEM (KnausBot-meldinger + feilede koder) ──
+// Poller bbVarsel-feltet i JSONBin mens denne siden er åpen. Dette er IKKE ekte
+// push-varsling til telefonen når appen er lukket - kun live-oppdatering mens
+// fanen er åpen og aktiv.
+const BB_VARSEL_POLL_INTERVALL = 20000; // 20 sek
+let bbVarslerListe = [];
+let bbVarselLestIds = new Set(JSON.parse(localStorage.getItem("bb_varsel_lest") || "[]"));
+let bbVarselAudioCtx = null;
+let bbVarselPollTimer = null;
+
+function bbLagreLestIds(){
+  // Behold maks 200 IDer for å unngå at localStorage vokser ubegrenset
+  const arr = Array.from(bbVarselLestIds).slice(-200);
+  localStorage.setItem("bb_varsel_lest", JSON.stringify(arr));
+}
+
+function bbSpillVarselLyd(){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    if(!bbVarselAudioCtx) bbVarselAudioCtx = new AC();
+    if(bbVarselAudioCtx.state === "suspended") bbVarselAudioCtx.resume();
+    const osc = bbVarselAudioCtx.createOscillator();
+    const gain = bbVarselAudioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = 880;
+    const now = bbVarselAudioCtx.currentTime;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.2, now+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now+0.18);
+    osc.connect(gain);
+    gain.connect(bbVarselAudioCtx.destination);
+    osc.start(now);
+    osc.stop(now+0.2);
+  }catch(e){ /* lyd er ikke kritisk */ }
+}
+
+function bbOppdaterBadge(){
+  const badge = document.getElementById("bb-varsel-badge");
+  if(!badge) return;
+  const uleste = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+  if(uleste > 0){
+    badge.textContent = uleste > 99 ? "99+" : String(uleste);
+    badge.style.display = "block";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+async function bbHentVarsler(varslLydVedNytt=true){
+  const ico = document.getElementById("bb-varsel-refresh-ico");
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const nyeListe = (data && data.bbVarsel) ? data.bbVarsel : [];
+    const forrigeAntallUlest = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+    bbVarslerListe = nyeListe;
+    const nyAntallUlest = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+    if(varslLydVedNytt && nyAntallUlest > forrigeAntallUlest){
+      bbSpillVarselLyd();
+    }
+    bbRenderVarsler();
+    bbOppdaterBadge();
+  }catch(e){ /* nettverksfeil - prøver igjen neste poll-syklus */ }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbRenderVarsler(){
+  const wrap = document.getElementById("bb-varsler-wrap");
+  if(!wrap) return;
+  if(!bbVarslerListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen varsler ennå</di
