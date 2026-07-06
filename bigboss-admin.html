@@ -534,11 +534,12 @@ async function bbOppdaterPushStatus(){
   const statusEl = document.getElementById("bb-push-status");
   const btn = document.getElementById("bb-push-btn");
   if(!statusEl || !btn) return;
-  if(typeof OneSignal === "undefined" || !window.OneSignalDeferred){
+  if(!window.OneSignalDeferred){
     statusEl.textContent = "Push-varsler ikke tilgjengelig i denne nettleseren";
     btn.style.display = "none";
     return;
   }
+  statusEl.textContent = "Sjekker status...";
   OneSignalDeferred.push(async function(OneSignal){
     try{
       const optedIn = OneSignal.User.PushSubscription.optedIn;
