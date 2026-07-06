@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BigBoss Admin">
 <title>BigBoss Admin — Knauskoret Pula 2026</title>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
   :root {
     --bg: #080e14;
@@ -265,6 +266,15 @@
   </div>
 
   <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
+    <div class="card" id="bb-push-card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:800">🔔 Push-varsler til denne telefonen</div>
+          <div id="bb-push-status" style="font-size:11px;color:var(--muted);margin-top:2px">Sjekker status...</div>
+        </div>
+        <button id="bb-push-btn" class="refresh-btn" onclick="bbAktiverPush()" style="flex-shrink:0;font-size:11.5px;padding:9px 12px">Aktiver</button>
+      </div>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
         <span id="bb-varsel-refresh-ico" class="spin">&#128260;</span> Sjekk nå
@@ -490,6 +500,7 @@ function sjekkAdminPw(e){
     hentAIInnboks();
     bbHentVarsler(false);
     bbStartPolling();
+    bbOppdaterPushStatus();
   } else {
     inp.value = "";
     if(err){ err.textContent = "Feil kode!"; setTimeout(()=>err.textContent="", 2000); }
@@ -504,6 +515,69 @@ if(sessionStorage.getItem("bb_admin_ok") === "1"){
     hentAIInnboks();
     bbHentVarsler(false);
     bbStartPolling();
+    bbOppdaterPushStatus();
+  });
+}
+
+// ── PUSH-VARSLER (OneSignal, kun til denne telefonen) ──
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal){
+  await OneSignal.init({
+    appId: "b049b249-665b-41ab-8cf8-8c2256b7c541",
+    safari_web_id: "web.onesignal.auto.b049b249-665b-41ab-8cf8-8c2256b7c541",
+    notifyButton: { enable: false },
+    allowLocalhostAsSecureOrigin: true,
+  });
+});
+
+async function bbOppdaterPushStatus(){
+  const statusEl = document.getElementById("bb-push-status");
+  const btn = document.getElementById("bb-push-btn");
+  if(!statusEl || !btn) return;
+  if(typeof OneSignal === "undefined" || !window.OneSignalDeferred){
+    statusEl.textContent = "Push-varsler ikke tilgjengelig i denne nettleseren";
+    btn.style.display = "none";
+    return;
+  }
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      const optedIn = OneSignal.User.PushSubscription.optedIn;
+      if(optedIn){
+        statusEl.textContent = "✅ Aktivert på denne telefonen";
+        btn.textContent = "Deaktiver";
+        btn.onclick = bbDeaktiverPush;
+      } else {
+        statusEl.textContent = "Ikke aktivert ennå";
+        btn.textContent = "Aktiver";
+        btn.onclick = bbAktiverPush;
+      }
+    }catch(e){
+      statusEl.textContent = "Kunne ikke sjekke status";
+    }
+  });
+}
+
+function bbAktiverPush(){
+  const statusEl = document.getElementById("bb-push-status");
+  if(statusEl) statusEl.textContent = "Ber om tillatelse...";
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.Notifications.requestPermission();
+      await OneSignal.User.addTag("rolle", "bigboss");
+      bbOppdaterPushStatus();
+    }catch(e){
+      if(statusEl) statusEl.textContent = "Kunne ikke aktivere — sjekk nettleser-innstillinger";
+    }
+  });
+}
+
+function bbDeaktiverPush(){
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.User.removeTag("rolle");
+      await OneSignal.User.PushSubscription.optOut();
+      bbOppdaterPushStatus();
+    }catch(e){}
   });
 }
 
