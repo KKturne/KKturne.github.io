@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BigBoss Admin">
+<title>BigBoss Admin — Knauskoret Pula 2026</title>
+<style>
+  :root {
+    --bg: #080e14;
+    --card: #0f1a24;
+    --card2: #162030;
+    --border: #1e3040;
+    --gold: #f5c518;
+    --green: #22c55e;
+    --red: #e00515;
+    --blue: #60a0f0;
+    --purple: #c084fc;
+    --text: #e8e0d4;
+    --muted: #4a6a8a;
+    --dim: #2a4a6a;
+  }
+  body.lys {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --card2: #e8eef4;
+    --border: #c8d8e8;
+    --gold: #c49a00;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --text: #1a2a3a;
+    --muted: #6a8aaa;
+    --dim: #a0b8cc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100dvh;
+    transition: background .25s, color .25s;
+  }
+
+  /* HEADER */
+  .hdr {
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .hdr-title { font-size: 15px; font-weight: 800; color: var(--gold); letter-spacing: -.3px; }
+  .hdr-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .refresh-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-appearance: none;
+  }
+  .refresh-btn.spinning { opacity: .6; pointer-events: none; }
+  .refresh-btn.spinning .spin { animation: spin .8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .theme-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  /* PASSWORD GATE */
+  #pw-gate {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 18px;
+    text-align: center;
+  }
+  #pw-gate .ico { font-size: 44px; }
+  #pw-gate .lbl { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  #pw-gate-form { display: flex; gap: 8px; width: 100%; max-width: 300px; }
+  #pw-gate-in {
+    flex: 1;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 11px 14px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  #pw-gate-btn {
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  #pw-gate-err { font-size: 12px; color: var(--red); min-height: 16px; }
+
+  /* MAIN CONTENT */
+  #app-main { display: none; padding: 16px; max-width: 640px; margin: 0 auto; }
+  .sec-lbl { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 20px 0 12px; }
+  .sec-lbl:first-child { margin-top: 0; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .stat-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat-box { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 900; color: var(--gold); }
+  .stat-lbl { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .list-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .list-row:last-child { border-bottom: none; }
+  .list-row .v { font-weight: 800; color: var(--gold); }
+  .person-card { background: var(--card2); border-radius: 8px; padding: 9px 11px; margin-bottom: 6px; }
+  .person-name { font-weight: 800; font-size: 12.5px; }
+  .person-count { font-weight: 800; color: var(--gold); font-size: 12.5px; }
+  .person-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .empty-msg { font-size: 12px; color: var(--muted); text-align: center; padding: 8px 0; }
+
+  .stat-tab-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .stat-tab-btn.active {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+  }
+  .person-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .person-nav-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .person-nav-btn:disabled { opacity: .3; cursor: default; }
+  .person-nav-lbl { font-size: 12px; color: var(--muted); text-align: center; flex: 1; }
+  .person-detail-name { font-size: 18px; font-weight: 900; color: var(--gold); text-align: center; margin-bottom: 4px; }
+
+  /* KNAUSBOT INNBOKS (mirrors index.html boss-conv styling) */
+  .boss-conv-list { display: flex; flex-direction: column; gap: 6px; }
+  .boss-conv-item { display: flex; align-items: center; gap: 10px; background: var(--card2); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+  .boss-conv-item.new { border: 1px solid var(--gold); }
+  .boss-conv-name { font-weight: 800; font-size: 13px; }
+  .boss-conv-preview { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .boss-conv-badge { background: var(--gold); color: #111; font-size: 9.5px; font-weight: 900; border-radius: 6px; padding: 2px 6px; flex-shrink: 0; }
+  .boss-conv-time { font-size: 10.5px; color: var(--muted); flex-shrink: 0; }
+  .boss-chat-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .boss-chat-hdr { display: flex; align-items: center; gap: 10px; }
+  .boss-chat-back { background: transparent; border: none; color: var(--text); font-size: 18px; cursor: pointer; }
+  .boss-chat-navn { font-weight: 800; font-size: 14px; flex: 1; }
+  .boss-msg-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; padding: 4px; }
+  .boss-msg-user, .boss-msg-bot { border-radius: 10px; padding: 8px 10px; max-width: 85%; }
+  .boss-msg-user { background: var(--card2); align-self: flex-start; }
+  .boss-msg-bot { background: var(--gold); color: #111; align-self: flex-end; }
+  .boss-msg-fra { font-size: 10px; font-weight: 800; opacity: .7; margin-bottom: 2px; }
+  .boss-msg-txt { font-size: 13px; line-height: 1.4; }
+  .boss-msg-time { font-size: 9.5px; opacity: .6; margin-top: 3px; text-align: right; }
+  .ai-reply-in { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; padding: 9px 10px; outline: none; flex: 1; -webkit-appearance: none; }
+  .ai-reply-btn { background: var(--gold); color: #111; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 800; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="pw-gate">
+  <div class="ico">👑</div>
+  <div class="lbl">BigBoss Admin</div>
+  <form id="pw-gate-form" onsubmit="return sjekkAdminPw(event)">
+    <input id="pw-gate-in" type="text" placeholder="KODE" autocapitalize="characters" autocomplete="off" maxlength="12">
+    <button id="pw-gate-btn" type="submit">&#8594;</button>
+  </form>
+  <div id="pw-gate-err"></div>
+</div>
+
+<div id="app-main">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">👑 BigBoss Admin</div>
+      <div class="hdr-sub">Knauskoret Pula 2026</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px">
+      <button id="bb-varsel-btn" class="theme-btn" onclick="bbVisVarslerPanel()" title="Varsler" style="position:relative">
+        🔔<span id="bb-varsel-badge" style="display:none;position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:9px;font-weight:900;border-radius:8px;min-width:15px;height:15px;line-height:15px;text-align:center;padding:0 3px"></span>
+      </button>
+      <button id="theme-btn" class="theme-btn" onclick="byttTema()" title="Mørk/lys modus">🌙</button>
+    </div>
+  </div>
+
+  <div style="padding:16px 16px 0">
+    <div class="sec-lbl">🔔 Varsler — KnausBot &amp; feilede koder</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
+        <span id="bb-varsel-refresh-ico" class="spin">&#128260;</span> Sjekk nå
+      </button>
+      <button class="refresh-btn" onclick="bbMerkAlleLest()" style="flex-shrink:0">✓ Merk alle lest</button>
+    </div>
+    <div id="bb-varsler-wrap" style="margin-bottom:20px">
+      <div class="empty-msg">Trykk «Sjekk nå» for å hente varsler</div>
+    </div>
+
+    <div class="sec-lbl">📈 Dev mode — bruksstatistikk</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="stats-tab-oversikt" class="stat-tab-btn active" onclick="statByttFane('oversikt')" style="flex:1">📊 Oversikt</button>
+      <button id="stats-tab-person" class="stat-tab-btn" onclick="statByttFane('person')" style="flex:1">👤 Per person</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="dev-stats-btn" class="refresh-btn" onclick="statVisDevPanel()" style="flex:1;justify-content:center">
+        <span id="dev-stats-btn-ico" class="spin">&#128260;</span>
+        <span id="dev-stats-btn-txt">Oppdater statistikk</span>
+      </button>
+    </div>
+    <div id="dev-stats-wrap">
+      <div class="empty-msg">Trykk for å hente statistikk</div>
+    </div>
+    <div id="dev-person-wrap" style="display:none">
+      <div class="empty-msg">Trykk «Oppdater statistikk» først</div>
+    </div>
+
+    <div class="sec-lbl">🤖 KnausBot-innboks</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button class="refresh-btn" onclick="hentAIInnboks()" style="flex:1;justify-content:center">
+        &#128260; Hent meldinger
+      </button>
+    </div>
+    <div id="ai-innboks-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk for å hente meldinger</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── JSONBIN-TILKOBLING ──
+const JB_BIN_ID = "6a36672af5f4af5e2913c2f1";
+const JB_KEY    = "$2a$10$On.B9FR9GJ81fyDwAKsbzuL81xI6InKhu8d008hvY4DVgSEhCbYTa";
+const JB_URL    = `https://api.jsonbin.io/v3/b/${JB_BIN_ID}`;
+
+let _jbCache = null, _jbCacheTs = 0;
+const JB_CACHE_TTL = 30000;
+
+async function jbGet(bustCache=false){
+  if(!bustCache && _jbCache && Date.now()-_jbCacheTs < JB_CACHE_TTL) return _jbCache;
+  try {
+    const res = await fetch(`${JB_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    _jbCache = data.record || null;
+    _jbCacheTs = Date.now();
+    return _jbCache;
+  } catch(e){ return _jbCache; }
+}
+
+async function jbSave(record){
+  try {
+    const res = await fetch(JB_URL, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
+      body: JSON.stringify(record)
+    });
+    if(res.ok){ _jbCache = record; _jbCacheTs = Date.now(); }
+    return res.ok;
+  } catch(e){ return false; }
+}
+
+function escHTML(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function tidsstempel(){
+  const n = new Date();
+  return `${n.getHours().toString().padStart(2,"0")}:${n.getMinutes().toString().padStart(2,"0")}`;
+}
+function statFormatDato(iso){
+  if(!iso) return "aldri";
+  return new Date(iso).toLocaleString("nb-NO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+}
+
+// ── VARSLINGSSYSTEM (KnausBot-meldinger + feilede koder) ──
+// Poller bbVarsel-feltet i JSONBin mens denne siden er åpen. Dette er IKKE ekte
+// push-varsling til telefonen når appen er lukket - kun live-oppdatering mens
+// fanen er åpen og aktiv.
+const BB_VARSEL_POLL_INTERVALL = 20000; // 20 sek
+let bbVarslerListe = [];
+let bbVarselLestIds = new Set(JSON.parse(localStorage.getItem("bb_varsel_lest") || "[]"));
+let bbVarselAudioCtx = null;
+let bbVarselPollTimer = null;
+
+function bbLagreLestIds(){
+  // Behold maks 200 IDer for å unngå at localStorage vokser ubegrenset
+  const arr = Array.from(bbVarselLestIds).slice(-200);
+  localStorage.setItem("bb_varsel_lest", JSON.stringify(arr));
+}
+
+function bbSpillVarselLyd(){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    if(!bbVarselAudioCtx) bbVarselAudioCtx = new AC();
+    if(bbVarselAudioCtx.state === "suspended") bbVarselAudioCtx.resume();
+    const osc = bbVarselAudioCtx.createOscillator();
+    const gain = bbVarselAudioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = 880;
+    const now = bbVarselAudioCtx.currentTime;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.2, now+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now+0.18);
+    osc.connect(gain);
+    gain.connect(bbVarselAudioCtx.destination);
+    osc.start(now);
+    osc.stop(now+0.2);
+  }catch(e){ /* lyd er ikke kritisk */ }
+}
+
+function bbOppdaterBadge(){
+  const badge = document.getElementById("bb-varsel-badge");
+  if(!badge) return;
+  const uleste = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+  if(uleste > 0){
+    badge.textContent = uleste > 99 ? "99+" : String(uleste);
+    badge.style.display = "block";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+async function bbHentVarsler(varslLydVedNytt=true){
+  const ico = document.getElementById("bb-varsel-refresh-ico");
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const nyeListe = (data && data.bbVarsel) ? data.bbVarsel : [];
+    const forrigeAntallUlest = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+    bbVarslerListe = nyeListe;
+    const nyAntallUlest = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+    if(varslLydVedNytt && nyAntallUlest > forrigeAntallUlest){
+      bbSpillVarselLyd();
+    }
+    bbRenderVarsler();
+    bbOppdaterBadge();
+  }catch(e){ /* nettverksfeil - prøver igjen neste poll-syklus */ }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbRenderVarsler(){
+  const wrap = document.getElementById("bb-varsler-wrap");
+  if(!wrap) return;
+  if(!bbVarslerListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen varsler ennå</div>';
+    return;
+  }
+  const sortert = bbVarslerListe.slice().reverse(); // nyeste øverst
+  wrap.innerHTML = sortert.map(v=>{
+    const erLest = bbVarselLestIds.has(v.id);
+    const ico = v.type === "knausbot" ? "🤖" : "🔒";
+    const fargeStil = erLest ? "opacity:.5" : "";
+    return `<div class="card" style="${fargeStil};display:flex;gap:10px;align-items:flex-start;margin-bottom:6px" onclick="bbMerkLest('${v.id}')">
+      <span style="font-size:18px;flex-shrink:0">${ico}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:800">${escHTML(v.navn)}${erLest?'':' <span style=\"color:var(--gold)\">• NYTT</span>'}</div>
+        <div style="font-size:12px;color:var(--text);margin-top:2px;word-break:break-word">${escHTML(v.tekst)}</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:3px">${statFormatDato(v.ts)}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function bbMerkLest(id){
+  bbVarselLestIds.add(id);
+  bbLagreLestIds();
+  bbRenderVarsler();
+  bbOppdaterBadge();
+}
+
+function bbMerkAlleLest(){
+  bbVarslerListe.forEach(v => bbVarselLestIds.add(v.id));
+  bbLagreLestIds();
+  bbRenderVarsler();
+  bbOppdaterBadge();
+}
+
+function bbVisVarslerPanel(){
+  // Scroll til varsel-seksjonen (den ligger øverst i innholdet)
+  const wrap = document.getElementById("bb-varsler-wrap");
+  if(wrap) wrap.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+function bbStartPolling(){
+  if(bbVarselPollTimer) clearInterval(bbVarselPollTimer);
+  bbVarselPollTimer = setInterval(()=>bbHentVarsler(true), BB_VARSEL_POLL_INTERVALL);
+}
+
+// ── PASSORDLÅS ──
+const BOSS_PW = "GRIBB67";
+function sjekkAdminPw(e){
+  if(e) e.preventDefault();
+  const inp = document.getElementById("pw-gate-in");
+  const err = document.getElementById("pw-gate-err");
+  if(!inp) return false;
+  if(inp.value.trim().toUpperCase() === BOSS_PW){
+    sessionStorage.setItem("bb_admin_ok", "1");
+    document.getElementById("pw-gate").style.display = "none";
+    document.getElementById("app-main").style.display = "block";
+    hentAIInnboks();
+    bbHentVarsler(false);
+    bbStartPolling();
+  } else {
+    inp.value = "";
+    if(err){ err.textContent = "Feil kode!"; setTimeout(()=>err.textContent="", 2000); }
+  }
+  return false;
+}
+// Husk innlogging for resten av nettleser-økten (fram til fanen lukkes)
+if(sessionStorage.getItem("bb_admin_ok") === "1"){
+  document.addEventListener("DOMContentLoaded", ()=>{
+    document.getElementById("pw-gate").style.display = "none";
+    document.getElementById("app-main").style.display = "block";
+    hentAIInnboks();
+    bbHentVarsler(false);
+    bbStartPolling();
+  });
+}
+
+// ── TEMA (mørk/lys) ──
+function statOppdaterTemaIkon(){
+  const btn = document.getElementById("theme-btn");
+  if(!btn) return;
+  const erLys = document.body.classList.contains("lys");
+  btn.textContent = erLys ? "🌙" : "☀️";
+}
+function byttTema(){
+  const lys = document.body.classList.toggle("lys");
+  localStorage.setItem("bb_tema", lys ? "lys" : "mork");
+  statOppdaterTemaIkon();
+}
+if(localStorage.getItem("bb_tema") === "lys"){
+  document.body.classList.add("lys");
+}
+document.addEventListener("DOMContentLoaded", statOppdaterTemaIkon);
+
+// ── BRUKSSTATISTIKK (DEV MODE) — leser samme data-struktur som index.html skriver til ──
+async function statHentServerData(){
+  const data = await jbGet(true);
+  return (data && data.stats) ? data.stats : {totalAapninger:0, faner:{}, toner:0, egg:{}, personer:{}, feilPw:[], zebraSist:null, sistOppdatert:""};
+}
+
+// ── BRUKSSTATISTIKK: OVERSIKT + PER-PERSON-NAVIGASJON ──
+let statCache = null;
+let statAktivFane = "oversikt";
+let statPersonIdx = 0;
+
+function statByttFane(fane){
+  statAktivFane = fane;
+  document.getElementById("stats-tab-oversikt").classList.toggle("active", fane==="oversikt");
+  document.getElementById("stats-tab-person").classList.toggle("active", fane==="person");
+  document.getElementById("dev-stats-wrap").style.display = fane==="oversikt" ? "block" : "none";
+  document.getElementById("dev-person-wrap").style.display = fane==="person" ? "block" : "none";
+  if(fane==="person" && statCache) statVisPerson(statPersonIdx);
+}
+
+function statVisDevPanel(){
+  const btn = document.getElementById("dev-stats-btn");
+  const ico = document.getElementById("dev-stats-btn-ico");
+  const txt = document.getElementById("dev-stats-btn-txt");
+  if(btn) btn.classList.add("spinning");
+  if(txt) txt.textContent = "Henter...";
+  statHentServerData().then(stats=>{
+    if(btn) btn.classList.remove("spinning");
+    if(txt){
+      txt.textContent = "Oppdatert! ✓";
+      setTimeout(()=>{ if(txt) txt.textContent = "Oppdater statistikk"; }, 1800);
+    }
+    statCache = stats;
+    statPersonIdx = 0;
+    statRenderOversikt(stats);
+    if(statAktivFane==="person") statVisPerson(0);
+  });
+}
+
+function statRenderOversikt(stats){
+  const wrap = document.getElementById("dev-stats-wrap");
+  if(!wrap) return;
+  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const faneListe = Object.entries(stats.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+  const eggListe = Object.entries(stats.egg||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${k}</span><span class="v">${v}</span></div>`).join("");
+  const sist = statFormatDato(stats.sistOppdatert);
+
+  const feilPwListe = (stats.feilPw||[]).slice().reverse().slice(0,20).map(f=>`
+    <div class="list-row">
+      <span>${escHTML(f.navn)} <span style="color:var(--muted)">@ ${escHTML(f.sted)}</span></span>
+      <span style="font-weight:700;color:var(--red)">"${escHTML(f.forsokt)}"</span>
+    </div>`).join("");
+
+  const zebraHtml = stats.zebraSist
+    ? `<div style="font-size:12.5px">${escHTML(stats.zebraSist.navn)} <span style="color:var(--muted)">— ${statFormatDato(stats.zebraSist.ts)}</span></div>`
+    : `<div class="empty-msg">Ingen innsendinger ennå</div>`;
+
+  const antallPersoner = Object.keys(stats.personer||{}).length;
+
+  wrap.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${stats.totalAapninger||0}</div>
+        <div class="stat-lbl">App-åpninger</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${stats.toner||0}</div>
+        <div class="stat-lbl">Emoji-toner spilt</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${antallPersoner}</div>
+        <div class="stat-lbl">Personer registrert</div>
+      </div>
+    </div>
+    <div class="sec-lbl">📊 Fane-besøk (totalt)</div>
+    <div class="card">${faneListe || '<div class="empty-msg">Ingen data ennå</div>'}</div>
+    <div class="sec-lbl">🦓 Zebraen sier — sist innsendt</div>
+    <div class="card">${zebraHtml}</div>
+    <div class="sec-lbl">🔒 Feilede passordforsøk (siste 20)</div>
+    <div class="card">${feilPwListe || '<div class="empty-msg">Ingen feilforsøk registrert</div>'}</div>
+    <div class="sec-lbl">🥚 Easter eggs funnet</div>
+    <div class="card">${eggListe || '<div class="empty-msg">Ingen data ennå</div>'}</div>
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-top:14px">Sist oppdatert: ${sist}</div>
+  `;
+}
+
+function statVisPerson(idx){
+  const wrap = document.getElementById("dev-person-wrap");
+  if(!wrap || !statCache) return;
+  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const personListe = Object.entries(statCache.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
+
+  if(!personListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen personer registrert ennå</div>';
+    return;
+  }
+  if(idx < 0) idx = 0;
+  if(idx >= personListe.length) idx = personListe.length - 1;
+  statPersonIdx = idx;
+
+  const [navn, p] = personListe[idx];
+  const faneRader = Object.entries(p.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+
+  // Egne feilede passord og zebra-innsendinger for denne personen
+  const egneFeil = (statCache.feilPw||[]).filter(f=>f.navn===navn).slice().reverse().slice(0,10);
+  const egneFeilHtml = egneFeil.map(f=>`
+    <div class="list-row">
+      <span style="color:var(--muted)">@ ${escHTML(f.sted)} — ${statFormatDato(f.ts)}</span>
+      <span style="font-weight:700;color:var(--red)">"${escHTML(f.forsokt)}"</span>
+    </div>`).join("");
+
+  wrap.innerHTML = `
+    <div class="person-nav">
+      <button class="person-nav-btn" onclick="statVisPerson(${idx-1})" ${idx<=0?"disabled":""}>&#8592;</button>
+      <div class="person-nav-lbl">${idx+1} av ${personListe.length}</div>
+      <button class="person-nav-btn" onclick="statVisPerson(${idx+1})" ${idx>=personListe.length-1?"disabled":""}>&#8594;</button>
+    </div>
+    <div class="person-detail-name">${escHTML(navn)}</div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${p.aapninger||0}</div>
+        <div class="stat-lbl">Ganger åpnet</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="font-size:13px">${statFormatDato(p.sistAktiv)}</div>
+        <div class="stat-lbl">Sist aktiv</div>
+      </div>
+    </div>
+    <div class="sec-lbl">📊 Fane-besøk</div>
+    <div class="card">${faneRader || '<div class="empty-msg">Ingen fane-besøk registrert</div>'}</div>
+    <div class="sec-lbl">🔒 Feilede passordforsøk</div>
+    <div class="card">${egneFeilHtml || '<div class="empty-msg">Ingen feilforsøk registrert</div>'}</div>
+  `;
+}
+
+// ── KNAUSBOT-INNBOKS ──
+let bossAktivSamtale = null;
+let bossLestTs = JSON.parse(localStorage.getItem("bb_boss_lest") || "{}");
+
+async function hentAIInnboks(){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  wrap.innerHTML = `<div class="empty-msg">Laster...</div>`;
+  const data = await jbGet();
+  if(!data){ wrap.innerHTML = `<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>`; return; }
+  const chatData = data.chat || {meldinger:[], svar:[]};
+  if(!chatData.meldinger || !chatData.meldinger.length){ wrap.innerHTML = `<div class="empty-msg">Ingen meldinger ennå</div>`; return; }
+
+  const alleMeldinger = (chatData.meldinger || []).filter(m => m.type === "user");
+  const samtaler = {};
+  alleMeldinger.forEach(m => {
+    const navn = m.fra || "Anonym";
+    if(!samtaler[navn]) samtaler[navn] = {meldinger:[], sistTs:0};
+    samtaler[navn].meldinger.push(m);
+    if(m.ts > samtaler[navn].sistTs) samtaler[navn].sistTs = m.ts;
+  });
+  (chatData.svar || []).forEach(s => {
+    if(samtaler[s.til]) samtaler[s.til].meldinger.push(s);
+  });
+
+  if(!Object.keys(samtaler).length){
+    wrap.innerHTML = `<div class="empty-msg">Ingen meldinger ennå</div>`; return;
+  }
+
+  const sorted = Object.keys(samtaler).sort((a,b) => {
+    const aNew = samtaler[a].sistTs > (bossLestTs[a]||0);
+    const bNew = samtaler[b].sistTs > (bossLestTs[b]||0);
+    if(aNew && !bNew) return -1;
+    if(!aNew && bNew) return 1;
+    return a.localeCompare(b);
+  });
+
+  if(bossAktivSamtale && samtaler[bossAktivSamtale]){
+    visBossSamtale(bossAktivSamtale, samtaler[bossAktivSamtale].meldinger, chatData);
+  } else {
+    visBossListe(sorted, samtaler, chatData);
+  }
+}
+
+function visBossListe(sorted, samtaler, chatData){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="boss-conv-list">
+      ${sorted.map(navn => {
+        const s = samtaler[navn];
+        const erNy = s.sistTs > (bossLestTs[navn]||0);
+        const sisteMsg = s.meldinger.filter(m=>m.type==="user").slice(-1)[0];
+        return `<div class="boss-conv-item${erNy?' new':''}" onclick="aapneBossSamtale('${escHTML(navn)}')">
+          <div style="flex:1;min-width:0">
+            <div class="boss-conv-name">${escHTML(navn)}</div>
+            <div class="boss-conv-preview">${sisteMsg?escHTML(sisteMsg.txt.substring(0,50)):'...'}</div>
+          </div>
+          ${erNy?`<span class="boss-conv-badge">NY</span>`:''}
+          <div class="boss-conv-time">${sisteMsg?sisteMsg.tid||'':''}</div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  wrap._chatData = chatData;
+  wrap._samtaler = samtaler;
+}
+
+function aapneBossSamtale(navn){
+  bossAktivSamtale = navn;
+  bossLestTs[navn] = Date.now();
+  localStorage.setItem("bb_boss_lest", JSON.stringify(bossLestTs));
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(wrap && wrap._samtaler && wrap._samtaler[navn]){
+    visBossSamtale(navn, wrap._samtaler[navn].meldinger, wrap._chatData);
+  } else {
+    hentAIInnboks();
+  }
+}
+
+function visBossSamtale(navn, meldinger, chatData){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  const sorted = [...meldinger].sort((a,b)=>(a.ts||0)-(b.ts||0));
+  const replyId = "boss-reply-"+Date.now();
+  wrap.innerHTML = `
+    <div class="boss-chat-wrap">
+      <div class="boss-chat-hdr">
+        <button class="boss-chat-back" onclick="bossAktivSamtale=null;hentAIInnboks()">&#8592;</button>
+        <div class="boss-chat-navn">${escHTML(navn)}</div>
+        <button onclick="hentAIInnboks()" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer">&#128260;</button>
+      </div>
+      <div class="boss-msg-list" id="boss-msg-list">
+        ${sorted.map(m => m.type==="user"
+          ? `<div class="boss-msg-user"><div class="boss-msg-fra">${escHTML(m.fra||navn)}</div><div class="boss-msg-txt">${escHTML(m.txt)}</div><div class="boss-msg-time">${m.tid||''}</div></div>`
+          : `<div class="boss-msg-bot"><div class="boss-msg-fra">KnausBot 3000</div><div class="boss-msg-txt">${escHTML(m.txt)}</div><div class="boss-msg-time">${m.tid||''}</div></div>`
+        ).join("")}
+      </div>
+      <div style="display:flex;gap:6px">
+        <input id="${replyId}" class="ai-reply-in" type="text" placeholder="Svar som KnausBot..." onkeydown="if(event.key==='Enter')sendBossSvar('${escHTML(navn)}','${replyId}')">
+        <button class="ai-reply-btn" onclick="sendBossSvar('${escHTML(navn)}','${replyId}')">Send</button>
+      </div>
+      <div id="boss-svar-st" style="font-size:11px;color:var(--muted);margin-top:6px;min-height:14px"></div>
+    </div>`;
+  setTimeout(()=>{ const l=document.getElementById("boss-msg-list"); if(l)l.scrollTop=l.scrollHeight; }, 50);
+}
+
+async function sendBossSvar(til, inputId){
+  const inp = document.getElementById(inputId);
+  const st  = document.getElementById("boss-svar-st");
+  if(!inp || !inp.value.trim()) return;
+  const svarTxt = inp.value.trim();
+  if(st) st.textContent = "Sender...";
+  const data = (await jbGet()) || {varsel:{melding:"",aktiv:false}, chat:{meldinger:[],svar:[]}};
+  if(!data.chat) data.chat = {meldinger:[], svar:[]};
+  if(!data.chat.svar) data.chat.svar = [];
+  data.chat.svar.push({
+    id: "svar-" + Date.now(),
+    til, txt: svarTxt,
+    tid: tidsstempel(),
+    ts: Date.now(),
+    type: "bot"
+  });
+  if(data.chat.svar.length > 200) data.chat.svar = data.chat.svar.slice(-200);
+  const ok = await jbSave(data);
+  if(ok){
+    inp.value = "";
+    if(st) st.textContent = "✅ Sendt!";
+    setTimeout(()=>{ if(st) st.textContent=""; }, 2000);
+    hentAIInnboks();
+  } else {
+    if(st) st.textContent = "❌ Feil";
+  }
+}
+</script>
+</body>
+</html>
