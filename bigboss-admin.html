@@ -189,6 +189,45 @@
     color: #111;
     border-color: var(--gold);
   }
+  .bb-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .bb-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+  .bb-toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: var(--border);
+    transition: background .2s;
+    cursor: pointer;
+    display: block;
+  }
+  .bb-toggle input:checked + .bb-toggle-track {
+    background: var(--gold);
+  }
+  .bb-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .2s;
+    pointer-events: none;
+  }
+  .bb-toggle input:checked ~ .bb-toggle-track .bb-toggle-thumb {
+    transform: translateX(20px);
+  }
   .person-nav {
     display: flex;
     align-items: center;
@@ -263,6 +302,7 @@
     <button id="main-tab-varsler" class="main-tab-btn active" onclick="bbByttHovedfane('varsler')">🔔 Varsler</button>
     <button id="main-tab-stats" class="main-tab-btn" onclick="bbByttHovedfane('stats')">📈 Statistikk</button>
     <button id="main-tab-knausbot" class="main-tab-btn" onclick="bbByttHovedfane('knausbot')">🤖 KnausBot</button>
+    <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 Logg</button>
   </div>
 
   <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
@@ -274,6 +314,28 @@
         </div>
         <button id="bb-push-btn" class="refresh-btn" onclick="bbAktiverPush()" style="flex-shrink:0;font-size:11.5px;padding:9px 12px">Aktiver</button>
       </div>
+    </div>
+    <div class="card" id="bb-varsel-innst-card" style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;margin-bottom:10px">⚙️ Varseltyper (push)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:12.5px;font-weight:700">🤖 KnausBot-meldinger</div>
+        </div>
+        <label class="bb-toggle">
+          <input type="checkbox" id="bb-innst-knausbot" checked onchange="bbLagreVarselInnst()">
+          <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0">
+        <div>
+          <div style="font-size:12.5px;font-weight:700">🔒 Feilede passordforsøk</div>
+        </div>
+        <label class="bb-toggle">
+          <input type="checkbox" id="bb-innst-feilpw" checked onchange="bbLagreVarselInnst()">
+          <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div id="bb-innst-status" style="font-size:10.5px;color:var(--muted);margin-top:8px;min-height:14px"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
@@ -313,6 +375,20 @@
     </div>
     <div id="ai-innboks-wrap" style="margin-bottom:24px">
       <div class="empty-msg">Trykk for å hente meldinger</div>
+    </div>
+  </div>
+
+  <div id="main-sec-logg" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Oversikt over alle komité-varsler sendt via komitémenyen — hvem, når, og hvilke kanaler som ble brukt.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-logg-refresh-btn" class="refresh-btn" onclick="bbHentKomiteLogg()" style="flex:1;justify-content:center">
+        <span id="bb-logg-refresh-ico" class="spin">&#128260;</span> Hent logg
+      </button>
+    </div>
+    <div id="bb-komite-logg-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
     </div>
   </div>
 </div>
@@ -472,7 +548,7 @@ function bbVisVarslerPanel(){
 }
 
 function bbByttHovedfane(fane){
-  const faner = ["varsler", "stats", "knausbot"];
+  const faner = ["varsler", "stats", "knausbot", "logg"];
   faner.forEach(f=>{
     const btn = document.getElementById("main-tab-"+f);
     const sec = document.getElementById("main-sec-"+f);
@@ -501,6 +577,7 @@ function sjekkAdminPw(e){
     bbHentVarsler(false);
     bbStartPolling();
     bbOppdaterPushStatus();
+    bbLastVarselInnst();
   } else {
     inp.value = "";
     if(err){ err.textContent = "Feil kode!"; setTimeout(()=>err.textContent="", 2000); }
@@ -516,6 +593,7 @@ if(sessionStorage.getItem("bb_admin_ok") === "1"){
     bbHentVarsler(false);
     bbStartPolling();
     bbOppdaterPushStatus();
+    bbLastVarselInnst();
   });
 }
 
@@ -597,6 +675,71 @@ function bbDeaktiverPush(){
       bbOppdaterPushStatus();
     }catch(e){}
   });
+}
+
+// ── VARSELTYPE-INNSTILLINGER (styrer hva index.html faktisk sender push for) ──
+async function bbLastVarselInnst(){
+  try{
+    const data = await jbGet(true);
+    const innst = (data && data.bbVarselInnst) ? data.bbVarselInnst : {knausbot:true, feilpw:true};
+    const kbEl = document.getElementById("bb-innst-knausbot");
+    const fpEl = document.getElementById("bb-innst-feilpw");
+    if(kbEl) kbEl.checked = innst.knausbot !== false;
+    if(fpEl) fpEl.checked = innst.feilpw !== false;
+  }catch(e){ /* beholder default (begge på) hvis noe feiler */ }
+}
+
+async function bbLagreVarselInnst(){
+  const statusEl = document.getElementById("bb-innst-status");
+  const kbEl = document.getElementById("bb-innst-knausbot");
+  const fpEl = document.getElementById("bb-innst-feilpw");
+  if(statusEl) statusEl.textContent = "Lagrer...";
+  try{
+    const data = (await jbGet(true)) || {};
+    data.bbVarselInnst = {
+      knausbot: kbEl ? kbEl.checked : true,
+      feilpw: fpEl ? fpEl.checked : true
+    };
+    const ok = await jbSave(data);
+    if(statusEl){
+      statusEl.textContent = ok ? "✅ Lagret" : "❌ Kunne ikke lagre";
+      setTimeout(()=>{ if(statusEl) statusEl.textContent=""; }, 2000);
+    }
+  }catch(e){
+    if(statusEl) statusEl.textContent = "❌ Kunne ikke lagre";
+  }
+}
+
+// ── KOMITÉ-VARSEL-LOGG (hvem sendte hva, når, via hvilke kanaler) ──
+async function bbHentKomiteLogg(){
+  const wrap = document.getElementById("bb-komite-logg-wrap");
+  const ico = document.getElementById("bb-logg-refresh-ico");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const logg = (data && data.komiteVarselLogg) ? data.komiteVarselLogg.slice().reverse() : [];
+    if(!logg.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen komité-varsler sendt ennå</div>';
+    } else {
+      wrap.innerHTML = logg.map(v=>{
+        const kanalTekst = (v.kanaler && v.kanaler.length)
+          ? v.kanaler.map(k=> k==="app" ? "📱 app" : "🔔 push").join(" · ")
+          : "(ingen kanal registrert)";
+        return `<div class="card" style="margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <span style="font-size:12.5px;font-weight:800">${escHTML(v.navn||"Ukjent")}</span>
+            <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(v.ts)}</span>
+          </div>
+          <div style="font-size:12px;margin-top:4px;word-break:break-word">${escHTML(v.melding||"")}</div>
+          <div style="font-size:10.5px;color:var(--gold);margin-top:4px">${kanalTekst}</div>
+        </div>`;
+      }).join("");
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
 }
 
 // ── TEMA (mørk/lys) ──
