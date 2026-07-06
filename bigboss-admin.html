@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BigBoss Admin">
+<link rel="manifest" href="./bigboss-manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>BigBoss Admin — Knauskoret Pula 2026</title>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <style>
@@ -597,6 +599,13 @@ if(sessionStorage.getItem("bb_admin_ok") === "1"){
   });
 }
 
+// ── PWA / SERVICE WORKER ──
+// Registreringen av bigboss-sw.js skjer via OneSignal.init() nedenfor
+// (serviceWorkerPath/serviceWorkerParam) - siden bigboss-sw.js er en kombinert
+// fil (OneSignal + egen cache-logikk), skal den KUN registreres én gang derfra.
+// En separat, manuell navigator.serviceWorker.register()-kall her ville gitt en
+// konkurrerende registrering på samme scope, noe som ikke er tillatt.
+
 // ── PUSH-VARSLER (OneSignal, kun til denne telefonen) ──
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal){
@@ -605,6 +614,8 @@ OneSignalDeferred.push(async function(OneSignal){
     safari_web_id: "web.onesignal.auto.b049b249-665b-41ab-8cf8-8c2256b7c541",
     notifyButton: { enable: false },
     allowLocalhostAsSecureOrigin: true,
+    serviceWorkerParam: { scope: "/bigboss-admin.html" },
+    serviceWorkerPath: "bigboss-sw.js",
   });
 });
 
@@ -644,10 +655,28 @@ async function bbOppdaterPushStatus(){
 
 function bbAktiverPush(){
   const statusEl = document.getElementById("bb-push-status");
+  // Sjekk eksisterende nettleser-tillatelse FØR vi ber om ny - moderne nettlesere
+  // viser aldri en ny dialog hvis brukeren allerede har blokkert varsler for
+  // dette domenet tidligere. Uten denne sjekken henger statusteksten på
+  // "Ber om tillatelse..." for alltid uten noen forklaring.
+  if(typeof Notification !== "undefined" && Notification.permission === "denied"){
+    if(statusEl) statusEl.textContent = "❌ Blokkert i nettleseren — gå til nettleser-innstillinger → Nettstedsinnstillinger → Varsler og tillat kkturne.no manuelt";
+    return;
+  }
   if(statusEl) statusEl.textContent = "Ber om tillatelse...";
+  // Sikkerhetsnett: hvis ingenting har skjedd etter 8 sekunder, anta at forespørselen
+  // hang stille (skjer på enkelte nettlesere/OS-kombinasjoner) og gi beskjed i stedet
+  // for å la statusteksten henge for alltid.
+  let ferdig = false;
+  setTimeout(()=>{
+    if(!ferdig && statusEl && statusEl.textContent === "Ber om tillatelse..."){
+      statusEl.textContent = "⚠️ Fikk ikke svar — prøv å laste siden på nytt, eller sjekk nettleser-innstillinger";
+    }
+  }, 8000);
   OneSignalDeferred.push(async function(OneSignal){
     try{
       await OneSignal.Notifications.requestPermission();
+      ferdig = true;
       // requestPermission() ber kun om nettleser-tillatelse - den registrerer IKKE
       // automatisk en aktiv push-subscription hos OneSignal. Må kalles eksplisitt,
       // ellers kan "rolle"-taggen bli satt på en bruker uten faktiv subscription,
@@ -662,6 +691,7 @@ function bbAktiverPush(){
         if(statusEl) statusEl.textContent = "Tillatelse ble ikke gitt — sjekk nettleser-innstillinger";
       }
     }catch(e){
+      ferdig = true;
       if(statusEl) statusEl.textContent = "Kunne ikke aktivere — sjekk nettleser-innstillinger";
     }
   });
