@@ -544,7 +544,13 @@ async function bbOppdaterPushStatus(){
     try{
       const optedIn = OneSignal.User.PushSubscription.optedIn;
       if(optedIn){
-        statusEl.textContent = "✅ Aktivert på denne telefonen";
+        let tags = {};
+        try{ tags = await OneSignal.User.getTags(); }catch(e){}
+        if(tags && tags.rolle === "bigboss"){
+          statusEl.textContent = "✅ Aktivert på denne telefonen";
+        } else {
+          statusEl.textContent = "⚠️ Aktivert, men mangler tag - trykk Aktiver på nytt";
+        }
         btn.textContent = "Deaktiver";
         btn.onclick = bbDeaktiverPush;
       } else {
@@ -564,8 +570,19 @@ function bbAktiverPush(){
   OneSignalDeferred.push(async function(OneSignal){
     try{
       await OneSignal.Notifications.requestPermission();
-      await OneSignal.User.addTag("rolle", "bigboss");
-      bbOppdaterPushStatus();
+      // requestPermission() ber kun om nettleser-tillatelse - den registrerer IKKE
+      // automatisk en aktiv push-subscription hos OneSignal. Må kalles eksplisitt,
+      // ellers kan "rolle"-taggen bli satt på en bruker uten faktiv subscription,
+      // og push vil da aldri leveres selv om alt ser riktig ut i UI.
+      if(OneSignal.Notifications.permission){
+        await OneSignal.User.PushSubscription.optIn();
+        await OneSignal.User.addTag("rolle", "bigboss");
+        if(statusEl) statusEl.textContent = "Aktiverer...";
+        // Liten pause for å la subscription faktisk registreres hos OneSignal før vi sjekker status
+        setTimeout(bbOppdaterPushStatus, 1200);
+      } else {
+        if(statusEl) statusEl.textContent = "Tillatelse ble ikke gitt — sjekk nettleser-innstillinger";
+      }
     }catch(e){
       if(statusEl) statusEl.textContent = "Kunne ikke aktivere — sjekk nettleser-innstillinger";
     }
