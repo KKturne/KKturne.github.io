@@ -279,9 +279,9 @@
 <div id="pw-gate">
   <div class="ico">👑</div>
   <div class="lbl">BigBoss Admin</div>
-  <form id="pw-gate-form" onsubmit="return sjekkAdminPw(event)">
+  <form id="pw-gate-form">
     <input id="pw-gate-in" type="text" placeholder="KODE" autocapitalize="characters" autocomplete="off" maxlength="12">
-    <button id="pw-gate-btn" type="submit">&#8594;</button>
+    <button id="pw-gate-btn" type="button">&#8594;</button>
   </form>
   <div id="pw-gate-err"></div>
 </div>
@@ -512,4 +512,586 @@ function bbRenderVarsler(){
   const wrap = document.getElementById("bb-varsler-wrap");
   if(!wrap) return;
   if(!bbVarslerListe.length){
-    wrap.innerHTML = '<div class="empty-msg">Ingen varsler ennå</di
+    wrap.innerHTML = '<div class="empty-msg">Ingen varsler ennå</div>';
+    return;
+  }
+  const sortert = bbVarslerListe.slice().reverse(); // nyeste øverst
+  wrap.innerHTML = sortert.map(v=>{
+    const erLest = bbVarselLestIds.has(v.id);
+    const ico = v.type === "knausbot" ? "🤖" : "🔒";
+    const fargeStil = erLest ? "opacity:.5" : "";
+    return `<div class="card" style="${fargeStil};display:flex;gap:10px;align-items:flex-start;margin-bottom:6px" onclick="bbMerkLest('${v.id}')">
+      <span style="font-size:18px;flex-shrink:0">${ico}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:800">${escHTML(v.navn)}${erLest?'':' <span style=\"color:var(--gold)\">• NYTT</span>'}</div>
+        <div style="font-size:12px;color:var(--text);margin-top:2px;word-break:break-word">${escHTML(v.tekst)}</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:3px">${statFormatDato(v.ts)}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function bbMerkLest(id){
+  bbVarselLestIds.add(id);
+  bbLagreLestIds();
+  bbRenderVarsler();
+  bbOppdaterBadge();
+}
+
+function bbMerkAlleLest(){
+  bbVarslerListe.forEach(v => bbVarselLestIds.add(v.id));
+  bbLagreLestIds();
+  bbRenderVarsler();
+  bbOppdaterBadge();
+}
+
+function bbVisVarslerPanel(){
+  bbByttHovedfane("varsler");
+}
+
+function bbByttHovedfane(fane){
+  const faner = ["varsler", "stats", "knausbot", "logg"];
+  faner.forEach(f=>{
+    const btn = document.getElementById("main-tab-"+f);
+    const sec = document.getElementById("main-sec-"+f);
+    if(btn) btn.classList.toggle("active", f===fane);
+    if(sec) sec.style.display = f===fane ? "block" : "none";
+  });
+}
+
+function bbStartPolling(){
+  if(bbVarselPollTimer) clearInterval(bbVarselPollTimer);
+  bbVarselPollTimer = setInterval(()=>bbHentVarsler(true), BB_VARSEL_POLL_INTERVALL);
+}
+
+// ── PASSORDLÅS ──
+const BOSS_PW = "GRIBB67";
+function sjekkAdminPw(e){
+  if(e) e.preventDefault();
+  const inp = document.getElementById("pw-gate-in");
+  const err = document.getElementById("pw-gate-err");
+  if(!inp) return false;
+  if(inp.value.trim().toUpperCase() === BOSS_PW){
+    sessionStorage.setItem("bb_admin_ok", "1");
+    document.getElementById("pw-gate").style.display = "none";
+    document.getElementById("app-main").style.display = "block";
+    hentAIInnboks();
+    bbHentVarsler(false);
+    bbStartPolling();
+    bbOppdaterPushStatus();
+    bbLastVarselInnst();
+  } else {
+    inp.value = "";
+    if(err){ err.textContent = "Feil kode!"; setTimeout(()=>err.textContent="", 2000); }
+  }
+  return false;
+}
+// Eksplisitt JS-binding i stedet for kun inline onsubmit i HTML-en - mer robust
+// på tvers av standalone PWA-modus og ulike Android/Chrome-versjoner, siden
+// skjema-submit-oppførsel kan variere i installert PWA-kontekst.
+function bbBindPwGate(){
+  const btn = document.getElementById("pw-gate-btn");
+  const inp = document.getElementById("pw-gate-in");
+  if(btn) btn.addEventListener("click", (e)=>sjekkAdminPw(e));
+  if(inp) inp.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") sjekkAdminPw(e);
+  });
+}
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", bbBindPwGate);
+} else {
+  bbBindPwGate();
+}
+// Husk innlogging for resten av nettleser-økten (fram til fanen lukkes)
+if(sessionStorage.getItem("bb_admin_ok") === "1"){
+  document.addEventListener("DOMContentLoaded", ()=>{
+    document.getElementById("pw-gate").style.display = "none";
+    document.getElementById("app-main").style.display = "block";
+    hentAIInnboks();
+    bbHentVarsler(false);
+    bbStartPolling();
+    bbOppdaterPushStatus();
+    bbLastVarselInnst();
+  });
+}
+
+// ── PWA / SERVICE WORKER ──
+// Registreringen av bigboss-sw.js skjer via OneSignal.init() nedenfor
+// (serviceWorkerPath/serviceWorkerParam) - siden bigboss-sw.js er en kombinert
+// fil (OneSignal + egen cache-logikk), skal den KUN registreres én gang derfra.
+// En separat, manuell navigator.serviceWorker.register()-kall her ville gitt en
+// konkurrerende registrering på samme scope, noe som ikke er tillatt.
+
+// ── PUSH-VARSLER (OneSignal, kun til denne telefonen) ──
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.bbOneSignalInitFeilet = false;
+OneSignalDeferred.push(async function(OneSignal){
+  try{
+    await OneSignal.init({
+      appId: "b049b249-665b-41ab-8cf8-8c2256b7c541",
+      safari_web_id: "web.onesignal.auto.b049b249-665b-41ab-8cf8-8c2256b7c541",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+      serviceWorkerParam: { scope: "/bigboss/" },
+      serviceWorkerPath: "bigboss-sw.js",
+    });
+  }catch(e){
+    // Hvis init() selv feiler, blir ALLE senere OneSignalDeferred.push(...)-kall
+    // (inkludert bbAktiverPush) hengende for alltid, siden de venter i samme kø.
+    // Denne flagget lar bbAktiverPush oppdage det og vise en tydelig feilmelding
+    // i stedet for å bare henge på "Ber om tillatelse..." uten forklaring.
+    window.bbOneSignalInitFeilet = true;
+    const statusEl = document.getElementById("bb-push-status");
+    if(statusEl) statusEl.textContent = "❌ OneSignal kunne ikke starte — prøv å laste siden på nytt";
+    console.log("OneSignal.init() feilet:", e);
+  }
+});
+
+async function bbOppdaterPushStatus(){
+  const statusEl = document.getElementById("bb-push-status");
+  const btn = document.getElementById("bb-push-btn");
+  if(!statusEl || !btn) return;
+  if(!window.OneSignalDeferred){
+    statusEl.textContent = "Push-varsler ikke tilgjengelig i denne nettleseren";
+    btn.style.display = "none";
+    return;
+  }
+  statusEl.textContent = "Sjekker status...";
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      const optedIn = OneSignal.User.PushSubscription.optedIn;
+      if(optedIn){
+        let tags = {};
+        try{ tags = await OneSignal.User.getTags(); }catch(e){}
+        if(tags && tags.rolle === "bigboss"){
+          statusEl.textContent = "✅ Aktivert på denne telefonen";
+        } else {
+          statusEl.textContent = "⚠️ Aktivert, men mangler tag - trykk Aktiver på nytt";
+        }
+        btn.textContent = "Deaktiver";
+        btn.onclick = bbDeaktiverPush;
+      } else {
+        statusEl.textContent = "Ikke aktivert ennå";
+        btn.textContent = "Aktiver";
+        btn.onclick = bbAktiverPush;
+      }
+    }catch(e){
+      statusEl.textContent = "Kunne ikke sjekke status";
+    }
+  });
+}
+
+function bbAktiverPush(){
+  const statusEl = document.getElementById("bb-push-status");
+  // Sjekk eksisterende nettleser-tillatelse FØR vi ber om ny - moderne nettlesere
+  // viser aldri en ny dialog hvis brukeren allerede har blokkert varsler for
+  // dette domenet tidligere. Uten denne sjekken henger statusteksten på
+  // "Ber om tillatelse..." for alltid uten noen forklaring.
+  if(typeof Notification !== "undefined" && Notification.permission === "denied"){
+    if(statusEl) statusEl.textContent = "❌ Blokkert i nettleseren — gå til nettleser-innstillinger → Nettstedsinnstillinger → Varsler og tillat kkturne.no manuelt";
+    return;
+  }
+  if(window.bbOneSignalInitFeilet){
+    if(statusEl) statusEl.textContent = "❌ OneSignal kunne ikke starte tidligere — last siden på nytt og prøv igjen";
+    return;
+  }
+  if(statusEl) statusEl.textContent = "Ber om tillatelse...";
+  // Sikkerhetsnett: hvis ingenting har skjedd etter 5 sekunder, anta at forespørselen
+  // hang stille (skjer på enkelte nettlesere/OS-kombinasjoner) og gi beskjed i stedet
+  // for å la statusteksten henge for alltid.
+  let ferdig = false;
+  setTimeout(()=>{
+    if(!ferdig && statusEl && statusEl.textContent === "Ber om tillatelse..."){
+      statusEl.textContent = "⚠️ Fikk ikke svar fra OneSignal — last siden på nytt (kan skje første gang etter installasjon)";
+    }
+  }, 5000);
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.Notifications.requestPermission();
+      ferdig = true;
+      // requestPermission() ber kun om nettleser-tillatelse - den registrerer IKKE
+      // automatisk en aktiv push-subscription hos OneSignal. Må kalles eksplisitt,
+      // ellers kan "rolle"-taggen bli satt på en bruker uten faktiv subscription,
+      // og push vil da aldri leveres selv om alt ser riktig ut i UI.
+      if(OneSignal.Notifications.permission){
+        await OneSignal.User.PushSubscription.optIn();
+        await OneSignal.User.addTag("rolle", "bigboss");
+        if(statusEl) statusEl.textContent = "Aktiverer...";
+        // Liten pause for å la subscription faktisk registreres hos OneSignal før vi sjekker status
+        setTimeout(bbOppdaterPushStatus, 1200);
+      } else {
+        if(statusEl) statusEl.textContent = "Tillatelse ble ikke gitt — sjekk nettleser-innstillinger";
+      }
+    }catch(e){
+      ferdig = true;
+      if(statusEl) statusEl.textContent = "Kunne ikke aktivere — sjekk nettleser-innstillinger";
+    }
+  });
+}
+
+function bbDeaktiverPush(){
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.User.removeTag("rolle");
+      await OneSignal.User.PushSubscription.optOut();
+      bbOppdaterPushStatus();
+    }catch(e){}
+  });
+}
+
+// ── VARSELTYPE-INNSTILLINGER (styrer hva index.html faktisk sender push for) ──
+async function bbLastVarselInnst(){
+  try{
+    const data = await jbGet(true);
+    const innst = (data && data.bbVarselInnst) ? data.bbVarselInnst : {knausbot:true, feilpw:true};
+    const kbEl = document.getElementById("bb-innst-knausbot");
+    const fpEl = document.getElementById("bb-innst-feilpw");
+    if(kbEl) kbEl.checked = innst.knausbot !== false;
+    if(fpEl) fpEl.checked = innst.feilpw !== false;
+  }catch(e){ /* beholder default (begge på) hvis noe feiler */ }
+}
+
+async function bbLagreVarselInnst(){
+  const statusEl = document.getElementById("bb-innst-status");
+  const kbEl = document.getElementById("bb-innst-knausbot");
+  const fpEl = document.getElementById("bb-innst-feilpw");
+  if(statusEl) statusEl.textContent = "Lagrer...";
+  try{
+    const data = (await jbGet(true)) || {};
+    data.bbVarselInnst = {
+      knausbot: kbEl ? kbEl.checked : true,
+      feilpw: fpEl ? fpEl.checked : true
+    };
+    const ok = await jbSave(data);
+    if(statusEl){
+      statusEl.textContent = ok ? "✅ Lagret" : "❌ Kunne ikke lagre";
+      setTimeout(()=>{ if(statusEl) statusEl.textContent=""; }, 2000);
+    }
+  }catch(e){
+    if(statusEl) statusEl.textContent = "❌ Kunne ikke lagre";
+  }
+}
+
+// ── KOMITÉ-VARSEL-LOGG (hvem sendte hva, når, via hvilke kanaler) ──
+async function bbHentKomiteLogg(){
+  const wrap = document.getElementById("bb-komite-logg-wrap");
+  const ico = document.getElementById("bb-logg-refresh-ico");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const logg = (data && data.komiteVarselLogg) ? data.komiteVarselLogg.slice().reverse() : [];
+    if(!logg.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen komité-varsler sendt ennå</div>';
+    } else {
+      wrap.innerHTML = logg.map(v=>{
+        const kanalTekst = (v.kanaler && v.kanaler.length)
+          ? v.kanaler.map(k=> k==="app" ? "📱 app" : "🔔 push").join(" · ")
+          : "(ingen kanal registrert)";
+        return `<div class="card" style="margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <span style="font-size:12.5px;font-weight:800">${escHTML(v.navn||"Ukjent")}</span>
+            <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(v.ts)}</span>
+          </div>
+          <div style="font-size:12px;margin-top:4px;word-break:break-word">${escHTML(v.melding||"")}</div>
+          <div style="font-size:10.5px;color:var(--gold);margin-top:4px">${kanalTekst}</div>
+        </div>`;
+      }).join("");
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+// ── TEMA (mørk/lys) ──
+function statOppdaterTemaIkon(){
+  const btn = document.getElementById("theme-btn");
+  if(!btn) return;
+  const erLys = document.body.classList.contains("lys");
+  btn.textContent = erLys ? "🌙" : "☀️";
+}
+function byttTema(){
+  const lys = document.body.classList.toggle("lys");
+  localStorage.setItem("bb_tema", lys ? "lys" : "mork");
+  statOppdaterTemaIkon();
+}
+if(localStorage.getItem("bb_tema") === "lys"){
+  document.body.classList.add("lys");
+}
+document.addEventListener("DOMContentLoaded", statOppdaterTemaIkon);
+
+// ── BRUKSSTATISTIKK (DEV MODE) — leser samme data-struktur som index.html skriver til ──
+async function statHentServerData(){
+  const data = await jbGet(true);
+  return (data && data.stats) ? data.stats : {totalAapninger:0, faner:{}, toner:0, egg:{}, personer:{}, feilPw:[], zebraSist:null, sistOppdatert:""};
+}
+
+// ── BRUKSSTATISTIKK: OVERSIKT + PER-PERSON-NAVIGASJON ──
+let statCache = null;
+let statAktivFane = "oversikt";
+let statPersonIdx = 0;
+
+function statByttFane(fane){
+  statAktivFane = fane;
+  document.getElementById("stats-tab-oversikt").classList.toggle("active", fane==="oversikt");
+  document.getElementById("stats-tab-person").classList.toggle("active", fane==="person");
+  document.getElementById("dev-stats-wrap").style.display = fane==="oversikt" ? "block" : "none";
+  document.getElementById("dev-person-wrap").style.display = fane==="person" ? "block" : "none";
+  if(fane==="person" && statCache) statVisPerson(statPersonIdx);
+}
+
+function statVisDevPanel(){
+  const btn = document.getElementById("dev-stats-btn");
+  const ico = document.getElementById("dev-stats-btn-ico");
+  const txt = document.getElementById("dev-stats-btn-txt");
+  if(btn) btn.classList.add("spinning");
+  if(txt) txt.textContent = "Henter...";
+  statHentServerData().then(stats=>{
+    if(btn) btn.classList.remove("spinning");
+    if(txt){
+      txt.textContent = "Oppdatert! ✓";
+      setTimeout(()=>{ if(txt) txt.textContent = "Oppdater statistikk"; }, 1800);
+    }
+    statCache = stats;
+    statPersonIdx = 0;
+    statRenderOversikt(stats);
+    if(statAktivFane==="person") statVisPerson(0);
+  });
+}
+
+function statRenderOversikt(stats){
+  const wrap = document.getElementById("dev-stats-wrap");
+  if(!wrap) return;
+  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const faneListe = Object.entries(stats.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+  const eggListe = Object.entries(stats.egg||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${k}</span><span class="v">${v}</span></div>`).join("");
+  const sist = statFormatDato(stats.sistOppdatert);
+
+  const feilPwListe = (stats.feilPw||[]).slice().reverse().slice(0,20).map(f=>`
+    <div class="list-row">
+      <span>${escHTML(f.navn)} <span style="color:var(--muted)">@ ${escHTML(f.sted)}</span></span>
+      <span style="font-weight:700;color:var(--red)">"${escHTML(f.forsokt)}"</span>
+    </div>`).join("");
+
+  const zebraHtml = stats.zebraSist
+    ? `<div style="font-size:12.5px">${escHTML(stats.zebraSist.navn)} <span style="color:var(--muted)">— ${statFormatDato(stats.zebraSist.ts)}</span></div>`
+    : `<div class="empty-msg">Ingen innsendinger ennå</div>`;
+
+  const antallPersoner = Object.keys(stats.personer||{}).length;
+
+  wrap.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${stats.totalAapninger||0}</div>
+        <div class="stat-lbl">App-åpninger</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${stats.toner||0}</div>
+        <div class="stat-lbl">Emoji-toner spilt</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${antallPersoner}</div>
+        <div class="stat-lbl">Personer registrert</div>
+      </div>
+    </div>
+    <div class="sec-lbl">📊 Fane-besøk (totalt)</div>
+    <div class="card">${faneListe || '<div class="empty-msg">Ingen data ennå</div>'}</div>
+    <div class="sec-lbl">🦓 Zebraen sier — sist innsendt</div>
+    <div class="card">${zebraHtml}</div>
+    <div class="sec-lbl">🔒 Feilede passordforsøk (siste 20)</div>
+    <div class="card">${feilPwListe || '<div class="empty-msg">Ingen feilforsøk registrert</div>'}</div>
+    <div class="sec-lbl">🥚 Easter eggs funnet</div>
+    <div class="card">${eggListe || '<div class="empty-msg">Ingen data ennå</div>'}</div>
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-top:14px">Sist oppdatert: ${sist}</div>
+  `;
+}
+
+function statVisPerson(idx){
+  const wrap = document.getElementById("dev-person-wrap");
+  if(!wrap || !statCache) return;
+  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const personListe = Object.entries(statCache.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
+
+  if(!personListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen personer registrert ennå</div>';
+    return;
+  }
+  if(idx < 0) idx = 0;
+  if(idx >= personListe.length) idx = personListe.length - 1;
+  statPersonIdx = idx;
+
+  const [navn, p] = personListe[idx];
+  const faneRader = Object.entries(p.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+
+  // Egne feilede passord og zebra-innsendinger for denne personen
+  const egneFeil = (statCache.feilPw||[]).filter(f=>f.navn===navn).slice().reverse().slice(0,10);
+  const egneFeilHtml = egneFeil.map(f=>`
+    <div class="list-row">
+      <span style="color:var(--muted)">@ ${escHTML(f.sted)} — ${statFormatDato(f.ts)}</span>
+      <span style="font-weight:700;color:var(--red)">"${escHTML(f.forsokt)}"</span>
+    </div>`).join("");
+
+  wrap.innerHTML = `
+    <div class="person-nav">
+      <button class="person-nav-btn" onclick="statVisPerson(${idx-1})" ${idx<=0?"disabled":""}>&#8592;</button>
+      <div class="person-nav-lbl">${idx+1} av ${personListe.length}</div>
+      <button class="person-nav-btn" onclick="statVisPerson(${idx+1})" ${idx>=personListe.length-1?"disabled":""}>&#8594;</button>
+    </div>
+    <div class="person-detail-name">${escHTML(navn)}</div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${p.aapninger||0}</div>
+        <div class="stat-lbl">Ganger åpnet</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="font-size:13px">${statFormatDato(p.sistAktiv)}</div>
+        <div class="stat-lbl">Sist aktiv</div>
+      </div>
+    </div>
+    <div class="sec-lbl">📊 Fane-besøk</div>
+    <div class="card">${faneRader || '<div class="empty-msg">Ingen fane-besøk registrert</div>'}</div>
+    <div class="sec-lbl">🔒 Feilede passordforsøk</div>
+    <div class="card">${egneFeilHtml || '<div class="empty-msg">Ingen feilforsøk registrert</div>'}</div>
+  `;
+}
+
+// ── KNAUSBOT-INNBOKS ──
+let bossAktivSamtale = null;
+let bossLestTs = JSON.parse(localStorage.getItem("bb_boss_lest") || "{}");
+
+async function hentAIInnboks(){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  wrap.innerHTML = `<div class="empty-msg">Laster...</div>`;
+  const data = await jbGet();
+  if(!data){ wrap.innerHTML = `<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>`; return; }
+  const chatData = data.chat || {meldinger:[], svar:[]};
+  if(!chatData.meldinger || !chatData.meldinger.length){ wrap.innerHTML = `<div class="empty-msg">Ingen meldinger ennå</div>`; return; }
+
+  const alleMeldinger = (chatData.meldinger || []).filter(m => m.type === "user");
+  const samtaler = {};
+  alleMeldinger.forEach(m => {
+    const navn = m.fra || "Anonym";
+    if(!samtaler[navn]) samtaler[navn] = {meldinger:[], sistTs:0};
+    samtaler[navn].meldinger.push(m);
+    if(m.ts > samtaler[navn].sistTs) samtaler[navn].sistTs = m.ts;
+  });
+  (chatData.svar || []).forEach(s => {
+    if(samtaler[s.til]) samtaler[s.til].meldinger.push(s);
+  });
+
+  if(!Object.keys(samtaler).length){
+    wrap.innerHTML = `<div class="empty-msg">Ingen meldinger ennå</div>`; return;
+  }
+
+  const sorted = Object.keys(samtaler).sort((a,b) => {
+    const aNew = samtaler[a].sistTs > (bossLestTs[a]||0);
+    const bNew = samtaler[b].sistTs > (bossLestTs[b]||0);
+    if(aNew && !bNew) return -1;
+    if(!aNew && bNew) return 1;
+    return a.localeCompare(b);
+  });
+
+  if(bossAktivSamtale && samtaler[bossAktivSamtale]){
+    visBossSamtale(bossAktivSamtale, samtaler[bossAktivSamtale].meldinger, chatData);
+  } else {
+    visBossListe(sorted, samtaler, chatData);
+  }
+}
+
+function visBossListe(sorted, samtaler, chatData){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="boss-conv-list">
+      ${sorted.map(navn => {
+        const s = samtaler[navn];
+        const erNy = s.sistTs > (bossLestTs[navn]||0);
+        const sisteMsg = s.meldinger.filter(m=>m.type==="user").slice(-1)[0];
+        return `<div class="boss-conv-item${erNy?' new':''}" onclick="aapneBossSamtale('${escHTML(navn)}')">
+          <div style="flex:1;min-width:0">
+            <div class="boss-conv-name">${escHTML(navn)}</div>
+            <div class="boss-conv-preview">${sisteMsg?escHTML(sisteMsg.txt.substring(0,50)):'...'}</div>
+          </div>
+          ${erNy?`<span class="boss-conv-badge">NY</span>`:''}
+          <div class="boss-conv-time">${sisteMsg?sisteMsg.tid||'':''}</div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  wrap._chatData = chatData;
+  wrap._samtaler = samtaler;
+}
+
+function aapneBossSamtale(navn){
+  bossAktivSamtale = navn;
+  bossLestTs[navn] = Date.now();
+  localStorage.setItem("bb_boss_lest", JSON.stringify(bossLestTs));
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(wrap && wrap._samtaler && wrap._samtaler[navn]){
+    visBossSamtale(navn, wrap._samtaler[navn].meldinger, wrap._chatData);
+  } else {
+    hentAIInnboks();
+  }
+}
+
+function visBossSamtale(navn, meldinger, chatData){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  const sorted = [...meldinger].sort((a,b)=>(a.ts||0)-(b.ts||0));
+  const replyId = "boss-reply-"+Date.now();
+  wrap.innerHTML = `
+    <div class="boss-chat-wrap">
+      <div class="boss-chat-hdr">
+        <button class="boss-chat-back" onclick="bossAktivSamtale=null;hentAIInnboks()">&#8592;</button>
+        <div class="boss-chat-navn">${escHTML(navn)}</div>
+        <button onclick="hentAIInnboks()" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer">&#128260;</button>
+      </div>
+      <div class="boss-msg-list" id="boss-msg-list">
+        ${sorted.map(m => m.type==="user"
+          ? `<div class="boss-msg-user"><div class="boss-msg-fra">${escHTML(m.fra||navn)}</div><div class="boss-msg-txt">${escHTML(m.txt)}</div><div class="boss-msg-time">${m.tid||''}</div></div>`
+          : `<div class="boss-msg-bot"><div class="boss-msg-fra">KnausBot 3000</div><div class="boss-msg-txt">${escHTML(m.txt)}</div><div class="boss-msg-time">${m.tid||''}</div></div>`
+        ).join("")}
+      </div>
+      <div style="display:flex;gap:6px">
+        <input id="${replyId}" class="ai-reply-in" type="text" placeholder="Svar som KnausBot..." onkeydown="if(event.key==='Enter')sendBossSvar('${escHTML(navn)}','${replyId}')">
+        <button class="ai-reply-btn" onclick="sendBossSvar('${escHTML(navn)}','${replyId}')">Send</button>
+      </div>
+      <div id="boss-svar-st" style="font-size:11px;color:var(--muted);margin-top:6px;min-height:14px"></div>
+    </div>`;
+  setTimeout(()=>{ const l=document.getElementById("boss-msg-list"); if(l)l.scrollTop=l.scrollHeight; }, 50);
+}
+
+async function sendBossSvar(til, inputId){
+  const inp = document.getElementById(inputId);
+  const st  = document.getElementById("boss-svar-st");
+  if(!inp || !inp.value.trim()) return;
+  const svarTxt = inp.value.trim();
+  if(st) st.textContent = "Sender...";
+  const data = (await jbGet()) || {varsel:{melding:"",aktiv:false}, chat:{meldinger:[],svar:[]}};
+  if(!data.chat) data.chat = {meldinger:[], svar:[]};
+  if(!data.chat.svar) data.chat.svar = [];
+  data.chat.svar.push({
+    id: "svar-" + Date.now(),
+    til, txt: svarTxt,
+    tid: tidsstempel(),
+    ts: Date.now(),
+    type: "bot"
+  });
+  if(data.chat.svar.length > 200) data.chat.svar = data.chat.svar.slice(-200);
+  const ok = await jbSave(data);
+  if(ok){
+    inp.value = "";
+    if(st) st.textContent = "✅ Sendt!";
+    setTimeout(()=>{ if(st) st.textContent=""; }, 2000);
+    hentAIInnboks();
+  } else {
+    if(st) st.textContent = "❌ Feil";
+  }
+}
+</script>
+</body>
+</html>
