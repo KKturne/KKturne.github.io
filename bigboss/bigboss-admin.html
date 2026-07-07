@@ -305,6 +305,8 @@
     <button id="main-tab-stats" class="main-tab-btn" onclick="bbByttHovedfane('stats')">📈 Statistikk</button>
     <button id="main-tab-knausbot" class="main-tab-btn" onclick="bbByttHovedfane('knausbot')">🤖 KnausBot</button>
     <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 Logg</button>
+    <button id="main-tab-hendelser" class="main-tab-btn" onclick="bbByttHovedfane('hendelser')">📜 Full logg</button>
+    <button id="main-tab-fanebytte" class="main-tab-btn" onclick="bbByttHovedfane('fanebytte')">📊 Fanebytte</button>
   </div>
 
   <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
@@ -354,6 +356,7 @@
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="stats-tab-oversikt" class="stat-tab-btn active" onclick="statByttFane('oversikt')" style="flex:1">📊 Oversikt</button>
       <button id="stats-tab-person" class="stat-tab-btn" onclick="statByttFane('person')" style="flex:1">👤 Per person</button>
+      <button id="stats-tab-dager" class="stat-tab-btn" onclick="statByttFane('dager')" style="flex:1">📅 Dag for dag</button>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="dev-stats-btn" class="refresh-btn" onclick="statVisDevPanel()" style="flex:1;justify-content:center">
@@ -365,6 +368,9 @@
       <div class="empty-msg">Trykk for å hente statistikk</div>
     </div>
     <div id="dev-person-wrap" style="display:none">
+      <div class="empty-msg">Trykk «Oppdater statistikk» først</div>
+    </div>
+    <div id="dev-dager-wrap" style="display:none">
       <div class="empty-msg">Trykk «Oppdater statistikk» først</div>
     </div>
   </div>
@@ -390,6 +396,38 @@
       </button>
     </div>
     <div id="bb-komite-logg-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
+    </div>
+  </div>
+
+  <div id="main-sec-hendelser" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Kronologisk logg over alle viktige hendelser: app-åpninger, easter eggs, feilede passord, KnausBot-meldinger og Zebra-innsendinger. Lagres i eget bin, ingen automatisk sletting.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-hendelser-refresh-btn" class="refresh-btn" onclick="bbHentHendelseslogg()" style="flex:1;justify-content:center">
+        <span id="bb-hendelser-refresh-ico" class="spin">&#128260;</span> Hent logg
+      </button>
+      <button class="refresh-btn" onclick="bbEksporterCSV()" style="flex-shrink:0">⬇️ Eksporter CSV</button>
+    </div>
+    <div id="bb-hendelser-status" style="font-size:10.5px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
+    <div id="bb-hendelser-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
+    </div>
+  </div>
+
+  <div id="main-sec-fanebytte" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Kronologisk logg over hvert fane-bytte i appen (Hjem, Program, Kart osv.) — hvem, når og hvilken fane. Eget bin siden dette er den mest høyfrekvente hendelsestypen.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-fanebytte-refresh-btn" class="refresh-btn" onclick="bbHentFaneloggData()" style="flex:1;justify-content:center">
+        <span id="bb-fanebytte-refresh-ico" class="spin">&#128260;</span> Hent logg
+      </button>
+      <button class="refresh-btn" onclick="bbEksporterFaneCSV()" style="flex-shrink:0">⬇️ Eksporter CSV</button>
+    </div>
+    <div id="bb-fanebytte-status" style="font-size:10.5px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
+    <div id="bb-fanebytte-wrap" style="margin-bottom:24px">
       <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
     </div>
   </div>
@@ -550,7 +588,7 @@ function bbVisVarslerPanel(){
 }
 
 function bbByttHovedfane(fane){
-  const faner = ["varsler", "stats", "knausbot", "logg"];
+  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte"];
   faner.forEach(f=>{
     const btn = document.getElementById("main-tab-"+f);
     const sec = document.getElementById("main-sec-"+f);
@@ -818,6 +856,172 @@ async function bbHentKomiteLogg(){
   if(ico) ico.parentElement.classList.remove("spinning");
 }
 
+// ── FULL HENDELSESLOGG (eget bin, kronologisk, ingen automatisk sletting) ──
+const JBLOGG_BIN_ID = "6a4cf57bf5f4af5e296c2655";
+const JBLOGG_URL     = `https://api.jsonbin.io/v3/b/${JBLOGG_BIN_ID}`;
+let _bbHendelserCache = [];
+
+async function jbLoggGet(){
+  try{
+    const res = await fetch(`${JBLOGG_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data.record || null;
+  }catch(e){ return null; }
+}
+
+const HENDELSE_IKON = {apning:"📱", egg:"🥚", feilpw:"🔒", knausbot:"🤖", zebra:"🦓"};
+const HENDELSE_NAVN = {apning:"App åpnet", egg:"Easter egg", feilpw:"Feilet passord", knausbot:"KnausBot-melding", zebra:"Zebraen sier"};
+
+async function bbHentHendelseslogg(){
+  const wrap = document.getElementById("bb-hendelser-wrap");
+  const ico = document.getElementById("bb-hendelser-refresh-ico");
+  const statusEl = document.getElementById("bb-hendelser-status");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbLoggGet();
+    const logg = (data && data.logg) ? data.logg.slice().reverse() : []; // nyeste først
+    _bbHendelserCache = (data && data.logg) ? data.logg : [];
+    if(statusEl) statusEl.textContent = `${_bbHendelserCache.length} hendelser registrert totalt`;
+    if(!logg.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen hendelser registrert ennå</div>';
+    } else {
+      // Vis kun de siste 200 i selve listen for ytelse - full eksport via CSV uansett
+      wrap.innerHTML = logg.slice(0,200).map(h=>{
+        const ico = HENDELSE_IKON[h.type] || "•";
+        const navn = HENDELSE_NAVN[h.type] || h.type;
+        return `<div class="list-row">
+          <span>${ico} ${escHTML(h.navn||"Ukjent")} <span style="color:var(--muted)">— ${escHTML(navn)}</span></span>
+          <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(h.ts)}</span>
+        </div>`;
+      }).join("");
+      if(logg.length > 200){
+        wrap.innerHTML += `<div class="empty-msg">... og ${logg.length-200} eldre hendelser (kun synlig i CSV-eksport)</div>`;
+      }
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbEksporterCSV(){
+  const statusEl = document.getElementById("bb-hendelser-status");
+  if(!_bbHendelserCache.length){
+    if(statusEl) statusEl.textContent = "Ingen data å eksportere — trykk «Hent logg» først";
+    return;
+  }
+  // Sorter kronologisk (eldste først) for regneark-vennlig rekkefølge
+  const sortert = _bbHendelserCache.slice().sort((a,b)=> (a.ts||"").localeCompare(b.ts||""));
+  const rader = [["Dato","Klokkeslett","Type","Navn","Detalj"]];
+  sortert.forEach(h=>{
+    const d = h.ts ? new Date(h.ts) : null;
+    const dato = d ? d.toLocaleDateString("nb-NO") : "";
+    const klokke = d ? d.toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "";
+    const type = HENDELSE_NAVN[h.type] || h.type || "";
+    rader.push([dato, klokke, type, h.navn||"", h.detalj||""]);
+  });
+  // CSV-escaping: pakk inn felt med komma/anførselstegn/linjeskift i anførselstegn
+  const csvInnhold = rader.map(rad =>
+    rad.map(felt => {
+      const s = String(felt).replace(/"/g,'""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    }).join(",")
+  ).join("\r\n");
+  const bom = "\uFEFF"; // sikrer riktig visning av æøå i Excel
+  const blob = new Blob([bom + csvInnhold], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `kkturne-hendelseslogg-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if(statusEl) statusEl.textContent = `✅ Eksportert ${sortert.length} hendelser`;
+}
+
+// ── FANE-BYTTE-LOGG (eget bin, høyfrekvent) ──
+const JBFANE_BIN_ID = "6a4cf89bda38895dfe3aa76c";
+const JBFANE_URL     = `https://api.jsonbin.io/v3/b/${JBFANE_BIN_ID}`;
+let _bbFaneloggCache = [];
+const FANE_NAVN = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+
+async function bbHentFaneloggData(){
+  const wrap = document.getElementById("bb-fanebytte-wrap");
+  const ico = document.getElementById("bb-fanebytte-refresh-ico");
+  const statusEl = document.getElementById("bb-fanebytte-status");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const res = await fetch(`${JBFANE_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    const json = res.ok ? await res.json() : null;
+    const data = json ? json.record : null;
+    const logg = (data && data.faneLogg) ? data.faneLogg.slice().reverse() : []; // nyeste først
+    _bbFaneloggCache = (data && data.faneLogg) ? data.faneLogg : [];
+    if(statusEl) statusEl.textContent = `${_bbFaneloggCache.length} fane-bytter registrert totalt`;
+    if(!logg.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen fane-bytter registrert ennå</div>';
+    } else {
+      // Vis kun de siste 200 for ytelse - full eksport via CSV uansett
+      wrap.innerHTML = logg.slice(0,200).map(f=>{
+        const faneVisning = FANE_NAVN[f.fane] || f.fane;
+        return `<div class="list-row">
+          <span>${escHTML(f.navn||"Ukjent")} <span style="color:var(--muted)">→ ${escHTML(faneVisning)}</span></span>
+          <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(f.ts)}</span>
+        </div>`;
+      }).join("");
+      if(logg.length > 200){
+        wrap.innerHTML += `<div class="empty-msg">... og ${logg.length-200} eldre fane-bytter (kun synlig i CSV-eksport)</div>`;
+      }
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbEksporterFaneCSV(){
+  const statusEl = document.getElementById("bb-fanebytte-status");
+  if(!_bbFaneloggCache.length){
+    if(statusEl) statusEl.textContent = "Ingen data å eksportere — trykk «Hent logg» først";
+    return;
+  }
+  const sortert = _bbFaneloggCache.slice().sort((a,b)=> (a.ts||"").localeCompare(b.ts||""));
+  const rader = [["Dato","Klokkeslett","Navn","Fane"]];
+  sortert.forEach(f=>{
+    const d = f.ts ? new Date(f.ts) : null;
+    const dato = d ? d.toLocaleDateString("nb-NO") : "";
+    const klokke = d ? d.toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "";
+    const faneVisning = FANE_NAVN[f.fane] || f.fane || "";
+    rader.push([dato, klokke, f.navn||"", faneVisning]);
+  });
+  const csvInnhold = rader.map(rad =>
+    rad.map(felt => {
+      const s = String(felt).replace(/"/g,'""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    }).join(",")
+  ).join("\r\n");
+  const bom = "\uFEFF";
+  const blob = new Blob([bom + csvInnhold], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `kkturne-fanebytte-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if(statusEl) statusEl.textContent = `✅ Eksportert ${sortert.length} fane-bytter`;
+}
+
 // ── TEMA (mørk/lys) ──
 function statOppdaterTemaIkon(){
   const btn = document.getElementById("theme-btn");
@@ -838,7 +1042,7 @@ document.addEventListener("DOMContentLoaded", statOppdaterTemaIkon);
 // ── BRUKSSTATISTIKK (DEV MODE) — leser samme data-struktur som index.html skriver til ──
 async function statHentServerData(){
   const data = await jbGet(true);
-  return (data && data.stats) ? data.stats : {totalAapninger:0, faner:{}, toner:0, egg:{}, personer:{}, feilPw:[], zebraSist:null, sistOppdatert:""};
+  return (data && data.stats) ? data.stats : {totalAapninger:0, faner:{}, toner:0, egg:{}, personer:{}, feilPw:[], zebraSist:null, dager:{}, sistOppdatert:""};
 }
 
 // ── BRUKSSTATISTIKK: OVERSIKT + PER-PERSON-NAVIGASJON ──
@@ -863,9 +1067,12 @@ function statByttFane(fane){
   statAktivFane = fane;
   document.getElementById("stats-tab-oversikt").classList.toggle("active", fane==="oversikt");
   document.getElementById("stats-tab-person").classList.toggle("active", fane==="person");
+  document.getElementById("stats-tab-dager").classList.toggle("active", fane==="dager");
   document.getElementById("dev-stats-wrap").style.display = fane==="oversikt" ? "block" : "none";
   document.getElementById("dev-person-wrap").style.display = fane==="person" ? "block" : "none";
+  document.getElementById("dev-dager-wrap").style.display = fane==="dager" ? "block" : "none";
   if(fane==="person" && statCache) statVisPersonListe();
+  if(fane==="dager" && statCache) statVisDagerListe();
 }
 
 function statVisDevPanel(){
@@ -884,6 +1091,7 @@ function statVisDevPanel(){
     statPersonIdx = 0;
     statRenderOversikt(stats);
     if(statAktivFane==="person") statVisPersonListe();
+    if(statAktivFane==="dager") statVisDagerListe();
   });
 }
 
@@ -971,6 +1179,81 @@ function statVisPersonListe(){
   }).join("");
 
   wrap.innerHTML = `<div class="sec-lbl" style="margin-top:0">👤 Alle personer (${personListe.length})</div>${rader}`;
+}
+
+// ── DAG-FOR-DAG-OVERSIKT ──
+function statVisDagerListe(){
+  const wrap = document.getElementById("dev-dager-wrap");
+  if(!wrap || !statCache) return;
+  const dager = Object.entries(statCache.dager||{}).sort((a,b)=> b[0].localeCompare(a[0])); // nyeste dato først
+
+  if(!dager.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen dagsdata registrert ennå</div>';
+    return;
+  }
+
+  const rader = dager.map(([dato,d])=>{
+    const antallPersoner = Object.keys(d.personer||{}).length;
+    const datoLabel = new Date(dato+"T00:00:00").toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
+    return `<div class="person-card" style="cursor:pointer" onclick="statVisDag('${dato}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="person-name">${datoLabel}</span>
+        <span class="person-count">${d.aapninger||0}× åpnet</span>
+      </div>
+      <div class="person-sub">👤 ${antallPersoner} aktive personer · 🎵 ${d.toner||0} toner</div>
+    </div>`;
+  }).join("");
+
+  wrap.innerHTML = `<div class="sec-lbl" style="margin-top:0">📅 Alle dager (${dager.length})</div>${rader}`;
+}
+
+function statVisDag(dato){
+  const wrap = document.getElementById("dev-dager-wrap");
+  if(!wrap || !statCache || !statCache.dager || !statCache.dager[dato]) return;
+  const d = statCache.dager[dato];
+  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const datoLabel = new Date(dato+"T00:00:00").toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
+
+  const faneRader = Object.entries(d.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+
+  const eggRader = Object.entries(d.egg||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${k}</span><span class="v">${v}</span></div>`).join("");
+
+  // Personer aktive denne dagen, sortert etter aktivitet
+  const personEntries = Object.entries(d.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
+  const personRader = personEntries.map(([navn,p])=>{
+    const eggAntall = Object.keys(p.egg||{}).length;
+    return `<div class="list-row">
+      <span>${escHTML(navn)}</span>
+      <span class="v">${p.aapninger||0}× · 🥚${eggAntall}</span>
+    </div>`;
+  }).join("");
+
+  wrap.innerHTML = `
+    <button class="refresh-btn" onclick="statVisDagerListe()" style="margin-bottom:12px">&#8592; Tilbake til liste</button>
+    <div class="person-detail-name" style="font-size:16px">${datoLabel}</div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${d.aapninger||0}</div>
+        <div class="stat-lbl">App-åpninger</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${d.toner||0}</div>
+        <div class="stat-lbl">Emoji-toner</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${personEntries.length}</div>
+        <div class="stat-lbl">Aktive personer</div>
+      </div>
+    </div>
+    <div class="sec-lbl">👤 Personer aktive denne dagen</div>
+    <div class="card">${personRader || '<div class="empty-msg">Ingen personer registrert</div>'}</div>
+    <div class="sec-lbl">📊 Fane-besøk denne dagen</div>
+    <div class="card">${faneRader || '<div class="empty-msg">Ingen fane-besøk registrert</div>'}</div>
+    <div class="sec-lbl">🥚 Easter eggs funnet denne dagen</div>
+    <div class="card">${eggRader || '<div class="empty-msg">Ingen egg funnet</div>'}</div>
+  `;
 }
 
 function statVisPerson(idx){
