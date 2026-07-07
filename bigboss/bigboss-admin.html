@@ -280,10 +280,17 @@
   <div class="ico">👑</div>
   <div class="lbl">BigBoss Admin</div>
   <form id="pw-gate-form">
-    <input id="pw-gate-in" type="text" placeholder="KODE" autocapitalize="characters" autocomplete="off" maxlength="12">
+    <input id="pw-gate-in" type="password" placeholder="KODE" autocapitalize="characters" autocomplete="off" maxlength="12">
     <button id="pw-gate-btn" type="button">&#8594;</button>
   </form>
   <div id="pw-gate-err"></div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px">
+    <label class="bb-toggle">
+      <input type="checkbox" id="bb-husk-pw-toggle">
+      <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+    </label>
+    <span style="font-size:12px;color:var(--muted)">Husk kode på denne telefonen</span>
+  </div>
 </div>
 
 <div id="app-main">
@@ -340,6 +347,13 @@
         </label>
       </div>
       <div id="bb-innst-status" style="font-size:10.5px;color:var(--muted);margin-top:8px;min-height:14px"></div>
+    </div>
+    <div class="card" id="bb-nullstill-card" style="margin-bottom:14px;border-color:var(--red)">
+      <div style="font-size:12px;font-weight:800;margin-bottom:6px;color:var(--red)">⚠️ Farlig sone — kun for testing</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+        Nullstiller all logget statistikk permanent (statistikk, hendelseslogg, fanebytte-logg). Krever eget passord for bekreftelse.
+      </div>
+      <button class="refresh-btn" onclick="bbApneNullstillDialog()" style="width:100%;justify-content:center;border-color:var(--red);color:var(--red)">🗑️ Nullstill alle logger</button>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
@@ -604,20 +618,31 @@ function bbStartPolling(){
 
 // ── PASSORDLÅS ──
 const BOSS_PW = "GRIBB67";
+function bbFullforInnlogging(){
+  document.getElementById("pw-gate").style.display = "none";
+  document.getElementById("app-main").style.display = "block";
+  hentAIInnboks();
+  bbHentVarsler(false);
+  bbStartPolling();
+  bbOppdaterPushStatus();
+  bbLastVarselInnst();
+}
+
 function sjekkAdminPw(e){
   if(e) e.preventDefault();
   const inp = document.getElementById("pw-gate-in");
   const err = document.getElementById("pw-gate-err");
+  const huskToggle = document.getElementById("bb-husk-pw-toggle");
   if(!inp) return false;
   if(inp.value.trim().toUpperCase() === BOSS_PW){
     sessionStorage.setItem("bb_admin_ok", "1");
-    document.getElementById("pw-gate").style.display = "none";
-    document.getElementById("app-main").style.display = "block";
-    hentAIInnboks();
-    bbHentVarsler(false);
-    bbStartPolling();
-    bbOppdaterPushStatus();
-    bbLastVarselInnst();
+    // Husk-bryter: lagre permanent på denne telefonen hvis skrudd på
+    if(huskToggle && huskToggle.checked){
+      localStorage.setItem("bb_husk_pw", "1");
+    } else {
+      localStorage.removeItem("bb_husk_pw");
+    }
+    bbFullforInnlogging();
   } else {
     inp.value = "";
     if(err){ err.textContent = "Feil kode!"; setTimeout(()=>err.textContent="", 2000); }
@@ -630,27 +655,25 @@ function sjekkAdminPw(e){
 function bbBindPwGate(){
   const btn = document.getElementById("pw-gate-btn");
   const inp = document.getElementById("pw-gate-in");
+  const huskToggle = document.getElementById("bb-husk-pw-toggle");
   if(btn) btn.addEventListener("click", (e)=>sjekkAdminPw(e));
   if(inp) inp.addEventListener("keydown", (e)=>{
     if(e.key === "Enter") sjekkAdminPw(e);
   });
+  // Sett bryteren til på hvis den allerede er huket av fra tidligere
+  if(huskToggle && localStorage.getItem("bb_husk_pw") === "1"){
+    huskToggle.checked = true;
+  }
 }
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", bbBindPwGate);
 } else {
   bbBindPwGate();
 }
-// Husk innlogging for resten av nettleser-økten (fram til fanen lukkes)
-if(sessionStorage.getItem("bb_admin_ok") === "1"){
-  document.addEventListener("DOMContentLoaded", ()=>{
-    document.getElementById("pw-gate").style.display = "none";
-    document.getElementById("app-main").style.display = "block";
-    hentAIInnboks();
-    bbHentVarsler(false);
-    bbStartPolling();
-    bbOppdaterPushStatus();
-    bbLastVarselInnst();
-  });
+// Husk innlogging: enten for resten av nettleser-økten (sessionStorage), eller
+// permanent på denne telefonen hvis husk-bryteren er skrudd på (localStorage).
+if(sessionStorage.getItem("bb_admin_ok") === "1" || localStorage.getItem("bb_husk_pw") === "1"){
+  document.addEventListener("DOMContentLoaded", bbFullforInnlogging);
 }
 
 // ── PWA / SERVICE WORKER ──
@@ -822,6 +845,60 @@ async function bbLagreVarselInnst(){
   }catch(e){
     if(statusEl) statusEl.textContent = "❌ Kunne ikke lagre";
   }
+}
+
+// ── NULLSTILL LOGGER (farlig sone, kun for testing før lansering) ──
+// Eget passord adskilt fra BOSS_PW, som en ekstra sikkerhetsbarriere mot at
+// noen trykker feil ved uhell midt i turnéuken.
+const NULLSTILL_PW = "SLETT2026";
+
+function bbApneNullstillDialog(){
+  const pw = prompt('Skriv "' + NULLSTILL_PW + '" for å bekrefte nullstilling av ALLE logger. Dette kan IKKE angres!');
+  if(pw === null) return; // avbrutt
+  if(pw.trim().toUpperCase() !== NULLSTILL_PW){
+    alert("Feil kode. Nullstilling avbrutt.");
+    return;
+  }
+  if(!confirm("Helt sikker? Dette sletter all statistikk, hendelseslogg og fanebytte-logg permanent.")) return;
+  bbNullstillAlleLogger();
+}
+
+async function bbNullstillAlleLogger(){
+  const resultater = [];
+  // 1) Hoved-bin: nullstill KUN stats-feltet, la varsel/chat/race_tracker/os_key/gjett/breakout stå urørt
+  try{
+    const data = (await jbGet(true)) || {};
+    data.stats = {totalAapninger:0, faner:{}, toner:0, egg:{}, personer:{}, feilPw:[], zebraSist:null, dager:{}, sistOppdatert:new Date().toISOString()};
+    const ok1 = await jbSave(data);
+    resultater.push(ok1 ? "✅ Statistikk nullstilt" : "❌ Statistikk feilet");
+  }catch(e){ resultater.push("❌ Statistikk feilet"); }
+
+  // 2) Hendelseslogg-bin: nullstill hele innholdet (dedikert bin, ingenting annet ligger her)
+  try{
+    const res = await fetch(JBLOGG_URL, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
+      body: JSON.stringify({logg:[]})
+    });
+    resultater.push(res.ok ? "✅ Hendelseslogg nullstilt" : "❌ Hendelseslogg feilet");
+  }catch(e){ resultater.push("❌ Hendelseslogg feilet"); }
+
+  // 3) Fanebytte-logg-bin: nullstill hele innholdet
+  try{
+    const res = await fetch(JBFANE_URL, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
+      body: JSON.stringify({faneLogg:[]})
+    });
+    resultater.push(res.ok ? "✅ Fanebytte-logg nullstilt" : "❌ Fanebytte-logg feilet");
+  }catch(e){ resultater.push("❌ Fanebytte-logg feilet"); }
+
+  alert(resultater.join("\n"));
+  // Oppdater visningen slik at nullstillingen reflekteres umiddelbart
+  statCache = null;
+  _bbHendelserCache = [];
+  _bbFaneloggCache = [];
+  if(statAktivFane === "oversikt") statVisDevPanel();
 }
 
 // ── KOMITÉ-VARSEL-LOGG (hvem sendte hva, når, via hvilke kanaler) ──
@@ -1064,7 +1141,6 @@ const SJEKKLISTE_EGG = [
   {key:"Valutakalkulator", ico:"💶", navn:"Brukt valutakalkulator"},
   {key:"Kart-knapp", ico:"🗺️", navn:"Åpnet kart-knappen"},
   {key:"Crazy-panel (emoji-sekvens)", ico:"🎹", navn:"Crazy-panelet (emoji-sekvens)"},
-  {key:"Fake install (trykk versjon)", ico:"⚙️", navn:"Fake install (trykk versjonsnummer)"},
 ];
 
 function statByttFane(fane){
