@@ -347,8 +347,9 @@ function tegn(){
       ctx.fillStyle = "#fff";
       ctx.fillText("🍐", p.x, p.y);
     } else if(p.type === "fisk" && fiskLastet){
-      const sz = 30;
-      ctx.drawImage(fiskImg, p.x - sz/2, p.y - sz/2, sz, sz);
+      const hoyde = 30;
+      const bredde = fiskImg.naturalHeight > 0 ? hoyde * (fiskImg.naturalWidth / fiskImg.naturalHeight) : hoyde;
+      ctx.drawImage(fiskImg, p.x - bredde/2, p.y - hoyde/2, bredde, hoyde);
     } else if(p.type === "fisk"){
       ctx.font = "28px serif";
       ctx.fillStyle = "#fff";
