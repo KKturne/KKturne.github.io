@@ -846,13 +846,26 @@ let statCache = null;
 let statAktivFane = "oversikt";
 let statPersonIdx = 0;
 
+// Sjekkliste-eggene - de "finn dette skjulte elementet"-easter eggene som skal
+// vises som en avhukingsliste per person. Nøklene må matche EKSAKT det som
+// sendes til statTellEgg(...) i index.html.
+const SJEKKLISTE_EGG = [
+  {key:"Rakett-emoji", ico:"🚀", navn:"Rakett-emoji (Program)"},
+  {key:"Breakout-spillet", ico:"🕹️", navn:"Breakout-spillet (Fakta)"},
+  {key:"After-Dark-Bingo", ico:"🍑", navn:"After-Dark-Bingo låst opp"},
+  {key:"Orakel-bruk", ico:"🔮", navn:"Brukt Orakelet"},
+  {key:"Valutakalkulator", ico:"💶", navn:"Brukt valutakalkulator"},
+  {key:"Kart-knapp", ico:"🗺️", navn:"Åpnet kart-knappen"},
+  {key:"Crazy-panel (emoji-sekvens)", ico:"🎹", navn:"Crazy-panelet (emoji-sekvens)"},
+];
+
 function statByttFane(fane){
   statAktivFane = fane;
   document.getElementById("stats-tab-oversikt").classList.toggle("active", fane==="oversikt");
   document.getElementById("stats-tab-person").classList.toggle("active", fane==="person");
   document.getElementById("dev-stats-wrap").style.display = fane==="oversikt" ? "block" : "none";
   document.getElementById("dev-person-wrap").style.display = fane==="person" ? "block" : "none";
-  if(fane==="person" && statCache) statVisPerson(statPersonIdx);
+  if(fane==="person" && statCache) statVisPersonListe();
 }
 
 function statVisDevPanel(){
@@ -870,7 +883,7 @@ function statVisDevPanel(){
     statCache = stats;
     statPersonIdx = 0;
     statRenderOversikt(stats);
-    if(statAktivFane==="person") statVisPerson(0);
+    if(statAktivFane==="person") statVisPersonListe();
   });
 }
 
@@ -880,7 +893,18 @@ function statRenderOversikt(stats){
   const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
   const faneListe = Object.entries(stats.faner||{}).sort((a,b)=>b[1]-a[1])
     .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
-  const eggListe = Object.entries(stats.egg||{}).sort((a,b)=>b[1]-a[1])
+
+  // Antall UNIKE personer som har funnet hver sjekkliste-egg (ikke totalt antall trykk)
+  const personEntries = Object.entries(stats.personer||{});
+  const sjekklisteOversikt = SJEKKLISTE_EGG.map(egg=>{
+    const antall = personEntries.filter(([,p]) => p.egg && p.egg[egg.key] > 0).length;
+    return `<div class="list-row"><span>${egg.ico} ${egg.navn}</span><span class="v">${antall}</span></div>`;
+  }).join("");
+
+  const sjekklisteKeys = new Set(SJEKKLISTE_EGG.map(e=>e.key));
+  const eggListe = Object.entries(stats.egg||{})
+    .filter(([k]) => !sjekklisteKeys.has(k))
+    .sort((a,b)=>b[1]-a[1])
     .map(([k,v])=>`<div class="list-row"><span>${k}</span><span class="v">${v}</span></div>`).join("");
   const sist = statFormatDato(stats.sistOppdatert);
 
@@ -917,10 +941,36 @@ function statRenderOversikt(stats){
     <div class="card">${zebraHtml}</div>
     <div class="sec-lbl">🔒 Feilede passordforsøk (siste 20)</div>
     <div class="card">${feilPwListe || '<div class="empty-msg">Ingen feilforsøk registrert</div>'}</div>
-    <div class="sec-lbl">🥚 Easter eggs funnet</div>
+    <div class="sec-lbl">🥚 Sjekkliste-easter eggs (antall som har funnet)</div>
+    <div class="card">${sjekklisteOversikt}</div>
+    <div class="sec-lbl">🎲 Andre easter eggs funnet</div>
     <div class="card">${eggListe || '<div class="empty-msg">Ingen data ennå</div>'}</div>
     <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-top:14px">Sist oppdatert: ${sist}</div>
   `;
+}
+
+function statVisPersonListe(){
+  const wrap = document.getElementById("dev-person-wrap");
+  if(!wrap || !statCache) return;
+  const personListe = Object.entries(statCache.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
+
+  if(!personListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen personer registrert ennå</div>';
+    return;
+  }
+
+  const rader = personListe.map(([navn,p],idx)=>{
+    const funnet = SJEKKLISTE_EGG.filter(e => p.egg && p.egg[e.key] > 0).length;
+    return `<div class="person-card" style="cursor:pointer" onclick="statVisPerson(${idx})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="person-name">${escHTML(navn)}</span>
+        <span class="person-count">${p.aapninger||0}× åpnet</span>
+      </div>
+      <div class="person-sub">🥚 ${funnet}/${SJEKKLISTE_EGG.length} egg funnet · Sist aktiv: ${statFormatDato(p.sistAktiv)}</div>
+    </div>`;
+  }).join("");
+
+  wrap.innerHTML = `<div class="sec-lbl" style="margin-top:0">👤 Alle personer (${personListe.length})</div>${rader}`;
 }
 
 function statVisPerson(idx){
@@ -949,12 +999,18 @@ function statVisPerson(idx){
       <span style="font-weight:700;color:var(--red)">"${escHTML(f.forsokt)}"</span>
     </div>`).join("");
 
+  // Sjekkliste over easter eggs for akkurat denne personen
+  const sjekklisteHtml = SJEKKLISTE_EGG.map(egg=>{
+    const antall = (p.egg && p.egg[egg.key]) || 0;
+    const funnet = antall > 0;
+    return `<div class="list-row">
+      <span>${egg.ico} ${egg.navn}</span>
+      <span style="font-weight:800;color:${funnet?'var(--green)':'var(--muted)'}">${funnet?'✅':'❌'}${funnet && antall>1 ? ' ('+antall+'x)' : ''}</span>
+    </div>`;
+  }).join("");
+
   wrap.innerHTML = `
-    <div class="person-nav">
-      <button class="person-nav-btn" onclick="statVisPerson(${idx-1})" ${idx<=0?"disabled":""}>&#8592;</button>
-      <div class="person-nav-lbl">${idx+1} av ${personListe.length}</div>
-      <button class="person-nav-btn" onclick="statVisPerson(${idx+1})" ${idx>=personListe.length-1?"disabled":""}>&#8594;</button>
-    </div>
+    <button class="refresh-btn" onclick="statVisPersonListe()" style="margin-bottom:12px">&#8592; Tilbake til liste</button>
     <div class="person-detail-name">${escHTML(navn)}</div>
     <div class="stat-row">
       <div class="stat-box">
@@ -962,10 +1018,13 @@ function statVisPerson(idx){
         <div class="stat-lbl">Ganger åpnet</div>
       </div>
       <div class="stat-box">
-        <div class="stat-num" style="font-size:13px">${statFormatDato(p.sistAktiv)}</div>
-        <div class="stat-lbl">Sist aktiv</div>
+        <div class="stat-num">${p.toner||0}</div>
+        <div class="stat-lbl">Emoji-toner spilt</div>
       </div>
     </div>
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Sist aktiv: ${statFormatDato(p.sistAktiv)}</div>
+    <div class="sec-lbl">🥚 Easter egg-sjekkliste</div>
+    <div class="card">${sjekklisteHtml}</div>
     <div class="sec-lbl">📊 Fane-besøk</div>
     <div class="card">${faneRader || '<div class="empty-msg">Ingen fane-besøk registrert</div>'}</div>
     <div class="sec-lbl">🔒 Feilede passordforsøk</div>
