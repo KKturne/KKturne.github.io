@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gjettekart-oversikt — Knauskoret Pula 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  :root {
+    --bg: #080e14;
+    --card: #0f1a24;
+    --card2: #162030;
+    --border: #1e3040;
+    --gold: #f5c518;
+    --red: #e00515;
+    --text: #e8e0d4;
+    --muted: #4a6a8a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100dvh;
+  }
+  #pw-gate {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 18px;
+    text-align: center;
+  }
+  #pw-gate .ico { font-size: 44px; }
+  #pw-gate .lbl { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  #pw-gate-form { display: flex; gap: 8px; width: 100%; max-width: 300px; }
+  #pw-gate-in {
+    flex: 1;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 11px 14px;
+    outline: none;
+  }
+  #pw-gate-btn {
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  #pw-gate-err { font-size: 12px; color: var(--red); min-height: 16px; }
+
+  #app-main { display: none; height: 100dvh; flex-direction: column; }
+  .hdr {
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hdr-title { font-size: 15px; font-weight: 800; color: var(--gold); }
+  .hdr-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .refresh-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .refresh-btn.spinning { opacity: .6; pointer-events: none; }
+  .refresh-btn.spinning .spin { animation: spin .8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #kart-status { padding: 8px 16px; font-size: 11.5px; color: var(--muted); }
+  #kart { flex: 1; }
+
+  .leaflet-popup-content-wrapper { background: var(--card2); color: var(--text); border-radius: 10px; }
+  .leaflet-popup-tip { background: var(--card2); }
+  .gjett-popup-navn { font-weight: 800; font-size: 13px; }
+  .gjett-popup-info { font-size: 11px; color: var(--muted); margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<div id="pw-gate">
+  <div class="ico">🗺️</div>
+  <div class="lbl">Gjettekart-oversikt</div>
+  <form id="pw-gate-form">
+    <input id="pw-gate-in" type="password" placeholder="KODE" autocapitalize="characters" autocomplete="off" maxlength="12">
+    <button id="pw-gate-btn" type="button">&#8594;</button>
+  </form>
+  <div id="pw-gate-err"></div>
+</div>
+
+<div id="app-main">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">🗺️ Gjettekart-oversikt</div>
+      <div class="hdr-sub">Knauskoret Pula 2026 — kun for komiteen</div>
+    </div>
+    <button id="refresh-btn" class="refresh-btn" onclick="hentOgVisGjett()">
+      <span id="refresh-ico" class="spin">&#128260;</span> Oppdater
+    </button>
+  </div>
+  <div id="kart-status">Henter gjett...</div>
+  <div id="kart"></div>
+</div>
+
+<script>
+// ── PASSORDLÅS (samme kode som BigBoss-appen) ──
+const GATE_PW = "IDEPA";
+function sjekkPw(e){
+  if(e) e.preventDefault();
+  const inp = document.getElementById("pw-gate-in");
+  const err = document.getElementById("pw-gate-err");
+  if(!inp) return false;
+  if(inp.value.trim().toUpperCase() === GATE_PW){
+    sessionStorage.setItem("gjettkart_ok", "1");
+    fullforInnlogging();
+  } else {
+    inp.value = "";
+    if(err){ err.textContent = "Feil kode!"; setTimeout(()=>err.textContent="", 2000); }
+  }
+  return false;
+}
+function fullforInnlogging(){
+  document.getElementById("pw-gate").style.display = "none";
+  document.getElementById("app-main").style.display = "flex";
+  setTimeout(initKart, 100); // liten forsinkelse sikrer riktig containerstørrelse (kjent Leaflet-fallgruve)
+}
+function bindPwGate(){
+  const btn = document.getElementById("pw-gate-btn");
+  const inp = document.getElementById("pw-gate-in");
+  if(btn) btn.addEventListener("click", (e)=>sjekkPw(e));
+  if(inp) inp.addEventListener("keydown", (e)=>{ if(e.key === "Enter") sjekkPw(e); });
+}
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", bindPwGate);
+} else {
+  bindPwGate();
+}
+if(sessionStorage.getItem("gjettkart_ok") === "1"){
+  document.addEventListener("DOMContentLoaded", fullforInnlogging);
+}
+
+// ── JSONBIN-TILKOBLING ──
+const JB_BIN_ID = "6a36672af5f4af5e2913c2f1";
+const JB_KEY    = "$2a$10$On.B9FR9GJ81fyDwAKsbzuL81xI6InKhu8d008hvY4DVgSEhCbYTa";
+const JB_URL    = `https://api.jsonbin.io/v3/b/${JB_BIN_ID}`;
+
+async function jbGet(){
+  try{
+    const res = await fetch(`${JB_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    if(!res.ok) return null;
+    const json = await res.json();
+    return json.record || null;
+  }catch(e){ return null; }
+}
+
+function escHTML(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+const PULA = {lat: 44.87, lng: 13.85};
+function splAvstand(lat1, lng1, lat2, lng2){
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ── KART ──
+let kartInstans = null;
+let gjettMarkorer = [];
+let pulaMarkor = null;
+
+function initKart(){
+  const kartEl = document.getElementById("kart");
+  if(!kartEl || kartInstans) return;
+  if(typeof L === "undefined"){
+    kartEl.innerHTML = '<div style="padding:20px;text-align:center;color:#9AB">Kartet kunne ikke lastes — sjekk internettforbindelsen.</div>';
+    return;
+  }
+  kartInstans = L.map("kart", { worldCopyJump: true, minZoom: 2 }).setView([20, 20], 2);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(kartInstans);
+  setTimeout(()=>{ if(kartInstans) kartInstans.invalidateSize(); }, 150);
+  hentOgVisGjett();
+}
+
+async function hentOgVisGjett(){
+  const statusEl = document.getElementById("kart-status");
+  const btn = document.getElementById("refresh-btn");
+  if(btn) btn.classList.add("spinning");
+  if(statusEl) statusEl.textContent = "Henter gjett...";
+
+  const data = await jbGet();
+  const gjett = (data && data.gjett) ? data.gjett : {};
+  const navn = Object.keys(gjett);
+
+  // Fjern gamle markører før vi tegner på nytt
+  gjettMarkorer.forEach(m => kartInstans.removeLayer(m));
+  gjettMarkorer = [];
+  if(pulaMarkor){ kartInstans.removeLayer(pulaMarkor); pulaMarkor = null; }
+
+  if(!navn.length){
+    if(statusEl) statusEl.textContent = "Ingen har gjettet ennå";
+    if(btn) btn.classList.remove("spinning");
+    return;
+  }
+
+  // Egen markør for selve Pula, så man ser fasit visuelt
+  const pulaIkon = L.divIcon({
+    html: '<div style="font-size:26px">📍</div>',
+    className: "", iconSize: [26,26], iconAnchor: [13,26]
+  });
+  pulaMarkor = L.marker([PULA.lat, PULA.lng], {icon: pulaIkon, zIndexOffset: 1000})
+    .addTo(kartInstans)
+    .bindPopup(`<div class="gjett-popup-navn">🇭🇷 Pula (fasit)</div>`);
+
+  const medDist = navn.map(n=>{
+    const g = gjett[n];
+    const km = Math.round(splAvstand(g.lat, g.lng, PULA.lat, PULA.lng));
+    return {navn:n, km, lat:g.lat, lng:g.lng, ts:g.ts};
+  }).sort((a,b)=>a.km-b.km);
+
+  const bounds = [[PULA.lat, PULA.lng]];
+  medDist.forEach((g,i)=>{
+    const medalje = i===0?"🥇":i===1?"🥈":i===2?"🥉":"📌";
+    const ikon = L.divIcon({
+      html: `<div style="font-size:22px">${medalje}</div>`,
+      className: "", iconSize: [22,22], iconAnchor: [11,22]
+    });
+    const tid = g.ts ? new Date(g.ts).toLocaleString("nb-NO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
+    const markor = L.marker([g.lat, g.lng], {icon: ikon})
+      .addTo(kartInstans)
+      .bindPopup(`<div class="gjett-popup-navn">${escHTML(g.navn)}</div><div class="gjett-popup-info">${g.km.toLocaleString("nb-NO")} km fra Pula · ${tid}</div>`);
+    gjettMarkorer.push(markor);
+    bounds.push([g.lat, g.lng]);
+  });
+
+  // Zoom kartet til å vise alle punktene samtidig
+  if(bounds.length > 1){
+    kartInstans.fitBounds(bounds, {padding: [40,40], maxZoom: 8});
+  }
+
+  if(statusEl) statusEl.textContent = `${navn.length} personer har gjettet — nærmest: ${medDist[0].navn} (${medDist[0].km} km)`;
+  if(btn) btn.classList.remove("spinning");
+}
+</script>
+</body>
+</html>
