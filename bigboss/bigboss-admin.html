@@ -314,6 +314,7 @@
     <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 Logg</button>
     <button id="main-tab-hendelser" class="main-tab-btn" onclick="bbByttHovedfane('hendelser')">📜 Full logg</button>
     <button id="main-tab-fanebytte" class="main-tab-btn" onclick="bbByttHovedfane('fanebytte')">📊 Fanebytte</button>
+    <button id="main-tab-gjettelek" class="main-tab-btn" onclick="bbByttHovedfane('gjettelek')">🗺️ Gjettelek</button>
   </div>
 
   <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
@@ -436,6 +437,21 @@
     <div id="bb-fanebytte-status" style="font-size:10.5px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
     <div id="bb-fanebytte-wrap" style="margin-bottom:24px">
       <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
+    </div>
+  </div>
+
+  <div id="main-sec-gjettelek" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Rangering av hvem som gjettet nærmest Pula på gjettekartet i splash-siden. Kun synlig her — deltakerne ser aldri resultatet selv.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-gjett-refresh-btn" class="refresh-btn" onclick="bbHentGjettData()" style="flex:1;justify-content:center">
+        <span id="bb-gjett-refresh-ico" class="spin">&#128260;</span> Hent gjett
+      </button>
+    </div>
+    <div id="bb-gjett-status" style="font-size:10.5px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
+    <div id="bb-gjett-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent gjett» for å se rangering</div>
     </div>
   </div>
 </div>
@@ -595,7 +611,7 @@ function bbVisVarslerPanel(){
 }
 
 function bbByttHovedfane(fane){
-  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte"];
+  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte", "gjettelek"];
   faner.forEach(f=>{
     const btn = document.getElementById("main-tab-"+f);
     const sec = document.getElementById("main-sec-"+f);
@@ -1108,6 +1124,54 @@ function bbEksporterFaneCSV(){
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   if(statusEl) statusEl.textContent = `✅ Eksportert ${sortert.length} fane-bytter`;
+}
+
+// ── GJETTELEK (rangering etter avstand til Pula) ──
+const PULA = {lat: 44.87, lng: 13.85};
+
+function splAvstand(lat1, lng1, lat2, lng2){
+  // Haversine-formel - storsirkelavstand mellom to koordinater i km
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function bbHentGjettData(){
+  const wrap = document.getElementById("bb-gjett-wrap");
+  const ico = document.getElementById("bb-gjett-refresh-ico");
+  const statusEl = document.getElementById("bb-gjett-status");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const gjett = (data && data.gjett) ? data.gjett : {};
+    const navn = Object.keys(gjett);
+    if(statusEl) statusEl.textContent = `${navn.length} personer har gjettet`;
+    if(!navn.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen gjett registrert ennå</div>';
+    } else {
+      const medDist = navn.map(n=>{
+        const g = gjett[n];
+        const km = Math.round(splAvstand(g.lat, g.lng, PULA.lat, PULA.lng));
+        return {navn:n, km, ts:g.ts};
+      }).sort((a,b)=>a.km-b.km);
+      const medaljer = ["🥇","🥈","🥉"];
+      wrap.innerHTML = medDist.map((g,i)=>`
+        <div class="card" style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-size:18px;flex-shrink:0">${medaljer[i]||`${i+1}.`}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:13px">${escHTML(g.navn)}</div>
+            <div style="font-size:10.5px;color:var(--muted)">${statFormatDato(g.ts)}</div>
+          </div>
+          <span style="font-size:13px;font-weight:800;color:${i===0?'var(--gold)':'var(--muted)'}">${g.km.toLocaleString("nb-NO")} km</span>
+        </div>`).join("");
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
 }
 
 // ── TEMA (mørk/lys) ──
