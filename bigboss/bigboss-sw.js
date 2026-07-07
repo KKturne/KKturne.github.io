@@ -1,7 +1,7 @@
 // OneSignal må importeres øverst i service workeren
 importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
 
-const CACHE_NAME = "bigboss-admin-v12";
+const CACHE_NAME = "bigboss-admin-v13";
 const SCOPE = self.registration.scope;
 
 self.addEventListener("install", (event) => {

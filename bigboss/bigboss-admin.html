@@ -296,7 +296,7 @@
 <div id="app-main">
   <div class="hdr">
     <div>
-      <div class="hdr-title">👑 BigBoss Admin</div>
+      <div class="hdr-title" onclick="bbTittelTrykk()" style="cursor:pointer;user-select:none">👑 BigBoss Admin</div>
       <div class="hdr-sub">Knauskoret Pula 2026</div>
     </div>
     <div style="display:flex;align-items:center;gap:4px">
@@ -347,13 +347,6 @@
         </label>
       </div>
       <div id="bb-innst-status" style="font-size:10.5px;color:var(--muted);margin-top:8px;min-height:14px"></div>
-    </div>
-    <div class="card" id="bb-nullstill-card" style="margin-bottom:14px;border-color:var(--red)">
-      <div style="font-size:12px;font-weight:800;margin-bottom:6px;color:var(--red)">⚠️ Farlig sone — kun for testing</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
-        Nullstiller all logget statistikk permanent (statistikk, hendelseslogg, fanebytte-logg). Krever eget passord for bekreftelse.
-      </div>
-      <button class="refresh-btn" onclick="bbApneNullstillDialog()" style="width:100%;justify-content:center;border-color:var(--red);color:var(--red)">🗑️ Nullstill alle logger</button>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
@@ -845,6 +838,21 @@ async function bbLagreVarselInnst(){
   }catch(e){
     if(statusEl) statusEl.textContent = "❌ Kunne ikke lagre";
   }
+}
+
+// ── SKJULT TILGANG TIL NULLSTILLING (5 raske trykk på tittelen) ──
+let bbTittelTrykkCount = 0;
+let bbTittelTrykkTimer = null;
+function bbTittelTrykk(){
+  bbTittelTrykkCount++;
+  clearTimeout(bbTittelTrykkTimer);
+  if(bbTittelTrykkCount >= 5){
+    bbTittelTrykkCount = 0;
+    bbApneNullstillDialog();
+    return;
+  }
+  // Nullstill telleren hvis det går mer enn 1.5 sek mellom trykk
+  bbTittelTrykkTimer = setTimeout(()=>{ bbTittelTrykkCount = 0; }, 1500);
 }
 
 // ── NULLSTILL LOGGER (farlig sone, kun for testing før lansering) ──
