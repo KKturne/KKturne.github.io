@@ -1166,12 +1166,29 @@ async function bbHentGjettData(){
             <div style="font-size:10.5px;color:var(--muted)">${statFormatDato(g.ts)}</div>
           </div>
           <span style="font-size:13px;font-weight:800;color:${i===0?'var(--gold)':'var(--muted)'}">${g.km.toLocaleString("nb-NO")} km</span>
+          <button onclick="bbSlettGjett('${escHTML(g.navn).replace(/'/g,"\\'")}')" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0;padding:4px" title="Slett gjett">🗑️</button>
         </div>`).join("");
     }
   }catch(e){
     wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
   }
   if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+async function bbSlettGjett(navn){
+  if(!confirm(`Slette gjettet til ${navn}? Dette kan ikke angres, og ${navn} må selv bruke "Nullstill hele appen" i komitémenyen for å kunne gjette på nytt.`)) return;
+  const statusEl = document.getElementById("bb-gjett-status");
+  try{
+    const data = (await jbGet(true)) || {};
+    if(data.gjett && data.gjett[navn]){
+      delete data.gjett[navn];
+      const ok = await jbSave(data);
+      if(statusEl) statusEl.textContent = ok ? `✅ Slettet gjettet til ${navn}` : "❌ Kunne ikke slette";
+    }
+    bbHentGjettData();
+  }catch(e){
+    if(statusEl) statusEl.textContent = "❌ Kunne ikke slette";
+  }
 }
 
 // ── TEMA (mørk/lys) ──
