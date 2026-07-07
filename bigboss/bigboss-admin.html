@@ -873,8 +873,8 @@ async function jbLoggGet(){
   }catch(e){ return null; }
 }
 
-const HENDELSE_IKON = {apning:"📱", egg:"🥚", feilpw:"🔒", knausbot:"🤖", zebra:"🦓"};
-const HENDELSE_NAVN = {apning:"App åpnet", egg:"Easter egg", feilpw:"Feilet passord", knausbot:"KnausBot-melding", zebra:"Zebraen sier"};
+const HENDELSE_IKON = {apning:"📱", egg:"🥚", feilpw:"🔒", knausbot:"🤖", zebra:"🎫", praktisk:"🌍", moro:"🦓"};
+const HENDELSE_NAVN = {apning:"App åpnet", egg:"Easter egg", feilpw:"Feilet passord", knausbot:"KnausBot-melding", zebra:"Zebraen sier", praktisk:"Praktisk", moro:"Moro"};
 
 async function bbHentHendelseslogg(){
   const wrap = document.getElementById("bb-hendelser-wrap");
@@ -891,11 +891,14 @@ async function bbHentHendelseslogg(){
       wrap.innerHTML = '<div class="empty-msg">Ingen hendelser registrert ennå</div>';
     } else {
       // Vis kun de siste 200 i selve listen for ytelse - full eksport via CSV uansett
+      const DETALJ_KATEGORIER = new Set(["egg","praktisk","moro","feilpw","knausbot"]);
       wrap.innerHTML = logg.slice(0,200).map(h=>{
         const ico = HENDELSE_IKON[h.type] || "•";
         const navn = HENDELSE_NAVN[h.type] || h.type;
+        const visDetalj = DETALJ_KATEGORIER.has(h.type) && h.detalj;
+        const navnTekst = visDetalj ? `${navn} - ${escHTML(h.detalj)}` : navn;
         return `<div class="list-row">
-          <span>${ico} ${escHTML(h.navn||"Ukjent")} <span style="color:var(--muted)">— ${escHTML(navn)}</span></span>
+          <span>${ico} ${escHTML(h.navn||"Ukjent")} <span style="color:var(--muted)">— ${navnTekst}</span></span>
           <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(h.ts)}</span>
         </div>`;
       }).join("");
