@@ -453,6 +453,16 @@
     <div id="bb-gjett-wrap" style="margin-bottom:24px">
       <div class="empty-msg">Trykk «Hent gjett» for å se rangering</div>
     </div>
+    <div class="card" style="border-color:var(--gold);margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;margin-bottom:6px;color:var(--gold)">🎭 Dilemma — lengst unna</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+        Finner automatisk personen som gjettet lengst unna Pula, og gir dem valget om å avsløre splash-passordet alene først eller dele det med alle med en gang.
+      </div>
+      <input id="bb-dilemma-pw" type="text" placeholder="Nytt splash-passord (f.eks. neste sitt)" autocapitalize="characters" maxlength="20"
+        style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:9px 10px;margin-bottom:10px;outline:none">
+      <button class="refresh-btn" onclick="bbStartDilemma()" style="width:100%;justify-content:center;border-color:var(--gold);color:var(--gold)">🎭 Start dilemma nå</button>
+      <div id="bb-dilemma-status" style="font-size:10.5px;color:var(--muted);margin-top:8px;min-height:14px"></div>
+    </div>
   </div>
 </div>
 
@@ -1188,6 +1198,48 @@ async function bbSlettGjett(navn){
     bbHentGjettData();
   }catch(e){
     if(statusEl) statusEl.textContent = "❌ Kunne ikke slette";
+  }
+}
+
+async function bbStartDilemma(){
+  const pwInp = document.getElementById("bb-dilemma-pw");
+  const statusEl = document.getElementById("bb-dilemma-status");
+  const passord = pwInp ? pwInp.value.trim().toUpperCase() : "";
+  if(!passord){
+    if(statusEl) statusEl.textContent = "❌ Skriv inn passordet som skal avsløres først";
+    return;
+  }
+  if(statusEl) statusEl.textContent = "Finner personen lengst unna...";
+  try{
+    const data = (await jbGet(true)) || {};
+    const gjett = data.gjett || {};
+    const navnListe = Object.keys(gjett);
+    if(!navnListe.length){
+      if(statusEl) statusEl.textContent = "❌ Ingen har gjettet ennå";
+      return;
+    }
+    const medDist = navnListe.map(n=>{
+      const g = gjett[n];
+      const km = Math.round(splAvstand(g.lat, g.lng, PULA.lat, PULA.lng));
+      return {navn:n, km};
+    }).sort((a,b)=>b.km-a.km); // lengst unna først
+    const vinner = medDist[0];
+    if(!confirm(`Start dilemma for ${vinner.navn} (${vinner.km.toLocaleString("nb-NO")} km unna)?\n\nPassord som avsløres: ${passord}`)) return;
+
+    data.dilemma = {
+      navn: vinner.navn,
+      status: "venter",
+      passord: passord,
+      sistOppdatert: new Date().toISOString()
+    };
+    const ok = await jbSave(data);
+    if(statusEl){
+      statusEl.textContent = ok
+        ? `✅ Dilemma startet for ${vinner.navn} (${vinner.km.toLocaleString("nb-NO")} km unna)`
+        : "❌ Kunne ikke lagre";
+    }
+  }catch(e){
+    if(statusEl) statusEl.textContent = "❌ Noe gikk galt";
   }
 }
 
