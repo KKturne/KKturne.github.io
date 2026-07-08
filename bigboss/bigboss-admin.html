@@ -157,17 +157,24 @@
     position: sticky;
     top: 57px;
     z-index: 90;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .main-tabs::-webkit-scrollbar {
+    display: none;
   }
   .main-tab-btn {
-    flex: 1;
+    flex: 0 0 auto;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
     border-radius: 10px;
-    padding: 10px 6px;
+    padding: 10px 14px;
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
+    white-space: nowrap;
     -webkit-appearance: none;
   }
   .main-tab-btn.active {
