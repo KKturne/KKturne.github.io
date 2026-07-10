@@ -1326,7 +1326,7 @@ function statVisDevPanel(){
 function statRenderOversikt(stats){
   const wrap = document.getElementById("dev-stats-wrap");
   if(!wrap) return;
-  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const faneNavn = {hjem:"Hjem",program:"Program",guide:"Guide",moro:"Moro",bilder:"Bilder"};
   const faneListe = Object.entries(stats.faner||{}).sort((a,b)=>b[1]-a[1])
     .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
 
@@ -1439,7 +1439,7 @@ function statVisDag(dato){
   const wrap = document.getElementById("dev-dager-wrap");
   if(!wrap || !statCache || !statCache.dager || !statCache.dager[dato]) return;
   const d = statCache.dager[dato];
-  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const faneNavn = {hjem:"Hjem",program:"Program",guide:"Guide",moro:"Moro",bilder:"Bilder"};
   const datoLabel = new Date(dato+"T00:00:00").toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
 
   const faneRader = Object.entries(d.faner||{}).sort((a,b)=>b[1]-a[1])
@@ -1487,7 +1487,7 @@ function statVisDag(dato){
 function statVisPerson(idx){
   const wrap = document.getElementById("dev-person-wrap");
   if(!wrap || !statCache) return;
-  const faneNavn = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+  const faneNavn = {hjem:"Hjem",program:"Program",guide:"Guide",moro:"Moro",bilder:"Bilder"};
   const personListe = Object.entries(statCache.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
 
   if(!personListe.length){
