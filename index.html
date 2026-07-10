@@ -11,7 +11,7 @@
 <meta name="description" content="Knauskorets turneprogram for Pula 2026">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>KKTurneprogram v26.07.10-03</title>
+<title>KKTurneprogram v26.07.10-07</title>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -262,15 +262,6 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .kol-body.closed{max-height:0}
 .kol-body-inner{padding:0 16px 16px}
 
-/* ONBOARDING */
-.ob-slide{display:none;flex-direction:column;align-items:center;max-width:380px;animation:ob-in .35s ease}
-.ob-slide.on{display:flex}
-@keyframes ob-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.ob-emoji{font-size:64px;margin-bottom:20px;line-height:1}
-.ob-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:12px;letter-spacing:-.3px}
-.ob-body{font-size:15px;color:#9BB4C4;line-height:1.6}
-.ob-dot{width:7px;height:7px;border-radius:50%;background:#2A3D4A;transition:background .2s,width .2s}
-.ob-dot.on{background:#C4982B;width:20px;border-radius:4px}
 .toggle-ttl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .toggle-ico{font-size:14px;color:var(--muted);transition:transform .2s}
 .toggle-ico.open{transform:rotate(180deg)}
@@ -674,12 +665,19 @@ body.shake-mode{animation:app-shake .5s infinite}
   <button onclick="dismissInstallBanner()" style="background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:6px;flex-shrink:0;-webkit-tap-highlight-color:transparent">✕</button>
 </div>
 
-<div id="onboard" style="display:none;position:fixed;inset:0;z-index:9800;background:#0C1824;flex-direction:column">
-  <button onclick="skipOnboard()" style="position:absolute;top:18px;right:16px;background:rgba(255,255,255,.08);border:none;color:#9BB4C4;font-size:13px;font-weight:700;padding:8px 14px;border-radius:20px;cursor:pointer;z-index:2;-webkit-tap-highlight-color:transparent">Hopp over</button>
-  <div id="onboard-slides" style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px 28px;text-align:center;overflow:hidden;position:relative"></div>
-  <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:0 24px 36px">
-    <div id="onboard-dots" style="display:flex;gap:7px"></div>
-    <button id="onboard-next-btn" onclick="onboardNext()" style="width:100%;max-width:340px;background:#C4982B;color:#111;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent">Neste →</button>
+<div id="apptur" style="display:none;position:fixed;inset:0;z-index:9800;pointer-events:none">
+  <div id="apptur-spotlight" style="position:fixed;border-radius:14px;transition:all .4s cubic-bezier(.4,0,.2,1);pointer-events:none"></div>
+  <div id="apptur-box" style="position:fixed;background:#0C1824;color:#fff;border-radius:16px;padding:20px 22px;max-width:min(88vw,360px);box-shadow:0 12px 40px rgba(0,0,0,.5);transition:top .4s cubic-bezier(.4,0,.2,1),left .4s cubic-bezier(.4,0,.2,1);pointer-events:auto">
+    <button onclick="apptursHoppOver()" style="position:absolute;top:10px;right:12px;background:transparent;border:none;color:#6A8AA4;font-size:18px;cursor:pointer;-webkit-tap-highlight-color:transparent">✕</button>
+    <div id="apptur-title" style="font-size:16px;font-weight:800;margin-bottom:8px;padding-right:20px"></div>
+    <div id="apptur-body" style="font-size:13.5px;line-height:1.55;color:#C9D8E4;margin-bottom:16px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div id="apptur-dots" style="display:flex;gap:6px"></div>
+      <div style="display:flex;gap:8px">
+        <button id="apptur-prev-btn" onclick="apptursForrige()" style="background:rgba(255,255,255,.08);color:#C9D8E4;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent">← Forrige</button>
+        <button id="apptur-next-btn" onclick="apptursNeste()" style="background:#C4982B;color:#111;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent">Neste →</button>
+      </div>
+    </div>
   </div>
 </div>
 <div id="secret-panel" style="display:none">
@@ -732,7 +730,7 @@ body.shake-mode{animation:app-shake .5s infinite}
     <div class="hdr-left">
       <div class="hdr-title">KKs turnéapp!</div>
       <div class="hdr-sub" style="opacity:.5;font-size:10px" id="ver-tap"
-        onclick="kjorFakeInstall(); statTellEgg('Fake install (trykk versjon)');">v26.07.10-03</div>
+        onclick="kjorFakeInstall(); statTellEgg('Fake install (trykk versjon)');">v26.07.10-07</div>
     </div>
     <div class="hdr-icon" id="hdr-logo" onclick="logoTap()"><svg style="height:40px;width:auto;display:block" id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 496"><image width="500" height="496" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAHwCAYAAABQR52cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAydpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDEwLjAtYzAwMCA3OS5kMDRjYzE2OTgsIDIwMjUvMDcvMDItMTI6MTg6MTMgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCAyNy4yIChXaW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1ODg1MjRDQjY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1ODg1MjRDQzY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjU4ODUyNEM5Njk4NTExRjE5RDlDREY3NkZFMjg2QURCIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU4ODUyNENBNjk4NTExRjE5RDlDREY3NkZFMjg2QURCIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+cg9cLwAAIwpJREFUeNrs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"/></svg></div>
     <button class="dm-btn" id="dm-btn" onclick="toggleDark()" title="Mørk/lys modus">🌙</button>
@@ -1407,8 +1405,7 @@ function buildNedtelling(){
     return (h*60+m) > naaTid;
   });
 
-  if(!kommende.length) return ""; // ingen flere faste punkter i dag - vis ingenting
-
+  const harKommende = kommende.length > 0;
   const naeste = kommende[0];
   const deretter = kommende[1] || null;
 
@@ -1423,14 +1420,15 @@ function buildNedtelling(){
     return `${min}min`;
   };
 
-  const naesteTxt = `${formaterNedtelling(naeste)} igjen til ${escHTML(naeste.tekst)}`;
-  const deretterTxt = deretter ? `, deretter ${formaterNedtelling(deretter)} til ${escHTML(deretter.tekst)}` : "";
+  const visningTxt = harKommende
+    ? `${formaterNedtelling(naeste)} igjen til ${escHTML(naeste.tekst)}${deretter ? `, deretter ${formaterNedtelling(deretter)} til ${escHTML(deretter.tekst)}` : ""}`
+    : "Ingen flere aktiviteter før i morgen";
 
   return `<div style="background:var(--card);border-radius:14px;border:1px solid var(--bdr);padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px">
     <div style="font-size:26px;flex-shrink:0">⏱️</div>
     <div style="flex:1">
       <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px">Nedtelling</div>
-      <div style="font-size:14px;font-weight:700;color:var(--text)">${naesteTxt}${deretterTxt}</div>
+      <div style="font-size:14px;font-weight:700;color:var(--text)">${visningTxt}</div>
     </div>
   </div>`;
 }
@@ -1613,12 +1611,28 @@ const BINGO=[
 // STATE
 let curSec="hjem";
 let obIdx=0; // onboarding-slide-index — deklarert tidlig for å unngå temporal dead zone ved retur-besøk
-const ONBOARD_SLIDES=[
-  {emoji:"👋",titleFn:()=>`Hei${aiChatNavn?", "+aiChatNavn:""}!`,body:"Dette er turneprogrammet for Pula 2026: én app for alt dere trenger på turen. La oss ta en rask titt før du går i gang."},
-  {emoji:"📅",title:"Program og Praktisk",body:"Program viser hva som skjer hver dag. Praktisk har bosted, buss og en valutakalkulator. Enkelte ting er låst bak passord: de deler komitéen ut underveis. (Kanskje du finner noen gjemt også?)"},
-  {emoji:"🗺️",title:"Kart, Gloser og Fakta",body:"Anbefalinger med kartlenker, en uttaleguide for kroatisk, og litt trivia om Pula og Istria, for de nysgjerrige."},
-  {emoji:"🎉",title:"Moro-fanen",body:"Zebraen sier, bingo, KnausBot 3000 (vår AI), orakel, spinnehjul og drikkeleker. Trykk deg gjennom, for her er det mye å oppdage!"},
-  {emoji:"✨",title:"Lykke til!",body:"Tips: trykk på solen/månen i toppen for mørk modus, og hold gjerne øynene åpne: det finnes flere skjulte overraskelser i appen 😉"}
+// ── APPTUR: interaktiv guidet tur gjennom selve appen (erstatter gammel statisk onboarding) ──
+// Hvert steg definerer: hvilken hovedfane, evt. under-fane i Guide, hvilket element
+// som skal highlightes (CSS-selektor), og teksten som vises i boksen.
+const APPTUR_STEG=[
+  {sec:"hjem", guide:null, target:null,
+    titleFn:()=>`Hei${aiChatNavn?", "+aiChatNavn:""}! 👋`,
+    body:"Dette er turneprogrammet for KK-Turnéen2026! Én app for alt dere trenger på turen. La oss ta en rask titt på hva som finnes hvor."},
+  {sec:"program", guide:null, target:"#tab-program",
+    title:"Program",
+    body:"Her ser du hva som skjer hver dag. Noen ting er felles, noen er valgfrie, og noen dager er helt fri. Enkelte overraskelser er låst bak passord som komitéen deler dem ut underveis."},
+  {sec:"guide", guide:"praktisk", target:".guide-tab-btn.on",
+    title:"Guide → Praktisk",
+    body:"Guide-fanen samler det praktiske: bl.a. bosted, bussruter og en valutakalkulator. Bla mellom underfanene her øverst for mer."},
+  {sec:"guide", guide:"kart", target:".guide-tab-btn.on",
+    title:"Guide → Kart, Gloser, Fakta",
+    body:"De andre underfanene har kartanbefalinger, en uttaleguide for kroatisk, og litt trivia om Pula og Istria-regionen for de nysgjerrige."},
+  {sec:"moro", guide:null, target:"#tab-moro",
+    title:"Moro-fanen",
+    body:"Zebraen sier, turné-bingo, KnausBot 3000 (vår egenutviklede AI-bot!), orakel, lykkehjul og drikkeleker. Lek i vei, for her er det mye å oppdage!"},
+  {sec:"hjem", guide:null, target:null,
+    title:"Klar til å utforske! ✨",
+    body:"Tips: trykk på solen/månen øverst for mørk modus, og hold gjerne øynene åpne, for det finnes mange skjulte overraskelser i appen 😉🥚 Have fun, hilsen Turnékomitéen! 😎🍹🌊☀️"}
 ];
 
 // ── TILBAKE-KNAPP-HÅNDTERING (Android/iOS) ──
@@ -1732,6 +1746,8 @@ function buildHjem(){
       <div class="hero-sub">Velkommen til Kroatia, sol, Adriaterhavet og ti dager med musikk, mat og minner som varer resten av livet!</div>
       <div class="hero-pill">2.–11. oktober 2026</div>
     </div>
+    ${buildNedtelling()}
+    ${buildHuskeliste()}
     <div style="background:var(--card);border-radius:14px;border:1px solid var(--bdr);padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px">
       <div style="font-size:32px;flex-shrink:0" id="yr-hjem-iko">🌤</div>
       <div style="flex:1">
@@ -1740,8 +1756,6 @@ function buildHjem(){
       </div>
       <a href="https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-3192224/Kroatia/Istria%20County/City%20of%20Pula/Pula" target="_blank" style="font-size:11px;color:var(--acc);font-weight:700;flex-shrink:0;text-decoration:none">Yr.no →</a>
     </div>
-    ${buildNedtelling()}
-    ${buildHuskeliste()}
     ${buildTKDag()}
     <div class="sec-lbl">Turn&eacute;komit&eacute;en</div>
     <div class="card">
@@ -5732,7 +5746,7 @@ const SPL_PW = "BLATUR";
 
   if(lagretNavn && splashSett){
     document.getElementById("splash").classList.add("gone");
-    maybeShowOnboard();
+    maybeShowApptur();
     setTimeout(maybeShowInstallBanner, 1200);
     setTimeout(osBeOmVarslingstillatelse, 2500);
     setTimeout(visFaneScrollHint, 1800);
@@ -6088,7 +6102,7 @@ function enterApp(){
   setTimeout(()=>{spl.style.opacity="0";},50);
   setTimeout(()=>{
     spl.classList.add("gone");
-    maybeShowOnboard();
+    maybeShowApptur();
     setTimeout(maybeShowInstallBanner, 1500);
     setTimeout(hentVaerHjem, 800); // hent vær til forsiden
     setTimeout(visFaneScrollHint, 2000);
@@ -6118,53 +6132,118 @@ function startDilemmaPolling(){
   dilemmaPollTimer = setInterval(sjekkDilemmaDeling, 15000);
 }
 
-// ── ONBOARDING — kort guidet tur ved første gangs bruk ──
+// ── APPTUR — interaktiv guidet tur gjennom den ekte appen ──
 
-function maybeShowOnboard(){
+function maybeShowApptur(){
   if(localStorage.getItem("kn_onboard_seen")==="1") return;
-  obIdx=0;
-  renderOnboard();
-  document.getElementById("onboard").style.display="flex";
-  pushPanel(closeOnboard);
+  apptursStart();
 }
 
 function visOnboardPaNytt(){
+  apptursStart();
+}
+
+function apptursStart(){
   obIdx=0;
-  renderOnboard();
-  document.getElementById("onboard").style.display="flex";
-  pushPanel(closeOnboard);
+  document.getElementById("apptur").style.display="block";
+  apptursVisSteg(0);
+  pushPanel(apptursLukk);
 }
 
-function renderOnboard(){
-  const wrap=document.getElementById("onboard-slides");
-  const dotsWrap=document.getElementById("onboard-dots");
-  if(!wrap||!dotsWrap) return;
-  wrap.innerHTML=ONBOARD_SLIDES.map((s,i)=>`
-    <div class="ob-slide${i===obIdx?" on":""}" id="ob-slide-${i}">
-      <div class="ob-emoji">${s.emoji}</div>
-      <div class="ob-title">${s.titleFn ? s.titleFn() : s.title}</div>
-      <div class="ob-body">${s.body}</div>
-    </div>`).join("");
-  dotsWrap.innerHTML=ONBOARD_SLIDES.map((s,i)=>`<div class="ob-dot${i===obIdx?" on":""}"></div>`).join("");
-  const btn=document.getElementById("onboard-next-btn");
-  if(btn) btn.textContent = (obIdx===ONBOARD_SLIDES.length-1) ? "Sett i gang →" : "Neste →";
+function apptursVisSteg(i){
+  const steg=APPTUR_STEG[i];
+  if(!steg) return;
+  obIdx=i;
+
+  // Naviger til riktig hovedfane, og evt. under-fane i Guide, FØR vi highlighter
+  if(curSec!==steg.sec) showSec(steg.sec);
+  if(steg.guide && guideHentAktivFane()!==steg.guide) byttGuideFane(steg.guide);
+
+  // Vent én frame slik at DOM-en faktisk er oppdatert før vi måler posisjoner
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    apptursOppdaterSpotlight(steg.target);
+    apptursOppdaterBoks(steg);
+  }));
 }
 
-function onboardNext(){
-  if(obIdx<ONBOARD_SLIDES.length-1){
-    obIdx++;
-    renderOnboard();
+function apptursOppdaterSpotlight(selector){
+  const spot=document.getElementById("apptur-spotlight");
+  if(!spot) return;
+  const el = selector ? document.querySelector(selector) : null;
+  if(!el){
+    // Ingen spesifikt mål denne runden - mørklegg hele skjermen jevnt
+    spot.style.top="-50vh"; spot.style.left="-50vw";
+    spot.style.width="200vw"; spot.style.height="200vh";
+    spot.style.boxShadow="0 0 0 9999px rgba(6,10,16,.82)";
+    spot.style.border="none";
+    return;
+  }
+  el.scrollIntoView({behavior:"smooth", block:"center", inline:"nearest"});
+  setTimeout(()=>{
+    const r=el.getBoundingClientRect();
+    const pad=8;
+    spot.style.top=(r.top-pad)+"px";
+    spot.style.left=(r.left-pad)+"px";
+    spot.style.width=(r.width+pad*2)+"px";
+    spot.style.height=(r.height+pad*2)+"px";
+    spot.style.boxShadow="0 0 0 9999px rgba(6,10,16,.82)";
+    spot.style.border="2px solid #C4982B";
+  }, 350); // vent til scrollIntoView faktisk har flyttet elementet på plass
+}
+
+function apptursOppdaterBoks(steg){
+  const box=document.getElementById("apptur-box");
+  const titleEl=document.getElementById("apptur-title");
+  const bodyEl=document.getElementById("apptur-body");
+  const dotsEl=document.getElementById("apptur-dots");
+  const prevBtn=document.getElementById("apptur-prev-btn");
+  const nextBtn=document.getElementById("apptur-next-btn");
+  if(!box) return;
+
+  if(titleEl) titleEl.textContent = steg.titleFn ? steg.titleFn() : steg.title;
+  if(bodyEl) bodyEl.textContent = steg.body;
+  if(dotsEl) dotsEl.innerHTML = APPTUR_STEG.map((s,i)=>
+    `<div style="width:6px;height:6px;border-radius:50%;background:${i===obIdx?'#C4982B':'rgba(255,255,255,.25)'}"></div>`
+  ).join("");
+  if(prevBtn) prevBtn.style.visibility = obIdx===0 ? "hidden" : "visible";
+  if(nextBtn) nextBtn.textContent = (obIdx===APPTUR_STEG.length-1) ? "Sett i gang →" : "Neste →";
+
+  // Plasser boksen sentrert horisontalt, og enten under eller over spotlighten
+  // avhengig av hvor det er mest plass, slik at den ikke dekker det highlightede elementet
+  const target = steg.target ? document.querySelector(steg.target) : null;
+  const vh = window.innerHeight, vw = window.innerWidth;
+  let top;
+  if(target){
+    const r = target.getBoundingClientRect();
+    const plassUnder = vh - r.bottom;
+    const plassOver = r.top;
+    top = plassUnder > plassOver ? r.bottom + 20 : Math.max(20, r.top - box.offsetHeight - 20);
   } else {
-    closeOnboard();
+    top = vh/2 - box.offsetHeight/2; // sentrert når ingenting highlightes
+  }
+  top = Math.max(16, Math.min(top, vh - box.offsetHeight - 16));
+  box.style.top = top+"px";
+  box.style.left = Math.max(16, vw/2 - box.offsetWidth/2)+"px";
+}
+
+function apptursNeste(){
+  if(obIdx<APPTUR_STEG.length-1){
+    apptursVisSteg(obIdx+1);
+  } else {
+    apptursLukk();
   }
 }
 
-function skipOnboard(){ closeOnboard(); }
+function apptursForrige(){
+  if(obIdx>0) apptursVisSteg(obIdx-1);
+}
 
-function closeOnboard(fromBack){
+function apptursHoppOver(){ apptursLukk(); }
+
+function apptursLukk(fromBack){
   localStorage.setItem("kn_onboard_seen","1");
-  const ob=document.getElementById("onboard");
-  if(ob) ob.style.display="none";
+  const ap=document.getElementById("apptur");
+  if(ap) ap.style.display="none";
   if(!fromBack) popPanelSilent();
 }
 
@@ -6369,7 +6448,7 @@ function closeOnboard(fromBack){
     <div><div class="set-row-h">Nullstill hele appen</div><div class="set-row-s">Fjerner all fremgang og laster siden på nytt</div></div>
     <div class="set-row-ico">&#9888;&#65039;</div>
   </div>
-  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#4A6A8A;letter-spacing:.05em">KKTurneprogram v26.07.10-03</div>
+  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#4A6A8A;letter-spacing:.05em">KKTurneprogram v26.07.10-07</div>
 </div>
 
 
