@@ -150,6 +150,7 @@
 
   .main-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     padding: 10px 16px;
     background: #0a1520;
@@ -157,15 +158,9 @@
     position: sticky;
     top: 57px;
     z-index: 90;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .main-tabs::-webkit-scrollbar {
-    display: none;
   }
   .main-tab-btn {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
@@ -305,7 +300,7 @@
     <div>
       <div class="hdr-title" onclick="bbTittelTrykk()" style="cursor:pointer;user-select:none">👑 BigBoss Admin</div>
       <div class="hdr-sub">Knauskoret Pula 2026</div>
-      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.07.11-01</div>
+      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.07.11-02</div>
     </div>
     <div style="display:flex;align-items:center;gap:4px">
       <button id="bb-varsel-btn" class="theme-btn" onclick="bbVisVarslerPanel()" title="Varsler" style="position:relative">
