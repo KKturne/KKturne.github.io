@@ -11,7 +11,10 @@
 <meta name="description" content="Knauskorets turneprogram for Pula 2026">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>KKTurneprogram v26.07.11-06</title>
+<title>KKTurneprogram v26.07.12-06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -202,36 +205,39 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 
 <style id="ar-css">
 
-#ar-app{--bg:var(--bg);--card:var(--card);--card2:var(--card2);--border:var(--border);--red:var(--red);--gold:var(--gold);--green:var(--green);--text:var(--text);--muted:var(--muted);color:var(--text)}
+#ar-app{--bg:#0A0A0A;--card:#161616;--card2:#1F1F1F;--border:#2a2a2a;--red:#FF1E3C;--gold:#FFD400;--green:#00E676;--text:#F5F5F0;--muted:#8A8A82;color:var(--text);font-family:'Archivo',system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;min-height:100dvh;overscroll-behavior:none}
 .screen{display:none;min-height:100dvh}.screen.on{display:flex;flex-direction:column}
-#s-setup{align-items:center;justify-content:center;padding:32px 24px}
-.s-logo{font-size:64px;margin-bottom:20px}
-.s-title{font-size:30px;font-weight:800;letter-spacing:-1.5px;text-align:center;line-height:1.1;margin-bottom:6px}
-.s-title b{color:var(--red)}
-.s-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:36px}
-.s-form{width:100%;max-width:340px;display:flex;flex-direction:column}
-.lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:block}
-.txt-in{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:17px;padding:14px 16px;margin-bottom:20px;outline:none;-webkit-appearance:none}
-.txt-in:focus{border-color:var(--red)}
-.go-btn{width:100%;background:var(--red);color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:700;padding:16px;cursor:pointer;-webkit-appearance:none}
+#s-setup{align-items:center;justify-content:center;padding:56px 24px 32px;position:relative;overflow:hidden}
+#s-setup::before{content:"";position:absolute;top:0;left:0;right:0;height:12px;background:repeating-linear-gradient(-45deg,var(--gold),var(--gold) 14px,var(--bg) 14px,var(--bg) 28px)}
+#s-setup::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-8deg,transparent,transparent 38px,rgba(255,212,0,.04) 38px,rgba(255,212,0,.04) 40px);pointer-events:none}
+.s-logo{font-size:56px;margin-bottom:14px;position:relative}
+.s-title{font-family:'Archivo Black',sans-serif;font-size:38px;text-transform:uppercase;letter-spacing:-.02em;text-align:center;line-height:.95;margin-bottom:8px;position:relative}
+.s-title b{color:var(--gold)}
+.s-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:34px;font-weight:500;position:relative}
+.s-form{width:100%;max-width:340px;display:flex;flex-direction:column;position:relative}
+.lbl{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;display:block}
+.txt-in{width:100%;background:var(--card);border:2px solid var(--card2);border-radius:12px;color:var(--text);font-size:17px;font-weight:700;padding:16px 18px;margin-bottom:18px;outline:none;-webkit-appearance:none;font-family:'Archivo',sans-serif}
+.txt-in:focus{border-color:var(--gold)}
+.go-btn{width:100%;background:var(--gold);color:#0A0A0A;border:none;border-radius:12px;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;padding:18px;cursor:pointer;-webkit-appearance:none}
 .go-btn:disabled{background:var(--border);color:var(--muted);cursor:default}
 #s-race{flex-direction:column;height:100dvh}
-.r-hdr{background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.r-hdr{background:var(--bg);padding:16px 20px 19px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:relative}
+.r-hdr::after{content:"";position:absolute;bottom:0;left:0;right:0;height:6px;background:repeating-linear-gradient(-45deg,var(--gold),var(--gold) 10px,var(--bg) 10px,var(--bg) 20px)}
 .r-left{display:flex;align-items:center;gap:10px}
-.r-dot{width:11px;height:11px;border-radius:50%}
-.r-name{font-size:14px;font-weight:700}
+.r-dot{width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px 2px rgba(255,212,0,.6)}
+.r-name{font-family:'Archivo Black',sans-serif;font-size:16px;text-transform:uppercase;letter-spacing:-.01em}
 .r-dots{display:flex;gap:5px}
-.pd{width:7px;height:7px;border-radius:50%;background:var(--border)}
-.pd.done{background:var(--green)}.pd.cur{background:var(--red)}
+.pd{width:7px;height:7px;border-radius:50%;background:var(--card2)}
+.pd.done{background:var(--gold)}.pd.cur{background:var(--red);box-shadow:0 0 8px 2px rgba(255,30,60,.7)}
 .r-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .cp-wrap{padding:20px 16px 0}
-.cp-eye{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:5px}
-.cp-h1{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:3px}
-.cp-loc{font-size:12px;color:var(--muted);margin-bottom:14px}
+.cp-eye{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.cp-h1{font-family:'Archivo Black',sans-serif;font-size:26px;text-transform:uppercase;letter-spacing:-.01em;line-height:1.05;margin-bottom:4px}
+.cp-loc{font-size:12.5px;color:var(--muted);margin-bottom:16px;font-weight:500}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+.badge{font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
 .clue-card{background:#140e00;border:1.5px solid #3d2e00;border-radius:14px;padding:16px 18px;margin-bottom:16px}
 .clue-eye{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
 .clue-txt{font-size:15px;font-style:italic;line-height:1.65;color:#f0d97a}
@@ -269,12 +275,12 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .toggle-body{display:none;padding:0 16px 14px;font-size:13px;line-height:1.65;color:#bbb;border-top:1px solid var(--border)}
 .toggle-body.open{display:block}
 .study-hdr .toggle-ttl{color:#f5c518}.study-body{padding-top:12px}
-.place-hdr .toggle-ttl{color:#60a0f0}
+.place-hdr .toggle-ttl{color:#FFD400}
 .rules-box{background:#0d1a0d;border:1.5px solid #1e4a1e;border-radius:14px;padding:14px 16px;margin-bottom:12px}
 .rules-ttl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3dd68c;margin-bottom:9px}
 .rules-body{font-size:13px;line-height:1.65;color:#b0e0b0}
-.yield-box{background:#0d0018;border:1.5px solid #3a0050;border-radius:14px;padding:14px 16px;margin-bottom:12px}
-.yield-ttl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c084fc;margin-bottom:8px}
+.yield-box{background:#1f0a0d;border:1.5px solid #4a1015;border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.yield-ttl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FF1E3C;margin-bottom:8px}
 .yield-body{font-size:13px;line-height:1.65;color:#c0a0e0}
 .arr-lock{background:#0a1a0a;border:1.5px dashed #2a5a2a;border-radius:14px;padding:14px 16px;margin-bottom:12px}
 .arr-ttl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3dd68c;margin-bottom:7px}
@@ -288,14 +294,14 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .up-name{font-size:13px;font-weight:600}.up-type{font-size:11px;color:var(--muted)}
 .rc-link{display:block;text-align:center;padding:16px 16px 28px;font-size:11px;color:#2a2a2a;cursor:pointer;user-select:none}
 .rc-link:hover{color:#444}
-.pw-bar{background:var(--card);border-top:1px solid var(--border);padding:14px 16px 18px;flex-shrink:0}
-.pw-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.pw-bar{margin:0 20px 20px;background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:18px;flex-shrink:0}
+.pw-lbl{font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
 .pw-row-in{display:flex;gap:10px}
-.pw-in{flex:1;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:19px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:13px 15px;outline:none;-webkit-appearance:none}
-.pw-in:focus{border-color:var(--red)}.pw-in.err{border-color:var(--red);animation:shake .3s}.pw-in.ok{border-color:var(--green)}
+.pw-in{flex:1;background:var(--bg);border:2px solid var(--card2);border-radius:10px;color:var(--text);font-size:18px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;text-align:center;padding:14px 15px;outline:none;-webkit-appearance:none;font-family:'Space Mono',monospace}
+.pw-in:focus{border-color:var(--gold)}.pw-in.err{border-color:var(--red);animation:shake .3s}.pw-in.ok{border-color:var(--green)}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
-.pw-btn{background:var(--red);color:#fff;border:none;border-radius:12px;padding:13px 22px;font-size:16px;font-weight:700;cursor:pointer;-webkit-appearance:none}
-.pw-hint{font-size:11px;color:var(--muted);margin-top:7px}
+.pw-btn{background:var(--gold);color:#0A0A0A;border:none;border-radius:10px;padding:0 22px;font-size:20px;font-weight:900;cursor:pointer;-webkit-appearance:none}
+.pw-hint{font-size:11px;color:var(--muted);margin-top:8px}
 #unlock{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;flex-direction:column;align-items:center;justify-content:center;padding:24px;cursor:pointer}
 #unlock.on{display:flex}
 .ul-ico{font-size:88px;margin-bottom:20px;animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
@@ -631,8 +637,8 @@ body.shake-mode{animation:app-shake .5s infinite}
 
   <!-- REVEAL VIEW -->
   <div id="rv">
-    <div class="rv-to" id="rv-to">Knauskoret drar på turné til&hellip;</div>
-    <div class="rv-dots" id="rv-dots">&nbsp;</div>
+    <div class="rv-to" id="rv-to">Knauskoret drar på turné til…</div>
+    <div class="rv-dots" id="rv-dots"> </div>
     <div class="rv-dest" id="rv-dest">PULA!</div>
     <div class="rv-flag" id="rv-flag">🇭🇷</div>
     <div class="rv-country" id="rv-country">Kroatia</div>
@@ -731,7 +737,7 @@ body.shake-mode{animation:app-shake .5s infinite}
     <div class="hdr-left">
       <div class="hdr-title">KKs turnéapp!</div>
       <div class="hdr-sub" style="opacity:.5;font-size:10px" id="ver-tap"
-        onclick="kjorFakeInstall(); statTellEgg('Fake install (trykk versjon)');">v26.07.11-06</div>
+        onclick="kjorFakeInstall(); statTellEgg('Fake install (trykk versjon)');">v26.07.12-06</div>
     </div>
     <div class="hdr-icon" id="hdr-logo" onclick="logoTap()"><svg style="height:40px;width:auto;display:block" id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 496"><image width="500" height="496" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAHwCAYAAABQR52cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAydpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDEwLjAtYzAwMCA3OS5kMDRjYzE2OTgsIDIwMjUvMDcvMDItMTI6MTg6MTMgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCAyNy4yIChXaW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1ODg1MjRDQjY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1ODg1MjRDQzY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjU4ODUyNEM5Njk4NTExRjE5RDlDREY3NkZFMjg2QURCIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU4ODUyNENBNjk4NTExRjE5RDlDREY3NkZFMjg2QURCIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+cg9cLwAAIwpJREFUeNrs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"/></svg></div>
     <button class="dm-btn" id="dm-btn" onclick="toggleDark()" title="Mørk/lys modus">🌙</button>
@@ -1515,7 +1521,7 @@ const LOCKS={
       <div class="ev"><span class="ev-t">~16:00</span><span class="ev-v"><strong>Målgang</strong></span></div>
       <div class="ev"><span class="ev-t">20:00</span><span class="ev-v"><strong>Felles middag</strong> på [RESTAURANT], med premieutdeling og feiring! 🥂</span></div>
     </div>
-    <div style="padding:0 16px 16px"><button onclick="openAR()" style="display:block;width:100%;background:#C4982B;color:#111;border-radius:12px;padding:15px;text-align:center;font-size:16px;font-weight:900;border:none;cursor:pointer;-webkit-appearance:none;font-family:inherit">&#127937; &Aring;pne Amazing Race-appen &rarr;</button></div>`}
+    <div style="padding:0 16px 16px"><button onclick="openAR()" style="display:block;width:100%;background:#C4982B;color:#111;border-radius:12px;padding:15px;text-align:center;font-size:16px;font-weight:900;border:none;cursor:pointer;-webkit-appearance:none;font-family:inherit">&#127937; Åpne Amazing Race-appen →</button></div>`}
 };
 
 const DAYS=[
@@ -1619,6 +1625,8 @@ const BINGO=[
 // STATE
 let curSec="hjem";
 let obIdx=0; // onboarding-slide-index — deklarert tidlig for å unngå temporal dead zone ved retur-besøk
+let dilemmaPollTimer = null; // deklarert tidlig - startDilemmaPolling() kalles synkront fra initSplash()
+let knausbotPollTimer = null; // deklarert tidlig - startKnausbotPolling() kalles synkront fra initSplash()
 // ── APPTUR: interaktiv guidet tur gjennom selve appen (erstatter gammel statisk onboarding) ──
 // Hvert steg definerer: hvilken hovedfane, evt. under-fane i Guide, hvilket element
 // som skal highlightes (CSS-selektor), og teksten som vises i boksen.
@@ -1803,13 +1811,13 @@ function buildHjem(){
       <a href="https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-3192224/Kroatia/Istria%20County/City%20of%20Pula/Pula" target="_blank" style="font-size:11px;color:var(--acc);font-weight:700;flex-shrink:0;text-decoration:none">Yr.no →</a>
     </div>
     ${buildTKDag()}
-    <div class="sec-lbl">Turn&eacute;komit&eacute;en</div>
+    <div class="sec-lbl">Turnékomitéen</div>
     <div class="card">
-      <div class="info-item"><span class="info-ico">&#127897;</span><div><div class="info-h">Andreas &mdash; Big Boss</div><a href="tel:48106065" style="color:var(--acc);font-weight:700;text-decoration:none">48106065</a></div></div>
-      <div class="info-item"><span class="info-ico">&#127852;</span><div><div class="info-h">Daniel &mdash; Sugar Daddy</div><a href="tel:94035935" style="color:var(--acc);font-weight:700;text-decoration:none">94035935</a></div></div>
-      <div class="info-item"><span class="info-ico">&#128296;</span><div><div class="info-h">Erik &mdash; Fixer Upper</div><a href="tel:94160495" style="color:var(--acc);font-weight:700;text-decoration:none">94160495</a></div></div>
-      <div class="info-item"><span class="info-ico">&#129504;</span><div><div class="info-h">Ingvild &mdash; Biggest Brain</div><a href="tel:40385131" style="color:var(--acc);font-weight:700;text-decoration:none">40385131</a></div></div>
-      <div class="info-item"><span class="info-ico">&#129364;</span><div><div class="info-h">Petter &mdash; Potetmannen</div><a href="tel:97150133" style="color:var(--acc);font-weight:700;text-decoration:none">97150133</a></div></div>
+      <div class="info-item"><span class="info-ico">&#127897;</span><div><div class="info-h">Andreas — Big Boss</div><a href="tel:48106065" style="color:var(--acc);font-weight:700;text-decoration:none">48106065</a></div></div>
+      <div class="info-item"><span class="info-ico">&#127852;</span><div><div class="info-h">Daniel — Sugar Daddy</div><a href="tel:94035935" style="color:var(--acc);font-weight:700;text-decoration:none">94035935</a></div></div>
+      <div class="info-item"><span class="info-ico">&#128296;</span><div><div class="info-h">Erik — Fixer Upper</div><a href="tel:94160495" style="color:var(--acc);font-weight:700;text-decoration:none">94160495</a></div></div>
+      <div class="info-item"><span class="info-ico">&#129504;</span><div><div class="info-h">Ingvild — Biggest Brain</div><a href="tel:40385131" style="color:var(--acc);font-weight:700;text-decoration:none">40385131</a></div></div>
+      <div class="info-item"><span class="info-ico">&#129364;</span><div><div class="info-h">Petter — Potetmannen</div><a href="tel:97150133" style="color:var(--acc);font-weight:700;text-decoration:none">97150133</a></div></div>
     </div>
     <div class="sec-lbl">Nyttige tall</div>
     <div class="card">
@@ -1834,7 +1842,7 @@ function buildProgram(){
     </div>
     <div class="kol-body" id="kb-program-info">
       <div class="kol-body-inner" style="font-size:13px;line-height:1.6;color:var(--text)">
-        Se hva som skjer hver dag. Noe er oblig/felles, noe er forslag til aktiviteter, og noen dager er helt frie. Det st&aring;r ogs&aring; hvem fra komit&eacute;en som har ansvar for hvilke dager/aktiviteter. Kos d&aring;kker!<br><br>
+        Se hva som skjer hver dag. Noe er oblig/felles, noe er forslag til aktiviteter, og noen dager er helt frie. Det står også hvem fra komitéen som har ansvar for hvilke dager/aktiviteter. Kos dåkker!<br><br>
         Enkelte overraskelser er låst bak et passord. Disse passordene får dere fortløpende fra oss i turnekomiteen. For deres egen del: ikke gjett dere frem, og ikke spoil for andre!<br><br>
         Endringer kan skje, men da får dere et varsel her i appen, og programmet vil bli oppdatert og markert tydelig.<br><br>
         Ta kontakt med noen i turnékomitéen om dere har behov for å vite noe på forhånd.
@@ -2174,50 +2182,50 @@ function buildGloser(){
   </p>
   <div style="display:grid;grid-template-columns:28px 1fr;gap:7px 14px;align-items:baseline;margin-bottom:14px;padding-bottom:14px;border-bottom:.5px solid var(--bdr)">
     <div style="font-size:20px;font-weight:900;color:var(--blue);line-height:1">a</div>
-    <div style="font-size:13px;line-height:1.4">som «a» i «far» &mdash; åpent og klart<br><span style="color:var(--muted)">tartufi &rarr; <em>tar-TU-fi</em></span></div>
+    <div style="font-size:13px;line-height:1.4">som «a» i «far» — åpent og klart<br><span style="color:var(--muted)">tartufi → <em>tar-TU-fi</em></span></div>
     <div style="font-size:20px;font-weight:900;color:var(--blue);line-height:1">e</div>
-    <div style="font-size:13px;line-height:1.4">som «e» i «se» &mdash; ikke som engelsk «e»<br><span style="color:var(--muted)">more &rarr; <em>MO-re</em></span></div>
+    <div style="font-size:13px;line-height:1.4">som «e» i «se» — ikke som engelsk «e»<br><span style="color:var(--muted)">more → <em>MO-re</em></span></div>
     <div style="font-size:20px;font-weight:900;color:var(--blue);line-height:1">i</div>
-    <div style="font-size:13px;line-height:1.4">som «i» i «si» &mdash; kort og rent<br><span style="color:var(--muted)">vino &rarr; <em>VI-no</em></span></div>
+    <div style="font-size:13px;line-height:1.4">som «i» i «si» — kort og rent<br><span style="color:var(--muted)">vino → <em>VI-no</em></span></div>
     <div style="font-size:20px;font-weight:900;color:var(--blue);line-height:1">o</div>
-    <div style="font-size:13px;line-height:1.4">som «å» i «båt» &mdash; rundt og klart<br><span style="color:var(--muted)">dobar &rarr; <em>DÅ-bar</em></span></div>
+    <div style="font-size:13px;line-height:1.4">som «å» i «båt» — rundt og klart<br><span style="color:var(--muted)">dobar → <em>DÅ-bar</em></span></div>
     <div style="font-size:20px;font-weight:900;color:var(--blue);line-height:1">u</div>
-    <div style="font-size:13px;line-height:1.4">som «o» i «sol» &mdash; kortere enn norsk «u»<br><span style="color:var(--muted)">upomoć &rarr; <em>O-po-motj</em></span></div>
+    <div style="font-size:13px;line-height:1.4">som «o» i «sol» — kortere enn norsk «u»<br><span style="color:var(--muted)">upomoć → <em>O-po-motj</em></span></div>
   </div>
   <div style="display:grid;grid-template-columns:28px 1fr;gap:9px 14px;align-items:baseline">
 
-    <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">&scaron;</div>
-    <div style="font-size:13px;line-height:1.5"><strong>sj / skj</strong> &mdash; som «sj&oslash;» eller «skje»<br><span style="color:var(--muted)">&Scaron;ibenik &rarr; <em>Sji-be-nik</em></span></div>
+    <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">š</div>
+    <div style="font-size:13px;line-height:1.5"><strong>sj / skj</strong> — som «sjø» eller «skje»<br><span style="color:var(--muted)">Šibenik → <em>Sji-be-nik</em></span></div>
 
-    <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">&ccaron;</div>
-    <div style="font-size:13px;line-height:1.5"><strong>tsj</strong> (skarpt) &mdash; som «ch» i engelsk «church»<br><span style="color:var(--muted)">&#269;etiri &rarr; <em>Tsjé-ti-ri</em></span></div>
+    <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">č</div>
+    <div style="font-size:13px;line-height:1.5"><strong>tsj</strong> (skarpt) — som «ch» i engelsk «church»<br><span style="color:var(--muted)">&#269;etiri → <em>Tsjé-ti-ri</em></span></div>
 
-    <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">&zcaron;</div>
-    <div style="font-size:13px;line-height:1.5"><strong>sj</strong> (mykt, fransk) &mdash; som «g» i «genre» eller «j» i «journalist»<br><span style="color:var(--muted)">&#382;ivjeli &rarr; <em>Jsji-vje-li</em></span></div>
+    <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">ž</div>
+    <div style="font-size:13px;line-height:1.5"><strong>sj</strong> (mykt, fransk) — som «g» i «genre» eller «j» i «journalist»<br><span style="color:var(--muted)">&#382;ivjeli → <em>Jsji-vje-li</em></span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">&#263;</div>
-    <div style="font-size:13px;line-height:1.5"><strong>tj</strong> (mykt tsj) &mdash; litt mykere enn &ccaron;, n&aelig;rmere norsk «tj»<br><span style="color:var(--muted)">ćevapi &rarr; <em>TJe-va-pi</em></span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>tj</strong> (mykt tsj) — litt mykere enn č, nærmere norsk «tj»<br><span style="color:var(--muted)">ćevapi → <em>TJe-va-pi</em></span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">&#273;</div>
-    <div style="font-size:13px;line-height:1.5"><strong>dj</strong> (mykt) &mdash; som «j» i engelsk «jump», men mykere<br><span style="color:var(--muted)">&#272;akovo &rarr; <em>Dja-ko-vo</em></span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>dj</strong> (mykt) — som «j» i engelsk «jump», men mykere<br><span style="color:var(--muted)">&#272;akovo → <em>Dja-ko-vo</em></span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">c</div>
-    <div style="font-size:13px;line-height:1.5"><strong>ts</strong> &mdash; alltid «ts», aldri «k» eller «s»<br><span style="color:var(--muted)">tartuci &rarr; <em>tar-tu-tsi</em></span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>ts</strong> — alltid «ts», aldri «k» eller «s»<br><span style="color:var(--muted)">tartuci → <em>tar-tu-tsi</em></span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">j</div>
-    <div style="font-size:13px;line-height:1.5"><strong>j</strong> &mdash; alltid som norsk «j», aldri som engelsk «j»<br><span style="color:var(--muted)">jedan &rarr; <em>YE-dan</em></span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>j</strong> — alltid som norsk «j», aldri som engelsk «j»<br><span style="color:var(--muted)">jedan → <em>YE-dan</em></span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">g</div>
-    <div style="font-size:13px;line-height:1.5"><strong>g</strong> (alltid hardt) &mdash; som «g&aring;», aldri som «gele»<br><span style="color:var(--muted)">gdje &rarr; <em>GDE</em> (ikke «sjde»)</span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>g</strong> (alltid hardt) — som «gå», aldri som «gele»<br><span style="color:var(--muted)">gdje → <em>GDE</em> (ikke «sjde»)</span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">r</div>
-    <div style="font-size:13px;line-height:1.5"><strong>r</strong> (alltid rullet) &mdash; kan st&aring; alene som en stavelse<br><span style="color:var(--muted)">Krk &rarr; <em>Krrk</em> (ingen vokal!)</span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>r</strong> (alltid rullet) — kan stå alene som en stavelse<br><span style="color:var(--muted)">Krk → <em>Krrk</em> (ingen vokal!)</span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">lj</div>
-    <div style="font-size:13px;line-height:1.5"><strong>lj</strong> &mdash; som «ll» i spansk «llama», eller «lj» i «ljå» raskt<br><span style="color:var(--muted)">ljubav &rarr; <em>LJU-bav</em></span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>lj</strong> — som «ll» i spansk «llama», eller «lj» i «ljå» raskt<br><span style="color:var(--muted)">ljubav → <em>LJU-bav</em></span></div>
 
     <div style="font-size:20px;font-weight:900;color:var(--acc);line-height:1">nj</div>
-    <div style="font-size:13px;line-height:1.5"><strong>nj</strong> &mdash; som «gn» i italiensk, eller «nj» i «sjapmpinjong»<br><span style="color:var(--muted)">njezin &rarr; <em>NJE-zin</em></span></div>
+    <div style="font-size:13px;line-height:1.5"><strong>nj</strong> — som «gn» i italiensk, eller «nj» i «sjapmpinjong»<br><span style="color:var(--muted)">njezin → <em>NJE-zin</em></span></div>
 
   </div>
     </div>
@@ -2260,7 +2268,7 @@ function buildZebra(){
   return `
     <div class="sec-lbl">🦓 Zebraen sier</div>
     <div class="card">
-      <div class="card-h" style="margin-bottom:8px">Zebraen sier at&hellip;</div>
+      <div class="card-h" style="margin-bottom:8px">Zebraen sier at…</div>
       <textarea id="zebra-txt" rows="3" placeholder="Skriv her" autocorrect="on" style="width:100%;background:var(--bdr);border:1.5px solid #ddd;border-radius:10px;font-size:15px;padding:12px;outline:none;resize:none;font-family:inherit;color:var(--text);box-sizing:border-box;display:block"></textarea>
       <button onclick="sendZebra()" id="zebra-btn" style="margin-top:10px;width:100%;background:var(--dark);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none;font-family:inherit">Send til Zebraen 🦓</button>
       <div id="zebra-status" style="text-align:center;font-size:13px;color:var(--muted);margin-top:8px;min-height:20px"></div>
@@ -4681,110 +4689,110 @@ function arStartFraOppslag(){
 
 const CPS = [
   {
-    num:"S", emoji:"&#127999;", title:"Pula Arena &mdash; Start",
+    num:"S", emoji:"&#127999;", title:"Pula Arena — Start",
     loc:"Utenfor arenaen, ved nordveggen",
     clue:null,
     badges:[],
     person:"Andreas", pEmoji:"&#127897;",
-    pHint:"Startpassordet f&aring;r du av Andreas",
+    pHint:"Startpassordet får du av Andreas",
     place:{title:"Om Pula Arena",
-      body:"Pula Arena ble bygd mellom 27 f.Kr. og 68 e.Kr. og rommer ca. 20 000 tilskuere. Det er ett av de seks best bevarte amfiteatrene i verden &mdash; og det eneste med alle fire sidet&aring;rn intakt. Arenaen ble brukt til gladiatorkamper og dyrekamper. I dag huser den konserter og filmfestivaler om sommeren. Den er enn&aring; ikke inntatt av Knauskoret."},
+      body:"Pula Arena ble bygd mellom 27 f.Kr. og 68 e.Kr. og rommer ca. 20 000 tilskuere. Det er ett av de seks best bevarte amfiteatrene i verden — og det eneste med alle fire sidetårn intakt. Arenaen ble brukt til gladiatorkamper og dyrekamper. I dag huser den konserter og filmfestivaler om sommeren. Den er ennå ikke inntatt av Knauskoret."},
     sections:[
-      {t:"info", title:"Velkommen til l&oslash;pet!", body:"Motta startpakken fra Andreas: &euro;25 i kontanter, l&oslash;pspasset og lagfargemerket. Pengene er <strong>alt dere har</strong> for hele l&oslash;pet."},
-      {t:"info", title:"&#128242; Race Control", body:"Andreas er Race Control for hele l&oslash;pet. F&oslash;rste post er ubemannet, ellers vil dere m&oslash;te p&aring; dommere p&aring; hver plass. Meldinger sendes til Andreas, samt godkjennes av dommer p&aring; stedet. Passord mottas enten p&aring; melding eller fra dommer p&aring; stedet. Enkelte oppgaver l&aring;ses ikke opp f&oslash;r dere har ankommet neste post."},
+      {t:"info", title:"Velkommen til løpet!", body:"Motta startpakken fra Andreas: €25 i kontanter, løpspasset og lagfargemerket. Pengene er <strong>alt dere har</strong> for hele løpet."},
+      {t:"info", title:"&#128242; Race Control", body:"Andreas er Race Control for hele løpet. Første post er ubemannet, ellers vil dere møte på dommere på hver plass. Meldinger sendes til Andreas, samt godkjennes av dommer på stedet. Passord mottas enten på melding eller fra dommer på stedet. Enkelte oppgaver låses ikke opp før dere har ankommet neste post."},
     ]
   },
   {
     num:"1", emoji:"&#127963;", title:"Sergius-buen",
-    loc:"Slavoluk Sergijevaca &mdash; ved inngangen til gamlebyen",
-    clue:"Romerne bygde denne buen for &aring; &aelig;re familien Sergii for over 2000 &aring;r siden. Den har overlevd alt. Finn den, og velg deres Detour.",
-    badges:[{l:"Detour",bg:"#0d1e3d",c:"#60a0f0"}],
-    person:"Ingen. F&aring; godkjenning fra Andreas.", pEmoji:"&#128242;",
-    pHint:"Send video til Andreas. Passord mottas p&aring; melding.",
+    loc:"Slavoluk Sergijevaca — ved inngangen til gamlebyen",
+    clue:"Romerne bygde denne buen for å ære familien Sergii for over 2000 år siden. Den har overlevd alt. Finn den, og velg deres Detour.",
+    badges:[{l:"Detour",bg:"#3a2f00",c:"#FFD400"}],
+    person:"Ingen. Få godkjenning fra Andreas.", pEmoji:"&#128242;",
+    pHint:"Send video til Andreas. Passord mottas på melding.",
     place:{title:"Om Sergius-buen",
-      body:"Buen ble bygd ca. 29&ndash;27 f.Kr. av Salvia Postuma for &aring; &aelig;re tre familiemedlemmer &mdash; alle med etternavnet Sergius. Den opprinnelige porten het Porta Aurea (Gullporten) og markerte inngangen til det romerske Pula. Laget av hvit kalkstein med korintiske s&oslash;yler. Dante Alighieri skal ha beundret buen p&aring; en reise og omtalt den i skrift. Buen har overlevd to tusen &aring;r med krig, jordskjelv og turister."},
+      body:"Buen ble bygd ca. 29–27 f.Kr. av Salvia Postuma for å ære tre familiemedlemmer — alle med etternavnet Sergius. Den opprinnelige porten het Porta Aurea (Gullporten) og markerte inngangen til det romerske Pula. Laget av hvit kalkstein med korintiske søyler. Dante Alighieri skal ha beundret buen på en reise og omtalt den i skrift. Buen har overlevd to tusen år med krig, jordskjelv og turister."},
     sections:[
       {t:"detour-confirm",
-       a:{h:"A &mdash; BARNESANG", body:"Finn en lokal innbygger fra Pula (ikke turist, ikke butikkansatt). L&aelig;r hele laget en kroatisk barnesang &mdash; f.eks. &laquo;Eci peci pec&raquo; eller &laquo;Ringe ringe raja&raquo;. Alle synger den p&aring; video. Send til Andreas."},
-       b:{h:"B &mdash; MELODI", body:"Finn et offentlig sted innen 200 m fra buen. Fremf&oslash;r en Knauskoret-sang i minst 45 sek med hele laget. Tiltrekk 3 fremmede som stopper og ser p&aring;. &#9888; Dere har <strong>ikke lov til &aring; synge med et annet lag!</strong> Film fremf&oslash;ring + publikum. Send til Andreas."}
+       a:{h:"A — BARNESANG", body:"Finn en lokal innbygger fra Pula (ikke turist, ikke butikkansatt). Lær hele laget en kroatisk barnesang — f.eks. «Eci peci pec» eller «Ringe ringe raja». Alle synger den på video. Send til Andreas."},
+       b:{h:"B — MELODI", body:"Finn et offentlig sted innen 200 m fra buen. Fremfør en Knauskoret-sang i minst 45 sek med hele laget. Tiltrekk 3 fremmede som stopper og ser på. &#9888; Dere har <strong>ikke lov til å synge med et annet lag!</strong> Film fremføring + publikum. Send til Andreas."}
       }
     ]
   },
   {
-    num:"2", emoji:"&#128722;", title:"Tržnica &mdash; Green Market",
+    num:"2", emoji:"&#128722;", title:"Tržnica — Green Market",
     loc:"Markedet, finn Petter",
     clue:"Pulas folk har handlet fersk mat her siden 1903. Finn markedet, og finn Petter.",
-    badges:[{l:"Roadblock",bg:"#281600",c:"#f5a000"}],
+    badges:[{l:"Roadblock",bg:"#3a0d14",c:"#FF1E3C"}],
     person:"Petter", pEmoji:"&#9878;",
     pHint:"Passord gis av Petter etter godkjent stafethandling",
     place:{title:"Om Tržnica",
-      body:"Pulas markedsbygning ble reist i 1903, tegnet av arkitekten Giovanni Berlam i &oslash;sterriksk-ungarsk stil. Pula var da den viktigste marinebasen i det &oslash;sterriksk-ungarske keiserd&oslash;mmet. Markedet er delt i fiskeavdeling og en del for frukt, gr&oslash;nnsaker og lokale produkter &mdash; slik det var for 120 &aring;r siden. Det er fortsatt et av byens viktigste m&oslash;testeder for lokalbefolkningen."},
+      body:"Pulas markedsbygning ble reist i 1903, tegnet av arkitekten Giovanni Berlam i østerriksk-ungarsk stil. Pula var da den viktigste marinebasen i det østerriksk-ungarske keiserdømmet. Markedet er delt i fiskeavdeling og en del for frukt, grønnsaker og lokale produkter — slik det var for 120 år siden. Det er fortsatt et av byens viktigste møtesteder for lokalbefolkningen."},
     sections:[],
     arrivalLock:{
       pw:"NAMNAM",
       label:"Kode fra Petter ved ankomst",
-      hint:"Petter gir dere koden n&aring;r dere ankommer markedet",
+      hint:"Petter gir dere koden når dere ankommer markedet",
       sections:[
-        {t:"info", title:"&#9889; Stafethandling &mdash; hele laget deltar!",
-         body:"Dere fordeler varene dere imellom og handler <strong>&eacute;n om gangen</strong>. Alle produktene m&aring; kj&oslash;pes p&aring; <strong>hver sin plass</strong>. N&aring;r &eacute;n er ferdig, forteller de laget <em>n&oslash;yaktig</em> hvor de handlet, slik at neste person ikke handler p&aring; samme sted. Total budsjett: <strong>&euro;15 for alle fem varer.</strong><br><br>&#128203; Handleliste:<br>1. Fersk frukt, minimum 200g<br>2. Lokal ost (sir) eller meieri-produkt<br>3. Noe med istrisk olivenolje<br>4. Et tradisjonelt bakverk fra en stand<br>5. Et valgfritt lokalprodukt<br><br>Laget beholder maten som snacks p&aring; turen!"}
+        {t:"info", title:"&#9889; Stafethandling — hele laget deltar!",
+         body:"Dere fordeler varene dere imellom og handler <strong>én om gangen</strong>. Alle produktene må kjøpes på <strong>hver sin plass</strong>. Når én er ferdig, forteller de laget <em>nøyaktig</em> hvor de handlet, slik at neste person ikke handler på samme sted. Total budsjett: <strong>€15 for alle fem varer.</strong><br><br>&#128203; Handleliste:<br>1. Fersk frukt, minimum 200g<br>2. Lokal ost (sir) eller meieri-produkt<br>3. Noe med istrisk olivenolje<br>4. Et tradisjonelt bakverk fra en stand<br>5. Et valgfritt lokalprodukt<br><br>Laget beholder maten som snacks på turen!"}
       ]
     }
   },
   {
     num:"3", emoji:"&#9961;", title:"Forum &amp; Auguststempelet",
-    loc:"Foro Romano &mdash; sentrum av det antikke Pula",
-    clue:"Romas puls slo i dette torget i 2000 &aring;r. Finn det antikke sentrum av Pula, og les n&oslash;ye ;)",
-    badges:[{l:"Route Info",bg:"#001a40",c:"#60a0f0"}],
+    loc:"Foro Romano — sentrum av det antikke Pula",
+    clue:"Romas puls slo i dette torget i 2000 år. Finn det antikke sentrum av Pula, og les nøye ;)",
+    badges:[{l:"Route Info",bg:"#3a2f00",c:"#FFD400"}],
     person:"Erik", pEmoji:"&#9878;",
     pHint:"Passord gis av Erik etter godkjent lagbilde",
     place:{title:"Om Forum og okse-mosaikken",
-      body:"Forum Romanum i Pula er et av de best bevarte romerske torga utenfor Roma. Auguststempelet (2 f.Kr.&ndash;14 e.Kr.) er et av de best bevarte romerske templene i verden. Den skjulte skatten her er en mosaikkkomposisjon fra ca. 200-tallet e.Kr. som viser <em>Dirces straff</em>: i gresk mytologi ble dronning Dirce av Teben bundet til en vill okse (<strong>bik</strong> p&aring; kroatisk!) av stefs&oslash;nnene Zetos og Amfion som straff for hennes grusomhet. Mosaikken ble funnet i 1959 under utgravninger n&aelig;r Forum og er bevart i en beskyttet bakgård."},
+      body:"Forum Romanum i Pula er et av de best bevarte romerske torga utenfor Roma. Auguststempelet (2 f.Kr.–14 e.Kr.) er et av de best bevarte romerske templene i verden. Den skjulte skatten her er en mosaikkkomposisjon fra ca. 200-tallet e.Kr. som viser <em>Dirces straff</em>: i gresk mytologi ble dronning Dirce av Teben bundet til en vill okse (<strong>bik</strong> på kroatisk!) av stefsønnene Zetos og Amfion som straff for hennes grusomhet. Mosaikken ble funnet i 1959 under utgravninger nær Forum og er bevart i en beskyttet bakgård."},
     sections:[
       {t:"info", title:"&#128247; Finn oksen, ta en lagbilde",
-       body:"Finn mosaikken som viser Dirces straff: en gresk myte om en kvinne bundet til en okse. Mosaikken er gjemt i en bakgård bak bygningene n&aelig;r Forum. Den er ikke skiltet.<br><br>N&aring;r dere finner oksen (<strong>bik!</strong>): ta en <strong>selfie med hele laget foran oksen</strong>. Send bildet til Andreas OG vis det til Erik som er fysisk tilstede. Erik godkjenner og gir dere passordet."},
+       body:"Finn mosaikken som viser Dirces straff: en gresk myte om en kvinne bundet til en okse. Mosaikken er gjemt i en bakgård bak bygningene nær Forum. Den er ikke skiltet.<br><br>Når dere finner oksen (<strong>bik!</strong>): ta en <strong>selfie med hele laget foran oksen</strong>. Send bildet til Andreas OG vis det til Erik som er fysisk tilstede. Erik godkjenner og gir dere passordet."},
     ]
   },
   {
     num:"4", emoji:"&#127984;", title:"Kaštel-festningen",
-    loc:"Venetiansk festning &mdash; det h&oslash;yeste punktet i gamlebyen",
-    clue:"Venezianerne bygde det p&aring; toppen av en romersk festning. Det er det h&oslash;yeste punktet i den gamle bykjernen. Klatre opp, og gj&oslash;r dere klare for quizen som venter p&aring; toppen!",
-    badges:[{l:"Quiz",bg:"#1a1000",c:"#f5a000"}],
+    loc:"Venetiansk festning — det høyeste punktet i gamlebyen",
+    clue:"Venezianerne bygde det på toppen av en romersk festning. Det er det høyeste punktet i den gamle bykjernen. Klatre opp, og gjør dere klare for quizen som venter på toppen!",
+    badges:[{l:"Quiz",bg:"#3a0d14",c:"#FF1E3C"}],
     person:"Daniel", pEmoji:"&#9878;",
-    pHint:"Passord gis av Daniel etter fullf&oslash;rt quiz (+ evt. straffetid)",
+    pHint:"Passord gis av Daniel etter fullført quiz (+ evt. straffetid)",
     place:{title:"Om Kaštel-festningen",
-      body:"Festningen ble ferdigstilt av venezianerne i 1630, bygget p&aring; ruinene av en romersk festning. &laquo;Kaštel&raquo; betyr borg eller festning p&aring; kroatisk. Den ble reist under Uskoks-krigene for &aring; beskytte mot osmanske angrep og pirater. Festningen ligger 29 meter over havet og gir panoramautsikt over hele den gamle bykjernen og havna. I dag huser den Istrias historiske og maritime museum."},
+      body:"Festningen ble ferdigstilt av venezianerne i 1630, bygget på ruinene av en romersk festning. «Kaštel» betyr borg eller festning på kroatisk. Den ble reist under Uskoks-krigene for å beskytte mot osmanske angrep og pirater. Festningen ligger 29 meter over havet og gir panoramautsikt over hele den gamle bykjernen og havna. I dag huser den Istrias historiske og maritime museum."},
     sections:[
       {t:"study",
-       title:"&#128218; Pugg dette p&aring; vei hit &mdash; noe dukker opp i quizen!",
-       body:"<strong>Om Pula og Istria:</strong><br>&bull; Pula Arena ble bygd mellom 27 f.Kr. og 68 e.Kr. &mdash; rommer ca. 20 000 tilskuere<br>&bull; Istria er kjent for trøfler (tartufi) &mdash; de hvite fra Motovun er blant verdens beste<br>&bull; Malvazija Istarska er den vanligste hvitvinsdruens sort i Istria<br>&bull; Fuzi er en h&aring;ndrullet pastaform typisk for Istria, laget av egg og mel<br>&bull; Kroatia ble EU-medlem i 2013 og innf&oslash;rte euro 1. januar 2023 (gammel valuta: Kuna)<br>&bull; Adriaterhavet er oppkalt etter den antikke byen Hadria i nord-Italia<br>&bull; Kaštel-festningen ble ferdigstilt i 1630<br><br><strong>Kroatiske ord og uttrykk:</strong><br>&bull; Hvala = takk<br>&bull; Dobar dan = god dag<br>&bull; Dobro jutro = god morgen<br>&bull; Oprostite = unnskyld meg<br>&bull; Gdje je...? = Hvor er...?<br>&bull; Jedan, dva, tri, &ccaron;etiri, pet = 1, 2, 3, 4, 5<br>&bull; Šest, sedam, osam, devet, deset = 6, 7, 8, 9, 10<br>&bull; More = hav / sj&oslash;<br>&bull; Tartufi = tr&oslash;fler<br>&bull; Sir = ost &bull; Vino = vin &bull; Mozaik = mosaikk"},
+       title:"&#128218; Pugg dette på vei hit — noe dukker opp i quizen!",
+       body:"<strong>Om Pula og Istria:</strong><br>• Pula Arena ble bygd mellom 27 f.Kr. og 68 e.Kr. — rommer ca. 20 000 tilskuere<br>• Istria er kjent for trøfler (tartufi) — de hvite fra Motovun er blant verdens beste<br>• Malvazija Istarska er den vanligste hvitvinsdruens sort i Istria<br>• Fuzi er en håndrullet pastaform typisk for Istria, laget av egg og mel<br>• Kroatia ble EU-medlem i 2013 og innførte euro 1. januar 2023 (gammel valuta: Kuna)<br>• Adriaterhavet er oppkalt etter den antikke byen Hadria i nord-Italia<br>• Kaštel-festningen ble ferdigstilt i 1630<br><br><strong>Kroatiske ord og uttrykk:</strong><br>• Hvala = takk<br>• Dobar dan = god dag<br>• Dobro jutro = god morgen<br>• Oprostite = unnskyld meg<br>• Gdje je...? = Hvor er...?<br>• Jedan, dva, tri, četiri, pet = 1, 2, 3, 4, 5<br>• Šest, sedam, osam, devet, deset = 6, 7, 8, 9, 10<br>• More = hav / sjø<br>• Tartufi = trøfler<br>• Sir = ost • Vino = vin • Mozaik = mosaikk"},
       {t:"rules"}
     ]
   },
   {
     num:"5", emoji:"&#127908;", title:"Havnepromenaden",
-    loc:"Pula havn &mdash; finn Ingvild langs riva",
-    clue:"Knauskorister er jo glade i &aring; synge. Finn havnepromenaden, og varm opp p&aring; veien dit!",
-    badges:[{l:"Choir Challenge",bg:"#18003a",c:"#c084fc"}],
+    loc:"Pula havn — finn Ingvild langs riva",
+    clue:"Knauskorister er jo glade i å synge. Finn havnepromenaden, og varm opp på veien dit!",
+    badges:[{l:"Choir Challenge",bg:"#3a2f00",c:"#FFD400"}],
     person:"Ingvild", pEmoji:"&#9878;",
-    pHint:"Passord gis av Ingvild etter godkjent fremf&oslash;ring",
-    place:{title:"Om Riva &mdash; Pulas havnepromenade",
-      body:"Pulas havnepromenade, kjent som Riva, strekker seg langs vestsiden av halvøya. Havnen har v&aelig;rt i bruk siden antikken &mdash; romerne, venezianerne og &oslash;sterrikerne brukte alle Pula som en viktig havneby. Det &oslash;sterriksk-ungarske keiserd&oslash;mmet hadde sin viktigste marinebase her. Adriaterhavet foran deg er kjent for eksepsjonell vanngjennomsiktighet &mdash; opptil 50 meter! Et perfekt sted &aring; synge."},
+    pHint:"Passord gis av Ingvild etter godkjent fremføring",
+    place:{title:"Om Riva — Pulas havnepromenade",
+      body:"Pulas havnepromenade, kjent som Riva, strekker seg langs vestsiden av halvøya. Havnen har vært i bruk siden antikken — romerne, venezianerne og østerrikerne brukte alle Pula som en viktig havneby. Det østerriksk-ungarske keiserdømmet hadde sin viktigste marinebase her. Adriaterhavet foran deg er kjent for eksepsjonell vanngjennomsiktighet — opptil 50 meter! Et perfekt sted å synge."},
     sections:[
-      {t:"info", title:"&#128205; Ankomst", body:"Finn Ingvild langs havnepromenaden. Hun gir dere en ankomstkode som l&aring;ser opp valget deres."}
+      {t:"info", title:"&#128205; Ankomst", body:"Finn Ingvild langs havnepromenaden. Hun gir dere en ankomstkode som låser opp valget deres."}
     ],
     arrivalLock:{
       pw:"TJOISES",
       label:"Kode fra Ingvild ved ankomst",
-      hint:"Ingvild gir dere koden n&aring;r dere ankommer havnen",
+      hint:"Ingvild gir dere koden når dere ankommer havnen",
       sections:[
         {t:"info", title:"&#127925; Oppdraget",
-         body:"Fremf&oslash;r en KK-l&aring;t her p&aring; promenaden. Bonuspoeng for show!"},
+         body:"Fremfør en KK-låt her på promenaden. Bonuspoeng for show!"},
         {t:"detour",
-         a:{h:"A &mdash; ALENE", body:"Dere fremf&oslash;rer alene, umiddelbart. Kortere ventetid, men dere er p&aring; egenhånd foran fremmede!"},
-         b:{h:"B &mdash; DUETT MED ET ANNET LAG", body:"Vent p&aring; et annet lag og fremf&oslash;r sammen. Mindre kleint, men det koster tid! Kan dere stole p&aring; at de faktisk kommer? &#128520;"}
+         a:{h:"A — ALENE", body:"Dere fremfører alene, umiddelbart. Kortere ventetid, men dere er på egenhånd foran fremmede!"},
+         b:{h:"B — DUETT MED ET ANNET LAG", body:"Vent på et annet lag og fremfør sammen. Mindre kleint, men det koster tid! Kan dere stole på at de faktisk kommer? &#128520;"}
         },
-        {t:"info", title:"&#128203; Fremf&oslash;ringskrav &mdash; uansett valg",
-         body:"&ndash; Alle lagmedlemmer synger aktivt<br>&ndash; Minst 60 sekunder<br>&ndash; Minst 3 fremmede stopper og ser p&aring;<br>&ndash; Tydelig <strong>bukking</strong> ved slutt<br>&ndash; Send video til Andreas OG vis Ingvild for godkjenning<br>&ndash; &#128683; <strong>Thomas-toget er ikke lov &aring; velge</strong>"}
+        {t:"info", title:"&#128203; Fremføringskrav — uansett valg",
+         body:"– Alle lagmedlemmer synger aktivt<br>– Minst 60 sekunder<br>– Minst 3 fremmede stopper og ser på<br>– Tydelig <strong>bukking</strong> ved slutt<br>– Send video til Andreas OG vis Ingvild for godkjenning<br>– &#128683; <strong>Thomas-toget er ikke lov å velge</strong>"}
       ]
     }
   }
@@ -4793,8 +4801,8 @@ const CPS = [
 const FINAL = {
   emoji:"&#127942;",
   title:"Race til Pula Arena!",
-  clue:"Race til m&aring;l. Dere startet der romerne kjempet. Dere slutter der romerne kjempet. :LOEP:",
-  body:"Sjekk inn med Andreas utenfor arenaen. Tid telles ved ankomst. Laget med mest gjenst&aring;ende penger av &euro;25 vinner tiebreaker."
+  clue:"Race til mål. Dere startet der romerne kjempet. Dere slutter der romerne kjempet. :LOEP:",
+  body:"Sjekk inn med Andreas utenfor arenaen. Tid telles ved ankomst. Laget med mest gjenstående penger av €25 vinner tiebreaker."
 };
 
 let nm="", clr="#ef4444", curCp=0, arrivals={};
@@ -4904,9 +4912,9 @@ function renderSecs(sections, prefix){
       if(savedChoice){
         // Vis kun valgt alternativ med badge
         const chosen = s[savedChoice];
-        const choiceColor = savedChoice==="a" ? "#60a0f0" : "#c084fc";
-        const choiceBg = savedChoice==="a" ? "#0a1525" : "#1a0a2e";
-        const choiceBdr = savedChoice==="a" ? "#1a3560" : "#3a1a5a";
+        const choiceColor = savedChoice==="a" ? "#FFD400" : "#FF1E3C";
+        const choiceBg = savedChoice==="a" ? "#1a1600" : "#1f0a0d";
+        const choiceBdr = savedChoice==="a" ? "#4a3d00" : "#4a1015";
         h+=`<div class="ar-sec">
           <div class="sec-ttl">Valgt alternativ 🔒</div>
           <div class="opt-box" style="background:${choiceBg};border-color:${choiceBdr}">
@@ -4918,17 +4926,17 @@ function renderSecs(sections, prefix){
       } else {
         // Vis begge med velg-knapper
         h+=`<div class="ar-sec"><div class="sec-ttl">Velg ett alternativ — valget er bindende!</div>`;
-        h+=`<div class="opt-box" style="background:#0a1525;border-color:#1a3560">
-          <div class="opt-h" style="color:#60a0f0">${s.a.h}</div>
+        h+=`<div class="opt-box" style="background:#1a1600;border-color:#4a3d00">
+          <div class="opt-h" style="color:#FFD400">${s.a.h}</div>
           <p>${s.a.body}</p>
-          <button onclick="lockDetourChoice('a')" style="margin-top:12px;width:100%;background:#1a3560;border:1.5px solid #60a0f0;color:#60a0f0;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;-webkit-appearance:none">
+          <button onclick="lockDetourChoice('a')" style="margin-top:12px;width:100%;background:#4a3d00;border:1.5px solid #FFD400;color:#FFD400;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;-webkit-appearance:none">
             Velg A — lås inn valget 🔒
           </button>
         </div>`;
-        h+=`<div class="opt-box" style="background:#1a0a2e;border-color:#3a1a5a">
-          <div class="opt-h" style="color:#c084fc">${s.b.h}</div>
+        h+=`<div class="opt-box" style="background:#1f0a0d;border-color:#4a1015">
+          <div class="opt-h" style="color:#FF1E3C">${s.b.h}</div>
           <p>${s.b.body}</p>
-          <button onclick="lockDetourChoice('b')" style="margin-top:12px;width:100%;background:#1a0a2e;border:1.5px solid #c084fc;color:#c084fc;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;-webkit-appearance:none">
+          <button onclick="lockDetourChoice('b')" style="margin-top:12px;width:100%;background:#4a1015;border:1.5px solid #FF1E3C;color:#FF1E3C;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;-webkit-appearance:none">
             Velg B — lås inn valget 🔒
           </button>
         </div>`;
@@ -4941,9 +4949,9 @@ function renderSecs(sections, prefix){
       ["a","b"].forEach(opt=>{
         const o = s[opt];
         const isChosen = confirmed===opt;
-        const baseColor = opt==="a" ? "#60a0f0" : "#c084fc";
-        const baseBg = opt==="a" ? "#0a1525" : "#1a0a2e";
-        const baseBdr = opt==="a" ? "#1a3560" : "#3a1a5a";
+        const baseColor = opt==="a" ? "#FFD400" : "#FF1E3C";
+        const baseBg = opt==="a" ? "#1a1600" : "#1f0a0d";
+        const baseBdr = opt==="a" ? "#4a3d00" : "#4a1015";
         h+=`<div class="opt-box" style="background:${baseBg};border-color:${isChosen?baseColor:baseBdr};border-width:${isChosen?"2.5px":"1px"}">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
             <div class="opt-h" style="color:${baseColor};margin:0">${o.h}</div>
@@ -4959,11 +4967,11 @@ function renderSecs(sections, prefix){
     } else if(s.t==="pow"){
       h+=`<div class="pow" style="background:${s.bg};border-color:${s.border}"><div class="pow-ttl" style="color:${s.tc}">${s.title}</div><div class="pow-body" style="color:#bbb">${s.body}</div></div>`;
     } else if(s.t==="yield-explain"){
-      h+=`<div class="yield-box"><div class="yield-ttl">&#128310; Hva er et YIELD?</div><div class="yield-body">Et YIELD er et maktmiddel &mdash; dere kan tvinge et annet lag til &aring; stoppe og vente i <strong>5 minutter</strong> p&aring; Yield-bordet f&oslash;r de f&aring;r fortsette. Hvert lag kan bruke Yield <strong>&eacute;n gang</strong> i hele l&oslash;pet. Andre lag kan fortsatt Yielde <em>dere</em> selv om dere allerede har brukt deres. Bruk det p&aring; rett tidspunkt &mdash; mot et lag som er rett bak dere!</div></div>`;
+      h+=`<div class="yield-box"><div class="yield-ttl">&#128310; Hva er et YIELD?</div><div class="yield-body">Et YIELD er et maktmiddel — dere kan tvinge et annet lag til å stoppe og vente i <strong>5 minutter</strong> på Yield-bordet før de får fortsette. Hvert lag kan bruke Yield <strong>én gang</strong> i hele løpet. Andre lag kan fortsatt Yielde <em>dere</em> selv om dere allerede har brukt deres. Bruk det på rett tidspunkt — mot et lag som er rett bak dere!</div></div>`;
     } else if(s.t==="study"){
       h+=`<div class="toggle-sec"><div class="toggle-hdr study-hdr" onclick="toggleSec('${id}')"><span class="toggle-ttl">${s.title}</span><span class="toggle-ico open" id="ti-${id}">&#9650;</span></div><div class="toggle-body study-body open" id="tb-${id}">${s.body}</div></div>`;
     } else if(s.t==="rules"){
-      h+=`<div class="rules-box"><div class="rules-ttl">&#128203; Quiz-regler</div><div class="rules-body"><strong>Format:</strong> Alle lagmedlemmer deltar. Daniel stiller sp&oslash;rsm&aring;l, og laget bestemmer selv rekkef&oslash;lgen p&aring; hvem som svarer.<br><br><strong>PASS:</strong> Velger personen &aring; passe, overtar neste, men skjermen l&aring;ses i <strong>60 sekunder</strong>. Samme gjelder ved feil svar.<br><br><strong>&#128241; Telefonene m&aring; ligge i lomma</strong> mens quizen p&aring;g&aring;r.<br><br><strong>&#9888; Kommunikasjon er FORBUDT</strong> mens quizen foreg&aring;r! Ingen hvisking, blikk, h&aring;ndbevegelser eller hinting. Enhver kommunikasjon Daniel observerer gir laget <strong>5 minutters straffetid</strong> per tilfelle i ventetid f&oslash;r dere f&aring;r passordet til neste plass etter quizen.</div></div>`;
+      h+=`<div class="rules-box"><div class="rules-ttl">&#128203; Quiz-regler</div><div class="rules-body"><strong>Format:</strong> Alle lagmedlemmer deltar. Daniel stiller spørsmål, og laget bestemmer selv rekkefølgen på hvem som svarer.<br><br><strong>PASS:</strong> Velger personen å passe, overtar neste, men skjermen låses i <strong>60 sekunder</strong>. Samme gjelder ved feil svar.<br><br><strong>&#128241; Telefonene må ligge i lomma</strong> mens quizen pågår.<br><br><strong>&#9888; Kommunikasjon er FORBUDT</strong> mens quizen foregår! Ingen hvisking, blikk, håndbevegelser eller hinting. Enhver kommunikasjon Daniel observerer gir laget <strong>5 minutters straffetid</strong> per tilfelle i ventetid før dere får passordet til neste plass etter quizen.</div></div>`;
     }
   });
   return h;
@@ -4996,13 +5004,13 @@ function renderRace(){
     cp.badges.forEach(b=>{h+=`<span class="badge" style="background:${b.bg};color:${b.c}">${b.l}</span>`;});
     h+=`</div>`;
   }
-  if(cp.clue)h+=`<div class="clue-card"><div class="clue-eye">&#128203; CLUE</div><div class="clue-txt">&ldquo;${cp.clue}&rdquo;</div></div>`;
+  if(cp.clue)h+=`<div class="clue-card"><div class="clue-eye">&#128203; CLUE</div><div class="clue-txt">${cp.clue}</div></div>`;
   h+=renderSecs(cp.sections,"s"+curCp);
   if(cp.arrivalLock){
     if(arrivals[curCp]){
       h+=renderSecs(cp.arrivalLock.sections,"a"+curCp);
     } else {
-      h+=`<div class="arr-lock"><div class="arr-ttl">&#128274; ${cp.arrivalLock.label}</div><div class="arr-hint">${cp.arrivalLock.hint}</div><div class="arr-row"><input class="pw-in" id="arr-in" style="font-size:16px;padding:11px 13px" type="text" placeholder="KODE" autocomplete="off" autocapitalize="characters" maxlength="8" onkeydown="if(event.key==='Enter')checkArrival(${curCp})"><button class="pw-btn" onclick="checkArrival(${curCp})">&rarr;</button></div></div>`;
+      h+=`<div class="arr-lock"><div class="arr-ttl">&#128274; ${cp.arrivalLock.label}</div><div class="arr-hint">${cp.arrivalLock.hint}</div><div class="arr-row"><input class="pw-in" id="arr-in" style="font-size:16px;padding:11px 13px" type="text" placeholder="KODE" autocomplete="off" autocapitalize="characters" maxlength="8" onkeydown="if(event.key==='Enter')checkArrival(${curCp})"><button class="pw-btn" onclick="checkArrival(${curCp})">→</button></div></div>`;
     }
   }
   if(cp.place){
@@ -5027,7 +5035,7 @@ function renderRace(){
 }
 
 function renderFinishHTML(){
-  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:32px 24px;text-align:center"><div style="font-size:80px;margin-bottom:20px">${FINAL.emoji}</div><div style="font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:8px">${FINAL.title}</div><div class="clue-card" style="width:100%;max-width:340px;margin:20px 0"><div class="clue-eye">&#128203; SISTE CLUE</div><div class="clue-txt">&ldquo;${FINAL.clue}&rdquo;</div></div><div style="font-size:13px;color:var(--muted);max-width:280px;line-height:1.6">${FINAL.body}</div><div class="rc-link" onclick="showAdmin()" style="margin-top:24px">Race Control</div></div>`;
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;padding:32px 24px;text-align:center"><div style="font-size:80px;margin-bottom:20px">${FINAL.emoji}</div><div style="font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:8px">${FINAL.title}</div><div class="clue-card" style="width:100%;max-width:340px;margin:20px 0"><div class="clue-eye">&#128203; SISTE CLUE</div><div class="clue-txt">${FINAL.clue}</div></div><div style="font-size:13px;color:var(--muted);max-width:280px;line-height:1.6">${FINAL.body}</div><div class="rc-link" onclick="showAdmin()" style="margin-top:24px">Race Control</div></div>`;
 }
 
 function confirmDetourChoice(choice){
@@ -5082,14 +5090,14 @@ function checkPw(){
     const isFinish=curCp>=CPS.length;
     const next=isFinish?FINAL:CPS[curCp];
     document.getElementById("ul-ico").innerHTML=isFinish?"&#127942;":next.emoji;
-    document.getElementById("ul-txt").innerHTML=isFinish?"Siste etappe! Race til m&aring;l!":next.title+" l&aring;st opp!";
+    document.getElementById("ul-txt").innerHTML=isFinish?"Siste etappe! Race til mål!":next.title+" låst opp!";
     document.getElementById("ul-sub").innerHTML=isFinish?FINAL.loc:next.loc;
     if(isFinish) trackEvent("maal", {postNavn:"Pula Arena — Mål"});
     document.getElementById("unlock").classList.add("on");
   } else {
     pi.value="";pi.classList.add("err");
     setTimeout(()=>pi.classList.remove("err"),400);
-    pi.placeholder="Feil &mdash; pr&oslash;v igjen";
+    pi.placeholder="Feil — prøv igjen";
     setTimeout(()=>{pi.placeholder="PASSORD";},2000);
     if(typeof statTellFeilPassord === "function") statTellFeilPassord("Race Control (post "+curCp+")", v, typeof nm!=="undefined"?nm:null);
   }
@@ -5345,7 +5353,7 @@ function buildFlyLeg(fra_tid, fra_sted, til_tid, til_sted, flyNr, varighet, dark
       <div class="fly-time" style="color:${timeColor} !important">${fra_tid}</div>
       <div class="fly-place" style="color:${placeColor} !important">${fra_sted}</div>
       <div class="fly-badge" style="background:${badgeBg} !important;border-color:${badgeBdr} !important;color:${badgeColor} !important">✈️ ${flyNr}</div>
-      <div class="fly-duration" style="color:${durColor} !important;border-top-color:${durBdr} !important">⏱ ${varighet} &nbsp;·&nbsp; ankommer ${til_tid} ${til_sted}</div>
+      <div class="fly-duration" style="color:${durColor} !important;border-top-color:${durBdr} !important">⏱ ${varighet}  ·  ankommer ${til_tid} ${til_sted}</div>
     </div>
   </div>`;
 }
@@ -5757,7 +5765,7 @@ function resetAll(){
 // ── SPLASH ──
 const SPL_PW = "BLATUR";
 
-(async function initSplash(){
+(function initSplash(){
   const starsEl = document.getElementById("spl-stars");
   if(starsEl) for(let i=0;i<60;i++){
     const s=document.createElement("div"); s.className="spl-star";
@@ -5770,14 +5778,10 @@ const SPL_PW = "BLATUR";
   const gjettLast = localStorage.getItem("kn_gjett_last") === "1";
   if(lagretNavn){ aiChatNavn = lagretNavn; const n=document.getElementById("spl-navn"); if(n) n.value=lagretNavn; }
 
-  // Sjekk dilemma FØR vi bestemmer om splash skal hoppes over - selv personer
-  // som normalt går rett forbi splash må få se dilemma-boksen hvis den er aktiv.
-  const dilemmaVises = lagretNavn ? await sjekkDilemmaVedOppstart() : false;
-  if(dilemmaVises){
-    return; // dilemma-view er nå synlig, ikke gjør noe mer i splash-logikken
-  }
-
   if(lagretNavn && splashSett){
+    // Allerede låst opp splash minst én gang tidligere - dilemmaet (som kun er
+    // relevant MENS man venter på passordfeltet) er ikke aktuelt lenger, så vi
+    // skjuler splash momentant uten å vente på noe nettverkskall først.
     document.getElementById("splash").classList.add("gone");
     maybeShowApptur();
     setTimeout(maybeShowInstallBanner, 1200);
@@ -5789,6 +5793,10 @@ const SPL_PW = "BLATUR";
     document.getElementById("pw-view").style.display = "none";
     document.getElementById("gjett-view").style.display = "flex";
     setTimeout(initGjettKart, 100); // liten forsinkelse sikrer at containeren har fått riktig størrelse i DOM-en
+  } else if(lagretNavn){
+    // Har gjettet, men ikke låst opp splash ennå - fortsatt på passordfeltet,
+    // dette er ETT sted et ventende dilemma faktisk kan være relevant.
+    sjekkDilemmaVedOppstart();
   }
 })();
 
@@ -5820,7 +5828,7 @@ function initGjettKart(){
   }).setView([20, 20], 2);
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
     maxZoom: 19,
     subdomains: "abcd"
   }).addTo(gjettKartInstans);
@@ -6146,7 +6154,6 @@ function enterApp(){
 // Sjekker jevnlig (ikke bare ved fane-bytte) om dilemmaet er delt, siden appen
 // ikke har ekte push-varsling for dette - folk som sitter stille på én fane
 // skal likevel fange opp delingen innen rimelig tid.
-let dilemmaPollTimer = null;
 function startDilemmaPolling(){
   if(dilemmaPollTimer) return;
   dilemmaPollTimer = setInterval(sjekkDilemmaDeling, 15000);
@@ -6157,7 +6164,6 @@ function startDilemmaPolling(){
 // Denne pollingen kjører uavhengig, slik at folk oppdager svaret selv om de har
 // lukket chatten og gått til en annen fane - synlig som en pulserende prikk på
 // Moro-fanen helt til de faktisk åpner chatten og ser svaret.
-let knausbotPollTimer = null;
 function startKnausbotPolling(){
   if(knausbotPollTimer) return;
   sjekkNyttKnausbotSvar(); // sjekk med en gang, ikke bare ved neste intervall
@@ -6482,7 +6488,7 @@ function apptursLukk(fromBack){
       </div>
     </label>
     <button onclick="prepTeam()" style="width:100%;background:#C4982B;color:#111;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;-webkit-appearance:none">
-      &#127937; Klargjør og &aring;pne Amazing Race-appen &rarr;
+      &#127937; Klargjør og åpne Amazing Race-appen →
     </button>
   </div>
 
@@ -6508,7 +6514,7 @@ function apptursLukk(fromBack){
     <div><div class="set-row-h">Nullstill hele appen</div><div class="set-row-s">Fjerner all fremgang og laster siden på nytt</div></div>
     <div class="set-row-ico">&#9888;&#65039;</div>
   </div>
-  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#4A6A8A;letter-spacing:.05em">KKTurneprogram v26.07.11-06</div>
+  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#4A6A8A;letter-spacing:.05em">KKTurneprogram v26.07.12-06</div>
 </div>
 
 
@@ -6530,7 +6536,7 @@ function apptursLukk(fromBack){
 <div class="screen on" id="s-setup">
   <div class="s-logo">&#127937;</div>
   <div class="s-title">Amazing Race<br><b>Pula</b> 2026</div>
-  <div class="s-sub">Fredag 9. oktober &middot; Knauskoret</div>
+  <div class="s-sub">Fredag 9. oktober · Knauskoret</div>
   <div class="s-form">
     <div id="setup-step1">
       <label class="lbl" for="nm-input">Ditt fornavn</label>
@@ -6552,10 +6558,10 @@ function apptursLukk(fromBack){
           <div style="font-size:11px;color:#4a6a8a;margin-top:2px">Kun lagleder sender fremgang til live-trackeren</div>
         </div>
       </label>
-      <button class="go-btn" id="ar-start-btn" onclick="arStartFraOppslag()" style="margin-bottom:0">Start l&oslash;pet &rarr;</button>
+      <button class="go-btn" id="ar-start-btn" onclick="arStartFraOppslag()" style="margin-bottom:0">Start løpet →</button>
       <button onclick="arResetLagInfo()" style="background:none;border:none;color:#555;font-size:12px;cursor:pointer;text-decoration:underline;padding:12px;font-family:inherit;width:100%;text-align:center">← Endre navn</button>
     </div>
-    <div style="text-align:center;margin-top:8px"><button onclick="arShowManualSetup()" style="background:none;border:none;color:#333;font-size:11px;cursor:pointer;text-decoration:underline;padding:8px;font-family:inherit">&#9881; Komit&eacute;oppsett</button></div>
+    <div style="text-align:center;margin-top:8px"><button onclick="arShowManualSetup()" style="background:none;border:none;color:#333;font-size:11px;cursor:pointer;text-decoration:underline;padding:8px;font-family:inherit">&#9881; Komitéoppsett</button></div>
   </div>
 </div>
 
@@ -6573,7 +6579,7 @@ function apptursLukk(fromBack){
       <div class="pw-lbl">Passord for neste post</div>
       <div class="pw-row-in">
         <input class="pw-in" id="pw-in" type="text" placeholder="PASSORD" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" maxlength="10">
-        <button class="pw-btn" onclick="checkPw()"> &rarr; </button>
+        <button class="pw-btn" onclick="checkPw()"> → </button>
       </div>
       <div class="pw-hint" id="pw-hint"></div>
     </div>
@@ -6583,8 +6589,8 @@ function apptursLukk(fromBack){
 
 <div id="unlock" onclick="dismissUnlock()">
   <div class="ul-ico" id="ul-ico">&#128275;</div>
-  <div class="ul-txt" id="ul-txt">L&aring;st opp!</div>
-  <div class="ul-sub" id="ul-sub">Trykk for &aring; fortsette</div>
+  <div class="ul-txt" id="ul-txt">Låst opp!</div>
+  <div class="ul-sub" id="ul-sub">Trykk for å fortsette</div>
 </div>
 
 <div id="admin">
