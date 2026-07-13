@@ -300,7 +300,7 @@
     <div>
       <div class="hdr-title" onclick="bbTittelTrykk()" style="cursor:pointer;user-select:none">👑 BigBoss Admin</div>
       <div class="hdr-sub">Knauskoret Pula 2026</div>
-      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.07.11-02</div>
+      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.07.13-01</div>
     </div>
     <div style="display:flex;align-items:center;gap:4px">
       <button id="bb-varsel-btn" class="theme-btn" onclick="bbVisVarslerPanel()" title="Varsler" style="position:relative">
@@ -314,8 +314,8 @@
     <button id="main-tab-varsler" class="main-tab-btn active" onclick="bbByttHovedfane('varsler')">🔔 Varsler</button>
     <button id="main-tab-stats" class="main-tab-btn" onclick="bbByttHovedfane('stats')">📈 Statistikk</button>
     <button id="main-tab-knausbot" class="main-tab-btn" onclick="bbByttHovedfane('knausbot')">🤖 KnausBot</button>
-    <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 Logg</button>
-    <button id="main-tab-hendelser" class="main-tab-btn" onclick="bbByttHovedfane('hendelser')">📜 Full logg</button>
+    <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 App-varsler</button>
+    <button id="main-tab-hendelser" class="main-tab-btn" onclick="bbByttHovedfane('hendelser')">🗂️ Viktige hendelser</button>
     <button id="main-tab-fanebytte" class="main-tab-btn" onclick="bbByttHovedfane('fanebytte')">📊 Fanebytte</button>
     <button id="main-tab-gjettelek" class="main-tab-btn" onclick="bbByttHovedfane('gjettelek')">🗺️ Gjettelek</button>
   </div>
@@ -413,7 +413,11 @@
 
   <div id="main-sec-hendelser" class="main-sec" style="display:none;padding:16px 16px 0">
     <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
-      Kronologisk logg over alle viktige hendelser: app-åpninger, easter eggs, feilede passord, KnausBot-meldinger og Zebra-innsendinger. Lagres i eget bin, ingen automatisk sletting.
+      Kronologisk logg over viktige hendelser. Lagres i eget bin, ingen automatisk sletting.
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button id="hendelser-tab-apninger" class="main-tab-btn active" onclick="bbByttHendelserFane('apninger')" style="flex:1">📱 App-åpninger</button>
+      <button id="hendelser-tab-andre" class="main-tab-btn" onclick="bbByttHendelserFane('andre')" style="flex:1">🗂️ Andre hendelser</button>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="bb-hendelser-refresh-btn" class="refresh-btn" onclick="bbHentHendelseslogg()" style="flex:1;justify-content:center">
@@ -990,6 +994,15 @@ async function jbLoggGet(){
 const HENDELSE_IKON = {apning:"📱", egg:"🥚", feilpw:"🔒", knausbot:"🤖", zebra:"🎫", praktisk:"🌍", moro:"🦓"};
 const HENDELSE_NAVN = {apning:"App åpnet", egg:"Easter egg", feilpw:"Feilet passord", knausbot:"KnausBot-melding", zebra:"Zebraen sier", praktisk:"Praktisk", moro:"Moro"};
 
+let hendelserAktivFane = "apninger";
+
+function bbByttHendelserFane(fane){
+  hendelserAktivFane = fane;
+  document.getElementById("hendelser-tab-apninger").classList.toggle("active", fane==="apninger");
+  document.getElementById("hendelser-tab-andre").classList.toggle("active", fane==="andre");
+  bbVisHendelser(); // re-render med cachet data, ikke nytt nettverkskall
+}
+
 async function bbHentHendelseslogg(){
   const wrap = document.getElementById("bb-hendelser-wrap");
   const ico = document.getElementById("bb-hendelser-refresh-ico");
@@ -998,32 +1011,42 @@ async function bbHentHendelseslogg(){
   if(ico) ico.parentElement.classList.add("spinning");
   try{
     const data = await jbLoggGet();
-    const logg = (data && data.logg) ? data.logg.slice().reverse() : []; // nyeste først
     _bbHendelserCache = (data && data.logg) ? data.logg : [];
-    if(statusEl) statusEl.textContent = `${_bbHendelserCache.length} hendelser registrert totalt`;
-    if(!logg.length){
-      wrap.innerHTML = '<div class="empty-msg">Ingen hendelser registrert ennå</div>';
-    } else {
-      // Vis kun de siste 200 i selve listen for ytelse - full eksport via CSV uansett
-      const DETALJ_KATEGORIER = new Set(["egg","praktisk","moro","feilpw","knausbot"]);
-      wrap.innerHTML = logg.slice(0,200).map(h=>{
-        const ico = HENDELSE_IKON[h.type] || "•";
-        const navn = HENDELSE_NAVN[h.type] || h.type;
-        const visDetalj = DETALJ_KATEGORIER.has(h.type) && h.detalj;
-        const navnTekst = visDetalj ? `${navn} - ${escHTML(h.detalj)}` : navn;
-        return `<div class="list-row">
-          <span>${ico} ${escHTML(h.navn||"Ukjent")} <span style="color:var(--muted)">— ${navnTekst}</span></span>
-          <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(h.ts)}</span>
-        </div>`;
-      }).join("");
-      if(logg.length > 200){
-        wrap.innerHTML += `<div class="empty-msg">... og ${logg.length-200} eldre hendelser (kun synlig i CSV-eksport)</div>`;
-      }
-    }
+    bbVisHendelser();
   }catch(e){
     wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
   }
   if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbVisHendelser(){
+  const wrap = document.getElementById("bb-hendelser-wrap");
+  const statusEl = document.getElementById("bb-hendelser-status");
+  if(!wrap) return;
+  const filtrert = hendelserAktivFane==="apninger"
+    ? _bbHendelserCache.filter(h => h.type==="apning")
+    : _bbHendelserCache.filter(h => h.type!=="apning");
+  const logg = filtrert.slice().reverse(); // nyeste først
+  if(statusEl) statusEl.textContent = `${filtrert.length} ${hendelserAktivFane==="apninger"?"app-åpninger":"andre hendelser"} registrert`;
+  if(!logg.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen hendelser registrert ennå</div>';
+  } else {
+    // Vis kun de siste 200 i selve listen for ytelse - full eksport via CSV uansett
+    const DETALJ_KATEGORIER = new Set(["egg","praktisk","moro","feilpw","knausbot"]);
+    wrap.innerHTML = logg.slice(0,200).map(h=>{
+      const ico = HENDELSE_IKON[h.type] || "•";
+      const navn = HENDELSE_NAVN[h.type] || h.type;
+      const visDetalj = DETALJ_KATEGORIER.has(h.type) && h.detalj;
+      const navnTekst = visDetalj ? `${navn} - ${escHTML(h.detalj)}` : navn;
+      return `<div class="list-row">
+        <span>${ico} ${escHTML(h.navn||"Ukjent")} <span style="color:var(--muted)">— ${navnTekst}</span></span>
+        <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(h.ts)}</span>
+      </div>`;
+    }).join("");
+    if(logg.length > 200){
+      wrap.innerHTML += `<div class="empty-msg">... og ${logg.length-200} eldre hendelser (kun synlig i CSV-eksport)</div>`;
+    }
+  }
 }
 
 function bbEksporterCSV(){
