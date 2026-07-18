@@ -11,7 +11,7 @@
 <meta name="description" content="Knauskorets turneprogram for Pula 2026">
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>KKTurneprogram v26.07.12-06</title>
+<title>KKTurneprogram v26.07.18-03</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -19,17 +19,17 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
-:root{--bg:#F4EFE6;--card:#fff;--dark:#1C2B35;--acc:#B85228;--gold:#C4982B;--green:#2D5A3D;--blue:#1A4070;--text:#1a1a1a;--muted:#888;--bdr:#E2D8CC}
+:root{--bg:#F4EFE6;--card:#fff;--dark:#1C2B35;--acc:var(--acc);--gold:var(--gold);--green:#2D5A3D;--blue:#1A4070;--text:#1a1a1a;--muted:#888;--bdr:#E2D8CC;--sub:var(--sub);--label:var(--label)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;height:100%;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100dvh}
 .app-hdr{background:var(--dark);color:#fff;padding:14px 18px 10px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .hdr-left{}
 .hdr-title{font-size:18px;font-weight:900;letter-spacing:-.3px}
-.hdr-sub{font-size:11px;color:#7AA0B0;margin-top:1px}
+.hdr-sub{font-size:11px;color:var(--sub);margin-top:1px}
 .hdr-icon{font-size:28px;display:flex;align-items:center}
 .tabs{background:var(--dark);display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0}
-.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;cursor:pointer;white-space:nowrap;border:none;background:transparent;color:#7AA0B0;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:2.5px solid transparent;flex:1 1 auto;-webkit-appearance:none}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 14px;cursor:pointer;white-space:nowrap;border:none;background:transparent;color:var(--sub);font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-bottom:2.5px solid transparent;flex:1 1 auto;-webkit-appearance:none}
 .tab.on{color:#fff;border-bottom-color:var(--gold)}
 .tab-ico{font-size:17px}
 .tab-badge{position:absolute;top:-3px;right:-6px;width:10px;height:10px;border-radius:50%;background:#FF3B30;box-shadow:0 0 0 2px var(--dark,#1C2B35),0 0 8px 2px rgba(255,59,48,.9),0 0 14px 4px rgba(255,59,48,.5);animation:tab-badge-pulse 1.6s ease-in-out infinite}
@@ -51,10 +51,10 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .sec-lbl:first-child{margin-top:0}
 
 /* HERO */
-.hero{background:linear-gradient(150deg,#1C2B35 0%,#2D4A3E 100%);border-radius:16px;padding:24px 20px 20px;margin-bottom:14px;color:#fff;text-align:center}
+.hero{background:linear-gradient(150deg,var(--hero-g1,var(--dark)) 0%,var(--hero-g2,#2D4A3E) 100%);border-radius:16px;padding:24px 20px 20px;margin-bottom:14px;color:var(--hero-txt,#fff);text-align:center}
 .hero-emoji{font-size:52px;margin-bottom:10px}
 .hero-title{font-size:24px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
-.hero-sub{font-size:14px;color:#8AABB8;margin-bottom:16px;line-height:1.55}
+.hero-sub{font-size:14px;color:var(--hero-sub,#8AABB8);margin-bottom:16px;line-height:1.55}
 .hero-pill{display:inline-flex;background:rgba(255,255,255,.1);border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;color:var(--gold)}
 
 /* DAY CARDS */
@@ -62,7 +62,7 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .day-hdr{display:flex;align-items:center;gap:12px;padding:12px 16px}
 .day-num-box{background:var(--dark);color:#fff;border-radius:8px;padding:6px 10px;text-align:center;flex-shrink:0;min-width:44px}
 .day-n{font-size:21px;font-weight:900;line-height:1}
-.day-m{font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7AA0B0}
+.day-m{font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--sub)}
 .day-info{flex:1}
 .day-title{font-size:15px;font-weight:800}
 .day-sub{font-size:12px;color:var(--muted);margin-top:1px}
@@ -151,18 +151,18 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .spl-star{position:absolute;background:#fff;border-radius:50%;opacity:.15;animation:twinkle 4s infinite alternate}
 @keyframes twinkle{0%{opacity:.05}100%{opacity:.5}}
 .spl-logo{font-size:56px;margin-bottom:12px}
-.spl-h{font-size:14px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#4A6A8A;margin-bottom:6px}
+.spl-h{font-size:14px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--label);margin-bottom:6px}
 .spl-t{font-size:24px;font-weight:900;color:#fff;letter-spacing:-.3px;margin-bottom:32px}
 .spl-box{width:100%;max-width:340px}
 .spl-in{width:100%;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:14px;color:#fff;font-size:22px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:16px 20px;outline:none;-webkit-appearance:none;text-align:center;margin-bottom:12px;display:block}
 .spl-in:focus{border-color:#4A8AB8}
-.spl-go{width:100%;background:#C4982B;color:#111;border:none;border-radius:14px;font-size:18px;font-weight:800;padding:16px;cursor:pointer;-webkit-appearance:none}
+.spl-go{width:100%;background:var(--gold);color:#111;border:none;border-radius:14px;font-size:18px;font-weight:800;padding:16px;cursor:pointer;-webkit-appearance:none}
 .spl-err{font-size:13px;color:#E87070;margin-top:10px;min-height:18px}
 #rv{display:none;flex-direction:column;align-items:center;width:100%}
 .rv-to{font-size:20px;color:#8AABB8;font-weight:600;opacity:0;transition:opacity .9s;margin-bottom:4px}
 .rv-to.v{opacity:1}
 .rv-dots{font-size:clamp(64px,18vw,90px);color:#fff;font-weight:900;min-height:80px;letter-spacing:0;display:flex;align-items:center;justify-content:center;width:100%;transition:transform .25s,opacity .25s}
-.rv-dest{font-size:clamp(72px,22vw,110px);font-weight:900;letter-spacing:-3px;color:#C4982B;transform:scale(0) rotate(-4deg);opacity:0;transition:transform .55s cubic-bezier(.25,1.7,.4,1),opacity .3s;line-height:1;margin:6px 0}
+.rv-dest{font-size:clamp(72px,22vw,110px);font-weight:900;letter-spacing:-3px;color:var(--gold);transform:scale(0) rotate(-4deg);opacity:0;transition:transform .55s cubic-bezier(.25,1.7,.4,1),opacity .3s;line-height:1;margin:6px 0}
 .rv-dest.v{transform:scale(1) rotate(0deg);opacity:1}
 .rv-country{font-size:clamp(20px,6vw,30px);font-weight:700;color:#fff;letter-spacing:.12em;text-transform:uppercase;opacity:0;transition:opacity 1.1s;margin-top:4px;margin-bottom:36px}
 .rv-country.v{opacity:1}
@@ -178,18 +178,18 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 @keyframes spin{to{transform:rotate(360deg)}}
 
 
-.hdr-set-btn{background:transparent;border:none;color:#3A5A70;font-size:20px;cursor:pointer;padding:4px 2px;-webkit-appearance:none;line-height:1}
+.hdr-set-btn{background:transparent;border:none;color:var(--label);font-size:20px;cursor:pointer;padding:4px 2px;-webkit-appearance:none;line-height:1}
 .hdr-set-btn:active{color:#fff}
 #settings{display:none;position:fixed;inset:0;background:#0C1824;z-index:9990;overflow-y:auto;padding:20px 16px 80px}
 #settings.on{display:block}
 .set-close{position:fixed;top:14px;right:14px;background:#1C2B38;border:none;color:#fff;font-size:18px;width:44px;height:44px;border-radius:50%;cursor:pointer;z-index:9991;-webkit-appearance:none}
 .set-h{font-size:22px;font-weight:900;color:#fff;margin-bottom:4px;padding-top:4px}
-.set-sub{font-size:13px;color:#4A6A8A;margin-bottom:22px;line-height:1.5}
-.set-grp-h{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#4A6A8A;margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid #1C2B38}
+.set-sub{font-size:13px;color:var(--label);margin-bottom:22px;line-height:1.5}
+.set-grp-h{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid #1C2B38}
 .set-row{background:#1C2B38;border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border:1px solid #243444;gap:12px}
 .set-row:active{background:#243444}
 .set-row-h{font-size:14px;font-weight:700;color:#fff}
-.set-row-s{font-size:12px;color:#4A6A8A;margin-top:2px}
+.set-row-s{font-size:12px;color:var(--label);margin-top:2px}
 .set-row-ico{font-size:22px;flex-shrink:0}
 .set-row.danger{border-color:#4A1010}
 .set-row.danger .set-row-h{color:#F07070}
@@ -199,7 +199,7 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 .st-seen{background:#2A2A10;color:#C0B040}
 .st-unseen{background:#1A1A3A;color:#6070D0}
 .st-marks{background:#2A1A10;color:#D09040}
-.st-empty{background:#1C2B38;color:#4A6A8A}
+.st-empty{background:#1C2B38;color:var(--label)}
 
 </style>
 
@@ -322,19 +322,20 @@ html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-sy
 
 
 /* DARK MODE */
-body.dark{--bg:#0f1923;--card:#1C2B35;--dark:#0a1018;--text:#e8ddd0;--muted:#6A8898;--bdr:#2A3D4A;--gold:#C4982B;--acc:#D06038;--green:#2D5A3D;--blue:#3A6090}
+body.dark{--bg:#0f1923;--card:#1C2B35;--dark:#0a1018;--text:#e8ddd0;--muted:#6A8898;--bdr:#2A3D4A;--gold:#C4982B;--acc:#D06038;--green:#2D5A3D;--blue:#3A6090;--sub:#5A8090;--label:#3A6878}
 /* Amazing Race låses fast til mørkt tema uavhengig av hovedappens tema.
    body.dark-klassens variabler kan ikke overstyre #ar-app (ID > klasse i spesifisitet),
    men body.dark setter ikke alle AR-variabelnavnene, så vi redefinerer eksplisitt
    de som overlapper slik at dark-mode-arvede verdier ikke siver gjennom. */
-body.dark #ar-app{--bg:#0c0c0c;--card:#181818;--card2:#1f1f1f;--border:#2a2a2a;--red:#e00515;--gold:#f5c518;--green:#22c55e;--text:#f0f0f0;--muted:#666;--bdr:#2a2a2a}
-body.dark .valuta-input{background:#1C2B35;border-color:#2A3D4A;color:#e8ddd0}
-body.dark .hero{background:linear-gradient(150deg,#0a1018 0%,#1a2a20 100%)}
-body.dark .bcell{background:#1C2B35;border-color:#2A3D4A;color:#e8ddd0}
+body.dark #ar-app{--bg:#0c0c0c;--card:#181818;--card2:#1f1f1F;--border:#2a2a2a;--red:#e00515;--gold:#f5c518;--green:#22c55e;--text:#f0f0f0;--muted:#666;--bdr:#2a2a2a}
+body.dark .valuta-input{background:var(--card);border-color:var(--bdr);color:var(--text)}
+body.dark .hero{background:linear-gradient(150deg,#0a1018 0%,#1a2a20 100%);color:#e8ddd0}
+body.dark .hero .hero-sub{color:#6A8898}
+body.dark .bcell{background:var(--card);border-color:var(--bdr);color:var(--text)}
 body.dark .bcell.free{background:#8a6a1a;border-color:#8a6a1a;color:#fff}
-body.dark .bingo-btn{background:#1C2B35;border-color:#2A3D4A;color:#e8ddd0}
-body.dark .lck-in{background:#0a1018}
-.dm-btn{background:transparent;border:none;color:#3A5A70;font-size:20px;cursor:pointer;padding:4px 4px;-webkit-appearance:none;line-height:1}
+body.dark .bingo-btn{background:var(--card);border-color:var(--bdr);color:var(--text)}
+body.dark .lck-in{background:var(--dark)}
+.dm-btn{background:transparent;border:none;color:var(--label);font-size:20px;cursor:pointer;padding:4px 4px;-webkit-appearance:none;line-height:1}
 .dm-btn:active{color:#fff}
 
 /* LOGO EASTER EGG */
@@ -377,7 +378,7 @@ body.dark .lck-in{background:#0a1018}
 .skatt-hint{font-size:14px;line-height:1.6;margin-bottom:16px;color:var(--text)}
 .skatt-in-row{display:flex;gap:8px;max-width:320px}
 .skatt-in{flex:1;background:#F8F4EE;border:1.5px solid var(--bdr);border-radius:10px;color:var(--text);font-size:18px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:11px 14px;outline:none;-webkit-appearance:none}
-body.dark .skatt-in{background:#1C2B35;color:#e8ddd0}
+body.dark .skatt-in{background:var(--dark);color:#e8ddd0}
 .skatt-in:focus{border-color:var(--gold)}
 .skatt-btn{background:var(--gold);color:#111;border:none;border-radius:10px;padding:11px 18px;font-size:16px;font-weight:800;cursor:pointer;-webkit-appearance:none}
 .skatt-err{font-size:12px;color:#E87070;margin-top:6px;min-height:16px}
@@ -391,14 +392,14 @@ body.dark .skatt-in{background:#1C2B35;color:#e8ddd0}
 .skatt-win-sub{font-size:15px;color:var(--muted);line-height:1.5}
 
 /* TK-KORT (Hjem) */
-.tk-card{background:linear-gradient(135deg,#1C2B35 0%,#2D4A3E 100%);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #2A3D4A;color:#fff}
-.tk-lbl{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7AA0B0;margin-bottom:10px}
+.tk-card{background:linear-gradient(135deg,var(--tk-g1,var(--dark)) 0%,var(--tk-g2,#2D4A3E) 100%);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--bdr);color:var(--hero-txt,#fff)}
+.tk-lbl{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);margin-bottom:10px}
 .tk-inner{display:flex;align-items:center;gap:14px}
 .tk-avatar{width:56px;height:56px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:2px solid rgba(255,255,255,.2)}
 .tk-info{flex:1}
 .tk-name{font-size:18px;font-weight:900;letter-spacing:-.3px}
-.tk-title{font-size:12px;color:#7AA0B0;margin-top:2px;font-weight:600}
-.tk-role{font-size:12px;color:#8AABB8;margin-top:3px;line-height:1.4}
+.tk-title{font-size:12px;color:var(--sub);margin-top:2px;font-weight:600}
+.tk-role{font-size:12px;color:var(--hero-sub,#8AABB8);margin-top:3px;line-height:1.4}
 .tk-phone{display:inline-block;margin-top:8px;color:var(--gold);font-weight:700;font-size:14px;text-decoration:none}
 
 /* EMOJI HERO TAP */
@@ -417,7 +418,7 @@ body.dark .skatt-in{background:#1C2B35;color:#e8ddd0}
 .sp-btn{background:#111;border:1.5px solid #333;border-radius:12px;color:#fff;padding:14px 8px;font-size:11px;font-weight:700;letter-spacing:.05em;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s}
 .sp-btn:active{background:#222;border-color:#666}
 .sp-btn .sp-ico{font-size:24px;line-height:1}
-.sp-btn.active{border-color:#C4982B;background:#1a1500}
+.sp-btn.active{border-color:var(--gold);background:#1a1500}
 .sp-status{font-size:11px;color:#444;text-align:center;margin-top:8px;min-height:18px;letter-spacing:.05em}
 
 /* KAOS-EFFEKTER */
@@ -434,7 +435,7 @@ body.shake-mode{animation:app-shake .5s infinite}
 .husk-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bdr)}
 .husk-item:last-child{border-bottom:none;padding-bottom:0}
 .husk-ico{font-size:18px;flex-shrink:0;margin-top:1px}
-.husk-txt{font-size:13px;line-height:1.5;color:#7AA0B0}
+.husk-txt{font-size:13px;line-height:1.5;color:var(--sub)}
 .husk-empty{font-size:13px;color:var(--muted);font-style:italic;padding:8px 0}
 
 /* DRIKKELEK */
@@ -474,14 +475,14 @@ body.shake-mode{animation:app-shake .5s infinite}
 .ru-return:active{background:rgba(255,255,255,.22)}
 
 /* VARSEL-BANNER */
-#varsel-banner{display:none;position:sticky;top:0;z-index:4000;background:linear-gradient(90deg,#b85228,#c4982b);color:#fff;padding:9px 16px;font-size:13px;font-weight:700;line-height:1;box-shadow:0 2px 12px rgba(0,0,0,.25);cursor:pointer;-webkit-tap-highlight-color:transparent;align-items:center;gap:8px;white-space:nowrap;overflow:hidden}
+#varsel-banner{display:none;position:sticky;top:0;z-index:4000;background:linear-gradient(90deg,var(--acc),var(--gold));color:#fff;padding:9px 16px;font-size:13px;font-weight:700;line-height:1;box-shadow:0 2px 12px rgba(0,0,0,.25);cursor:pointer;-webkit-tap-highlight-color:transparent;align-items:center;gap:8px;white-space:nowrap;overflow:hidden}
 #varsel-banner.show{display:flex}
 #varsel-banner .v-ico{font-size:16px;flex-shrink:0}
 #varsel-banner .v-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #varsel-banner .v-hint{font-size:10px;opacity:.7;flex-shrink:0;font-weight:400}
 
 /* VARSEL-TOAST */
-#varsel-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);z-index:10400;background:linear-gradient(135deg,#b85228,#c4982b);color:#fff;border-radius:18px;padding:14px 20px;max-width:min(88vw,360px);width:max-content;box-shadow:0 8px 32px rgba(0,0,0,.45);display:flex;align-items:flex-start;gap:12px;opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease}
+#varsel-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);z-index:10400;background:linear-gradient(135deg,var(--acc),var(--gold));color:#fff;border-radius:18px;padding:14px 20px;max-width:min(88vw,360px);width:max-content;box-shadow:0 8px 32px rgba(0,0,0,.45);display:flex;align-items:flex-start;gap:12px;opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease}
 #varsel-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 #varsel-toast.hide{opacity:0;transform:translateX(-50%) translateY(20px)}
 .vt-ico{font-size:22px;flex-shrink:0;margin-top:1px}
@@ -495,13 +496,13 @@ body.shake-mode{animation:app-shake .5s infinite}
 /* DILEMMA-AVSLØRING: egen, ekstra prominent boks når passordet deles */
 #dilemma-delt-toast{position:fixed;inset:0;z-index:10500;background:rgba(8,14,20,.88);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
 #dilemma-delt-toast.show{display:flex}
-.ddt-card{background:linear-gradient(135deg,#C4982B,#E8B838);color:#111;border-radius:22px;padding:28px 24px;max-width:min(90vw,380px);width:100%;text-align:center;box-shadow:0 12px 48px rgba(196,152,43,.5);animation:ddt-pop .4s cubic-bezier(.2,1.4,.4,1)}
+.ddt-card{background:linear-gradient(135deg,var(--gold),#E8B838);color:#111;border-radius:22px;padding:28px 24px;max-width:min(90vw,380px);width:100%;text-align:center;box-shadow:0 12px 48px rgba(196,152,43,.5);animation:ddt-pop .4s cubic-bezier(.2,1.4,.4,1)}
 @keyframes ddt-pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
 .ddt-ico{font-size:44px;margin-bottom:8px}
 .ddt-lbl{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-bottom:6px}
 .ddt-navn{font-size:16px;font-weight:800;margin-bottom:14px}
 .ddt-pw{font-size:38px;font-weight:900;letter-spacing:.08em;font-family:monospace;background:rgba(0,0,0,.12);border-radius:14px;padding:14px 10px;margin-bottom:16px;word-break:break-all}
-.ddt-btn{background:#111;color:#C4982B;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ddt-btn{background:#111;color:var(--gold);border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;width:100%;cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 /* NAVN PÅ SPLASH */
 .spl-navn-wrap{margin-bottom:14px;width:100%}
@@ -513,11 +514,11 @@ body.shake-mode{animation:app-shake .5s infinite}
 /* AI CHAT */
 #ai-chat-panel{position:fixed;inset:0;z-index:7000;background:var(--bg);display:none;flex-direction:column}
 .ai-chat-hdr{background:var(--dark);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.ai-chat-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#3A6090,#C4982B);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ai-chat-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--gold));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .ai-chat-info{flex:1}
 .ai-chat-name{font-size:15px;font-weight:800}
-.ai-chat-status{font-size:11px;color:#7AA0B0}
-.ai-chat-close{background:transparent;border:none;color:#7AA0B0;font-size:22px;cursor:pointer;padding:11px;margin:-11px}
+.ai-chat-status{font-size:11px;color:var(--sub)}
+.ai-chat-close{background:transparent;border:none;color:var(--sub);font-size:22px;cursor:pointer;padding:11px;margin:-11px}
 .ai-chat-msgs{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
 .ai-msg{max-width:80%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;word-break:break-word}
 .ai-msg.user{background:var(--acc);color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
@@ -532,39 +533,39 @@ body.shake-mode{animation:app-shake .5s infinite}
 
 /* KOMITE AI-INNBOKS */
 .ai-inbox-msg{background:#1C2B38;border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1px solid #243444}
-.ai-inbox-from{font-size:11px;font-weight:800;letter-spacing:.08em;color:#C4982B;margin-bottom:4px}
+.ai-inbox-from{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--gold);margin-bottom:4px}
 .ai-inbox-txt{font-size:13px;color:#e8ddd0;line-height:1.5;margin-bottom:8px}
-.ai-inbox-time{font-size:10px;color:#4A6A8A;margin-bottom:8px}
+.ai-inbox-time{font-size:10px;color:var(--label);margin-bottom:8px}
 .ai-reply-wrap{display:flex;gap:6px}
 .ai-reply-in{flex:1;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;outline:none;-webkit-appearance:none}
-.ai-reply-btn{background:#C4982B;color:#111;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer}
+.ai-reply-btn{background:var(--gold);color:#111;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer}
 
 /* BOSS INNBOKS - SAMTALER */
 .boss-conv-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
 .boss-conv-item{background:#1C2B38;border-radius:10px;padding:12px 14px;cursor:pointer;border:1.5px solid transparent;display:flex;align-items:center;gap:10px;-webkit-tap-highlight-color:transparent}
-.boss-conv-item.new{border-color:#C4982B;background:#1E2E1A}
+.boss-conv-item.new{border-color:var(--gold);background:#1E2E1A}
 .boss-conv-name{font-size:14px;font-weight:800;color:#e8ddd0;flex:1}
-.boss-conv-preview{font-size:11px;color:#4A6A8A;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-.boss-conv-badge{background:#C4982B;color:#111;border-radius:20px;font-size:10px;font-weight:900;padding:2px 7px;flex-shrink:0}
-.boss-conv-time{font-size:10px;color:#4A6A8A;flex-shrink:0}
+.boss-conv-preview{font-size:11px;color:var(--label);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.boss-conv-badge{background:var(--gold);color:#111;border-radius:20px;font-size:10px;font-weight:900;padding:2px 7px;flex-shrink:0}
+.boss-conv-time{font-size:10px;color:var(--label);flex-shrink:0}
 .boss-chat-wrap{display:flex;flex-direction:column;height:100%}
 .boss-chat-hdr{display:flex;align-items:center;gap:10px;padding:0 0 12px;border-bottom:1px solid #1C2B38;margin-bottom:12px}
-.boss-chat-back{background:transparent;border:none;color:#7AA0B0;font-size:20px;cursor:pointer;padding:4px;flex-shrink:0}
+.boss-chat-back{background:transparent;border:none;color:var(--sub);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0}
 .boss-chat-navn{font-size:15px;font-weight:800;color:#e8ddd0;flex:1}
 .boss-msg-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:40vh;overflow-y:auto}
 .boss-msg-user{background:#243444;border-radius:12px;padding:8px 12px}
-.boss-msg-user .boss-msg-fra{font-size:10px;font-weight:800;color:#C4982B;margin-bottom:3px;letter-spacing:.06em}
+.boss-msg-user .boss-msg-fra{font-size:10px;font-weight:800;color:var(--gold);margin-bottom:3px;letter-spacing:.06em}
 .boss-msg-user .boss-msg-txt{font-size:13px;color:#e8ddd0;line-height:1.5}
 .boss-msg-bot{background:#1A2E1A;border-radius:12px;padding:8px 12px;border:1px solid #2D5A3D}
 .boss-msg-bot .boss-msg-fra{font-size:10px;font-weight:800;color:#4CAF72;margin-bottom:3px;letter-spacing:.06em}
 .boss-msg-bot .boss-msg-txt{font-size:13px;color:#e8ddd0;line-height:1.5}
-.boss-msg-time{font-size:10px;color:#4A6A8A;margin-top:3px}
+.boss-msg-time{font-size:10px;color:var(--label);margin-top:3px}
 
 /* NAVN-REDIGERING I SETTINGS */
 .navn-edit-wrap{background:#1C2B38;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px}
-.navn-edit-lbl{font-size:13px;color:#7AA0B0;flex-shrink:0}
+.navn-edit-lbl{font-size:13px;color:var(--sub);flex-shrink:0}
 .navn-edit-in{flex:1;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:8px;color:#fff;font-size:14px;font-weight:700;padding:8px 10px;outline:none;-webkit-appearance:none}
-.navn-edit-btn{background:#C4982B;color:#111;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0}
+.navn-edit-btn{background:var(--gold);color:#111;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -585,7 +586,7 @@ body.shake-mode{animation:app-shake .5s infinite}
       <input class="spl-navn-in" id="gjett-navn" type="text" placeholder="Kun fornavn..."
         autocomplete="given-name" autocorrect="off" autocapitalize="words" maxlength="20" inputmode="text">
     </div>
-    <div id="gjett-map" style="width:100%;max-width:420px;height:320px;border-radius:14px;overflow:hidden;border:2px solid var(--gold,#C4982B);background:#1a2530"></div>
+    <div id="gjett-map" style="width:100%;max-width:420px;height:320px;border-radius:14px;overflow:hidden;border:2px solid var(--gold,var(--gold));background:#1a2530"></div>
     <div id="gjett-valgt-info" style="font-size:12px;color:#9AB;margin-top:10px;min-height:16px;text-align:center">Ingen sted valgt ennå</div>
     <button class="spl-go" id="gjett-lock-btn" onclick="laasGjett()" disabled style="margin-top:14px;max-width:420px;width:100%;opacity:.5">Lås gjett 🔒</button>
     <div style="font-size:11px;color:#789;margin-top:10px;text-align:center;max-width:320px">Obs: Du kan IKKE endre gjettet ditt etter at du har låst det!</div>
@@ -606,7 +607,7 @@ body.shake-mode{animation:app-shake .5s infinite}
   <div id="dilemma-resultat-view" style="display:none;flex-direction:column;align-items:center;width:100%;padding:24px 16px;box-sizing:border-box">
     <div class="spl-logo" style="font-size:38px;margin-bottom:4px" id="dilemma-res-ico">🔓</div>
     <div class="spl-h" style="font-size:20px" id="dilemma-res-tittel">Passordet er</div>
-    <div style="font-size:32px;font-weight:900;color:var(--gold,#C4982B);letter-spacing:.05em;margin:14px 0;font-family:monospace" id="dilemma-res-pw"></div>
+    <div style="font-size:32px;font-weight:900;color:var(--gold,var(--gold));letter-spacing:.05em;margin:14px 0;font-family:monospace" id="dilemma-res-pw"></div>
     <div class="spl-t" style="font-size:13px;text-align:center;max-width:320px;margin-bottom:20px" id="dilemma-res-tekst"></div>
     <button class="spl-go" onclick="dilemmaFortsett()" style="max-width:380px;width:100%">Fortsett →</button>
   </div>
@@ -649,17 +650,34 @@ body.shake-mode{animation:app-shake .5s infinite}
 </div>
 
 <div id="main-confetti"></div>
-<div id="shake-toast" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);z-index:8100;background:#1C2B35;border:1px solid #C4982B;border-radius:16px;padding:22px 28px;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:280px">
+<div id="shake-toast" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.8);z-index:8100;background:var(--dark);border:1px solid var(--gold);border-radius:16px;padding:22px 28px;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:280px">
   <div id="shake-toast-emoji" style="font-size:38px;margin-bottom:8px">🎉</div>
   <div id="shake-toast-txt" style="font-size:14px;font-weight:800;color:#e8ddd0;line-height:1.4"></div>
 </div>
-<div id="fake-install" style="position:fixed;inset:0;z-index:9500;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center">
-  <div style="font-size:44px" id="fake-install-emoji">⚙️</div>
-  <div style="font-size:14px;font-weight:800;color:#e8ddd0" id="fake-install-txt">Forbereder...</div>
-  <div style="width:220px;height:8px;background:#1C2B35;border-radius:5px;overflow:hidden;border:1px solid #2A3D4A">
-    <div id="fake-install-bar" style="width:0%;height:100%;background:#C4982B;transition:width .3s ease-out"></div>
+<div id="tema-modal" style="position:fixed;inset:0;z-index:9500;display:none;flex-direction:column;background:#1C2B35;transition:opacity .25s">
+  <div style="flex-shrink:0;padding:18px 18px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.1)">
+    <div style="font-size:17px;font-weight:900;color:#fff">Fargepalett</div>
+    <button onclick="lukkTemavelger()" style="background:none;border:none;font-size:22px;color:rgba(255,255,255,0.5);padding:4px 8px;cursor:pointer;-webkit-tap-highlight-color:transparent">✕</button>
   </div>
-  <div style="font-size:11px;color:#4A6A8A" id="fake-install-sub">0%</div>
+  <div style="flex:1;overflow-y:auto;padding:14px 14px 0">
+    <div id="tema-liste" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+  <div style="flex-shrink:0;padding:14px 14px 24px">
+    <div id="tema-preview-wrap" style="border-radius:14px;overflow:hidden;border:1.5px solid var(--bdr);transition:all .2s">
+      <div id="tema-preview-bg" style="padding:14px 14px 12px;transition:background .3s">
+        <div id="tema-preview-label" style="font-size:10px;font-weight:700;letter-spacing:.08em;margin-bottom:8px;opacity:.6;transition:color .3s">FORHÅNDSVISNING</div>
+        <div id="tema-preview-card" style="border-radius:10px;padding:12px 14px;transition:background .3s,box-shadow .3s">
+          <div id="tema-preview-title" style="font-size:13px;font-weight:900;margin-bottom:4px;transition:color .3s">KKs turnéapp!</div>
+          <div id="tema-preview-sub" style="font-size:11px;margin-bottom:10px;transition:color .3s">Pula, Kroatia · 2.–11. okt 2026</div>
+          <div style="display:flex;gap:7px">
+            <div id="tema-preview-btn" style="flex:1;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:800;text-align:center;transition:background .3s,color .3s">Program →</div>
+            <div id="tema-preview-muted" style="flex:1;border-radius:7px;padding:7px 10px;font-size:11px;text-align:center;transition:background .3s,color .3s">Kart ·  Info</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button id="tema-bruk-btn" onclick="brukValgtTema()" style="width:100%;margin-top:10px;padding:14px;border-radius:12px;border:none;font-size:14px;font-weight:900;letter-spacing:.03em;cursor:pointer;background:#C4982B;color:#111;transition:opacity .2s;-webkit-tap-highlight-color:transparent">Bruk dette temaet</button>
+  </div>
 </div>
 
 <div id="install-banner" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:9700;background:var(--card);border:1.5px solid var(--gold);border-radius:16px;padding:14px 16px;box-shadow:0 4px 20px rgba(0,0,0,.25);align-items:center;gap:12px">
@@ -682,7 +700,7 @@ body.shake-mode{animation:app-shake .5s infinite}
       <div id="apptur-dots" style="display:flex;gap:6px"></div>
       <div style="display:flex;gap:8px">
         <button id="apptur-prev-btn" onclick="apptursForrige()" style="background:rgba(255,255,255,.08);color:#C9D8E4;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent">← Forrige</button>
-        <button id="apptur-next-btn" onclick="apptursNeste()" style="background:#C4982B;color:#111;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent">Neste →</button>
+        <button id="apptur-next-btn" onclick="apptursNeste()" style="background:var(--gold);color:#111;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent">Neste →</button>
       </div>
     </div>
   </div>
@@ -735,9 +753,9 @@ body.shake-mode{animation:app-shake .5s infinite}
 <div id="varsel-banner" onclick="visBannerToast()"><span class="v-ico">📢</span><span class="v-txt" id="varsel-txt"></span><span class="v-hint">trykk for mer</span></div>
   <div class="app-hdr">
     <div class="hdr-left">
-      <div class="hdr-title">KKs turnéapp!</div>
-      <div class="hdr-sub" style="opacity:.5;font-size:10px" id="ver-tap"
-        onclick="kjorFakeInstall(); statTellEgg('Fake install (trykk versjon)');">v26.07.12-06</div>
+      <div class="hdr-title" onclick="apneTemavelger()" style="cursor:pointer">KKs turnéapp!</div>
+      <div class="hdr-sub" style="opacity:.5;font-size:10px;cursor:pointer" id="ver-tap"
+        onclick="apneTemavelger()">v26.07.18-03</div>
     </div>
     <div class="hdr-icon" id="hdr-logo" onclick="logoTap()"><svg style="height:40px;width:auto;display:block" id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 500 496"><image width="500" height="496" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAAHwCAYAAABQR52cAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAydpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDEwLjAtYzAwMCA3OS5kMDRjYzE2OTgsIDIwMjUvMDcvMDItMTI6MTg6MTMgICAgICAgICI+IDxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+IDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bXA6Q3JlYXRvclRvb2w9IkFkb2JlIFBob3Rvc2hvcCAyNy4yIChXaW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1ODg1MjRDQjY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo1ODg1MjRDQzY5ODUxMUYxOUQ5Q0RGNzZGRTI4NkFEQiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjU4ODUyNEM5Njk4NTExRjE5RDlDREY3NkZFMjg2QURCIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU4ODUyNENBNjk4NTExRjE5RDlDREY3NkZFMjg2QURCIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+cg9cLwAAIwpJREFUeNrs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"/></svg></div>
     <button class="dm-btn" id="dm-btn" onclick="toggleDark()" title="Mørk/lys modus">🌙</button>
@@ -1220,13 +1238,13 @@ let drikkPlayers=[];
 let drikkAktivKat="alle";
 
 const DRIKK_KATEGORIER=[
-  {id:"alle",   lbl:"🎲 Alle",    color:"#C4982B"},
+  {id:"alle",   lbl:"🎲 Alle",    color:"var(--gold)"},
   {id:"sannhet",lbl:"🔍 Sannhet", color:"#1565c0"},
   {id:"tor",    lbl:"😈 Nødt",    color:"#c0392b"},
   {id:"fmk",    lbl:"💘 FMK",     color:"#7a1a2a"},
   {id:"pekelek",lbl:"👉 Pekelek", color:"#2D5A3D"},
   {id:"regel",  lbl:"📜 Regler",  color:"#4a148c"},
-  {id:"hotseat",lbl:"🔥 Hot Seat",color:"#b85228"},
+  {id:"hotseat",lbl:"🔥 Hot Seat",color:"var(--acc)"},
 ];
 
 const DRIKK_KORT={
@@ -1521,7 +1539,7 @@ const LOCKS={
       <div class="ev"><span class="ev-t">~16:00</span><span class="ev-v"><strong>Målgang</strong></span></div>
       <div class="ev"><span class="ev-t">20:00</span><span class="ev-v"><strong>Felles middag</strong> på [RESTAURANT], med premieutdeling og feiring! 🥂</span></div>
     </div>
-    <div style="padding:0 16px 16px"><button onclick="openAR()" style="display:block;width:100%;background:#C4982B;color:#111;border-radius:12px;padding:15px;text-align:center;font-size:16px;font-weight:900;border:none;cursor:pointer;-webkit-appearance:none;font-family:inherit">&#127937; Åpne Amazing Race-appen →</button></div>`}
+    <div style="padding:0 16px 16px"><button onclick="openAR()" style="display:block;width:100%;background:var(--gold);color:#111;border-radius:12px;padding:15px;text-align:center;font-size:16px;font-weight:900;border:none;cursor:pointer;-webkit-appearance:none;font-family:inherit">&#127937; Åpne Amazing Race-appen →</button></div>`}
 };
 
 const DAYS=[
@@ -1795,7 +1813,7 @@ function buildHjem(){
   return `
     <div class="hero">
       <div class="hero-emoji" id="hero-emojis"><span id="he-0" onclick="heroEmojiTap(0)">🦓</span><span id="he-1" onclick="heroEmojiTap(1)">🌊</span><span id="he-2" onclick="heroEmojiTap(2)">😎</span><span id="he-3" onclick="heroEmojiTap(3)">🍹</span><span id="he-4" onclick="heroEmojiTap(4)">🎵</span></div>
-      ${aiChatNavn?`<div style="font-size:13px;font-weight:700;color:#7AA0B0;margin-bottom:4px;letter-spacing:.02em">👋 Hei, ${aiChatNavn}!</div>`:''}
+      ${aiChatNavn?`<div style="font-size:13px;font-weight:700;color:var(--sub);margin-bottom:4px;letter-spacing:.02em">👋 Hei, ${aiChatNavn}!</div>`:''}
       <div class="hero-title">Knauskoret i Pula!</div>
       <div class="hero-sub">Velkommen til Kroatia, sol, Adriaterhavet og ti dager med musikk, mat og minner som varer resten av livet!</div>
       <div class="hero-pill">2.–11. oktober 2026</div>
@@ -2067,7 +2085,7 @@ function buildKart(){
         {n:"🏊",bg:"#0096c7",name:"Valkane Beach",desc:"Fin betongkai med trapper ned i sjøen. Omgitt av furutrær. Bar og dusjer på stedet.",walk:"Ca. 10 min med buss (linje 1)",url:"https://maps.google.com/?q=Valkane+Beach,+Lungomare,+Pula"},
         {n:"🏊",bg:"#00b4d8",name:"Hawaii Beach",desc:"En av de vakreste og klareste strendene nær Pula. Noe klatring ned til vannet — gode sko anbefales.",walk:"20 min sørover med bil/taxi",url:"https://maps.google.com/?q=Hawaii+Beach,+Pula"},
         {n:"🏊",bg:"#1565c0",name:"Verudela Canyon",desc:"Dramatisk kløft med stup og krystallklart vann. Modige sjeler hopper fra klippene. Pass på glatte steiner!",walk:"20 min sørover med bil/taxi",url:"https://maps.google.com/?q=Verudela+Canyon,+Pula"},
-        {n:"🏝️",bg:"#c4982b",name:"Cape Kamenjak",desc:"Naturreservat med over 30 skjulte strender — den beste av dem alle. Lei sykkel eller ta taxi.",walk:"30 min sørover med bil/taxi",url:"https://maps.google.com/?q=Cape+Kamenjak,+Premantura"},
+        {n:"🏝️",bg:"var(--gold)",name:"Cape Kamenjak",desc:"Naturreservat med over 30 skjulte strender — den beste av dem alle. Lei sykkel eller ta taxi.",walk:"30 min sørover med bil/taxi",url:"https://maps.google.com/?q=Cape+Kamenjak,+Premantura"},
       ].map(m=>`<div class="map-item">
         <div class="map-dot" style="background:${m.bg};font-size:14px">${m.n}</div>
         <div><div class="map-name">${m.name}</div><div class="map-desc">${m.desc}</div><div class="map-desc" style="margin-top:3px">🚶 ${m.walk} · <a href="${m.url}" target="_blank" style="font-size:11px;font-weight:700;color:var(--blue)">kart →</a></div></div>
@@ -2078,12 +2096,12 @@ function buildKart(){
     <div class="card">
       <div style="font-size:11px;color:var(--muted);margin-bottom:10px">💰 = rimelig · 💰💰 = moderat · 💰💰💰 = dyrere · 🌱 = godt for veganer/vegetarianere</div>
       ${[
-        {n:"🍽️",bg:"#b85228",name:"Agrippina Street Food",desc:"Byens mest populære burgersted — ekstremt høy rating. Book bord på forhånd! 💰💰",walk:"Ul. Sergijevaca 5, gamlebyen",url:"https://maps.google.com/?q=Agrippina+Street+Food,+Ul.+Sergijevaca+5,+Pula"},
+        {n:"🍽️",bg:"var(--acc)",name:"Agrippina Street Food",desc:"Byens mest populære burgersted — ekstremt høy rating. Book bord på forhånd! 💰💰",walk:"Ul. Sergijevaca 5, gamlebyen",url:"https://maps.google.com/?q=Agrippina+Street+Food,+Ul.+Sergijevaca+5,+Pula"},
         {n:"🍽️",bg:"#2D5A3D",name:"Bambo",desc:"Hjemmekjøkkenmad med sjel — istriske spesialiteter, faste vegetar/veganalternativer. Familiedrevet og hyggelig. 💰💰 🌱",walk:"Zlatne stijene 11, Verudela",url:"https://maps.google.com/?q=Bambo,+Zlatne+stijene+11,+Pula"},
         {n:"🍽️",bg:"#1565c0",name:"La Familia",desc:"Fersk fisk og sjømat i gamlebyen. Imøtekommende personale, rimelige priser for kvaliteten. 💰💰",walk:"Kandlerova ul. 5",url:"https://maps.google.com/?q=La+Familia,+Kandlerova+ul.+5,+Pula"},
         {n:"🍽️",bg:"#4a148c",name:"Kantina Restaurant",desc:"Delikat sjømat og trøffelretter litt utenfor turiststrøket. Et gjemt perle. 💰💰💰",walk:"Flanatička ul. 16",url:"https://maps.google.com/?q=Kantina+Restaurant,+Flanati%C4%8Dka+ul.+16,+Pula"},
         {n:"🍽️",bg:"#1b5e20",name:"Konoba Boccaporta",desc:"Autentisk istrisk konoba med hjemmelaget pasta, fuži og peka. Book bord! 💰💰",walk:"Dolinka 18, litt utenfor sentrum",url:"https://maps.google.com/?q=Konoba+Boccaporta,+Dolinka+18,+Pula"},
-        {n:"☕",bg:"#c4982b",name:"PuSa Food Lab",desc:"Himmelsk hjemmelaget focaccia og smørbrød. Perfekt lunsj. Åpent hverdager til 17:00. 💰 🌱",walk:"Jeretova 17, nær Valkane",url:"https://maps.google.com/?q=PuSa+Food+Lab,+Rikarda+Katalini%C4%87a+Jeretova+17,+Pula"},
+        {n:"☕",bg:"var(--gold)",name:"PuSa Food Lab",desc:"Himmelsk hjemmelaget focaccia og smørbrød. Perfekt lunsj. Åpent hverdager til 17:00. 💰 🌱",walk:"Jeretova 17, nær Valkane",url:"https://maps.google.com/?q=PuSa+Food+Lab,+Rikarda+Katalini%C4%87a+Jeretova+17,+Pula"},
       ].map(m=>`<div class="map-item">
         <div class="map-dot" style="background:${m.bg};font-size:14px">${m.n}</div>
         <div><div class="map-name">${m.name}</div><div class="map-desc">${m.desc}</div><div class="map-desc" style="margin-top:3px">📍 ${m.walk} · <a href="${m.url}" target="_blank" style="font-size:11px;font-weight:700;color:var(--blue)">kart →</a></div></div>
@@ -2093,7 +2111,7 @@ function buildKart(){
     <div class="sec-lbl">Barer & uteliv</div>
     <div class="card">
       ${[
-        {n:"🍹",bg:"#b85228",name:"Old City Bar",desc:"Hjerte av gamlebyen. Stor terrasse på Danteov trg. Bred ølmeny, cocktails, god mat. Åpner 06:30 — yes, for frokost. Happy hour varierer, spør bartender.",walk:"Danteov trg 1",url:"https://maps.google.com/?q=Old+City+Bar,+Danteov+trg+1,+Pula"},
+        {n:"🍹",bg:"var(--acc)",name:"Old City Bar",desc:"Hjerte av gamlebyen. Stor terrasse på Danteov trg. Bred ølmeny, cocktails, god mat. Åpner 06:30 — yes, for frokost. Happy hour varierer, spør bartender.",walk:"Danteov trg 1",url:"https://maps.google.com/?q=Old+City+Bar,+Danteov+trg+1,+Pula"},
         {n:"🍺",bg:"#1565c0",name:"The Shipyard Pub",desc:"Koselig pub litt utenfor turiststøy. Avslappet stemning, god mat og rimelig. Særdeles hyggelig personale. Happy hour tidlig kveld.",walk:"Ul. Svetog Teodora 1",url:"https://maps.google.com/?q=The+Shipyard+Pub,+Ul.+Svetog+Teodora+1,+Pula"},
         {n:"🍸",bg:"#4a148c",name:"Bass Bar",desc:"Beste cocktailbar i Pula — bartenderne lager skreddersydde drinks basert på dine preferanser! Ca. €6 per cocktail. Litt utenfor sentrum, absolutt verdt turen.",walk:"Širolina ul. 3, Štinjan",url:"https://maps.google.com/?q=Bass+bar+Pula,+%C5%A0irolina+ul.+3,+Pula"},
         {n:"🍀",bg:"#2D5A3D",name:"Bounty (Irish Pub)",desc:"Irsk pub med Guinness på fat og lokale ølsorter. Rolig, lokal stemning. Cash only. Fin terrasse.",walk:"Veronska ul. 8",url:"https://maps.google.com/?q=Bounty+bar,+Veronska+ul.+8,+Pula"},
@@ -2106,7 +2124,7 @@ function buildKart(){
     <div class="sec-lbl">🏳️‍🌈 LGBTQ+-vennlige steder</div>
     <div class="card">
       <div class="map-item">
-        <div class="map-dot" style="background:#b85228;font-size:14px">ℹ️</div>
+        <div class="map-dot" style="background:var(--acc);font-size:14px">ℹ️</div>
         <div>
           <div class="map-name">Pula er generelt LGBTQ-vennlig</div>
           <div class="map-desc">Pula arrangerer Pride siden 2024 og er en av de mer åpne byene i Kroatia. Det finnes ingen dedikert gaybar i Pula, men mange barer er kjent for inkluderende stemning. <strong>Old City Bar</strong> og <strong>The Shipyard Pub</strong> trekkes frem som særlig inkluderende og hyggelige.</div>
@@ -2135,7 +2153,7 @@ function buildKart(){
       ${[
         {n:"🛒",bg:"#2D5A3D",name:"Plodine (nærmest Villa Stellina)",desc:"Stor supermarked med godt utvalg. Gratis parkering. Åpent ti.–lø. 07–22, søn. 07–22.",walk:"Mutilska ul. 60B · Ca. 10 min gange fra Villa Stellina",url:"https://maps.google.com/?q=Plodine,+Mutilska+ul.+60B,+Pula"},
         {n:"🛒",bg:"#1565c0",name:"Plodine (Stoja)",desc:"Alternativ Plodine litt sørover, nær strendene på Verudela-halvøya.",walk:"Stoja 14A · Ca. 15 min gange",url:"https://maps.google.com/?q=Plodine,+Stoja+14A,+Pula"},
-        {n:"🥕",bg:"#c4982b",name:"Tržnica — Green Market",desc:"Ferskt lokalt marked med frukt, grønnsaker, ost og pršut. Åpent morgen til middag.",walk:"Narodni trg · Gamlebyen",url:"https://maps.google.com/?q=Tr%C5%BEnica+Pula,+Narodni+trg,+Pula"},
+        {n:"🥕",bg:"var(--gold)",name:"Tržnica — Green Market",desc:"Ferskt lokalt marked med frukt, grønnsaker, ost og pršut. Åpent morgen til middag.",walk:"Narodni trg · Gamlebyen",url:"https://maps.google.com/?q=Tr%C5%BEnica+Pula,+Narodni+trg,+Pula"},
       ].map(m=>`<div class="map-item">
         <div class="map-dot" style="background:${m.bg};font-size:14px">${m.n}</div>
         <div><div class="map-name">${m.name}</div><div class="map-desc">${m.desc}</div><div class="map-desc" style="margin-top:3px">📍 ${m.walk} · <a href="${m.url}" target="_blank" style="font-size:11px;font-weight:700;color:var(--blue)">kart →</a></div></div>
@@ -2146,7 +2164,7 @@ function buildKart(){
     <div class="card">
       ${[
         {n:"⛵",bg:"#0077b6",name:"Pula Boat Tours (Europa Boat)",desc:"Solnedgangstur med delfiner, mat og drikke inkludert. 3 timer. Svært godt vurdert. Sjekk sesong og book på forhånd.",walk:"Riva (havnepromenaden)",url:"https://maps.google.com/?q=Europa+Boat,+Riva,+Pula"},
-        {n:"🗺️",bg:"#b85228",name:"Vandre i gamlebyen",desc:"Pula Arena → Sergius-buen → Forum → Kaštel. En naturlig rundtur på ca. 2–3 timer med stopp for espresso og gelato.",walk:"Start ved arenaen",url:"https://maps.google.com/?q=Pula+Arena,+Flavijevska,+Pula"},
+        {n:"🗺️",bg:"var(--acc)",name:"Vandre i gamlebyen",desc:"Pula Arena → Sergius-buen → Forum → Kaštel. En naturlig rundtur på ca. 2–3 timer med stopp for espresso og gelato.",walk:"Start ved arenaen",url:"https://maps.google.com/?q=Pula+Arena,+Flavijevska,+Pula"},
         {n:"🚴",bg:"#2D5A3D",name:"Sykkel til Cape Kamenjak",desc:"Lei sykkel i sentrum og sykkel sørover til naturreservatet. Ca. 14 km én vei. Skjulte strender venter!",walk:"Sykkelutleie finnes i sentrum",url:"https://maps.google.com/?q=Cape+Kamenjak,+Premantura"},
       ].map(m=>`<div class="map-item">
         <div class="map-dot" style="background:${m.bg};font-size:14px">${m.n}</div>
@@ -2722,7 +2740,7 @@ function orakelSvar(){
 let spinNames=[];
 let spinAngle=0;
 let spinRunning=false;
-const SPIN_COLORS=["#C4982B","#D06038","#2D5A3D","#1565c0","#7a1a2a","#4a148c","#0077b6","#b85228","#1b5e20","#c0392b"];
+const SPIN_COLORS=["var(--gold)","#D06038","#2D5A3D","#1565c0","#7a1a2a","#4a148c","#0077b6","var(--acc)","#1b5e20","#c0392b"];
 
 function spinQuick(grp){
   if(grp==='meg'){
@@ -3375,7 +3393,7 @@ launchMainConfetti=function(target){
   const el=document.getElementById("main-confetti");
   if(!el)return;
   const poops=["💩","🚽","🧻","💨","🫢"];
-  const cols=["#C4982B","#E05020","#fff","#3b82f6","#22c55e","#f97316","#a855f7","#ec4899","#f5c518"];
+  const cols=["var(--gold)","#E05020","#fff","#3b82f6","#22c55e","#f97316","#a855f7","#ec4899","#f5c518"];
   for(let i=0;i<120;i++){
     const p=document.createElement("div");
     const sz=Math.random()*11+5;
@@ -3636,7 +3654,7 @@ async function pushAIChatTilGist(msg){
 function updateBypassSwitch(trackId, thumbId, on){
   const track = document.getElementById(trackId);
   const thumb = document.getElementById(thumbId);
-  if(track) track.style.background = on ? "#C4982B" : "#2A3D4A";
+  if(track) track.style.background = on ? "var(--gold)" : "var(--bdr)";
   if(thumb) thumb.style.transform = on ? "translateX(22px)" : "translateX(0)";
 }
 
@@ -3646,43 +3664,262 @@ function toggleBypassIdepa(on){
 }
 
 
-// ── FAKE INSTALL EASTER EGG (long-press versjonsnummer) ──
-const FAKE_INSTALL_STEG = [
-  {p:8,  t:"Kontakter Dirras stemmebånd...", e:"🎤"},
-  {p:19, t:"Laster ned mer selvtillit...", e:"💪"},
-  {p:33, t:"Fikser Petters potetallergi...", e:"🥔"},
-  {p:47, t:"Komprimerer Ingvilds hjerne...", e:"🧠"},
-  {p:58, t:"Kalibrerer Daniels lommebok...", e:"💰"},
-  {p:71, t:"Sender varsel til Kroatia...", e:"🇭🇷"},
-  {p:84, t:"Polerer Big Boss-tittelen...", e:"👑"},
-  {p:96, t:"Rydder opp i After-Dark-Bingo...", e:"🍸"},
-  {p:100,t:"Ferdig! (Det skjedde egentlig ingenting)", e:"✅"}
-];
-function kjorFakeInstall(){
-  const wrap = document.getElementById("fake-install");
-  const bar  = document.getElementById("fake-install-bar");
-  const txt  = document.getElementById("fake-install-txt");
-  const sub  = document.getElementById("fake-install-sub");
-  const emo  = document.getElementById("fake-install-emoji");
-  if(!wrap || !bar || !txt || !sub || !emo) return;
-  wrap.style.display = "flex";
-  bar.style.width = "0%";
-  let i = 0;
-  function nesteSteg(){
-    if(i >= FAKE_INSTALL_STEG.length){
-      setTimeout(()=>{ wrap.style.display = "none"; }, 2200);
-      return;
-    }
-    const steg = FAKE_INSTALL_STEG[i];
-    bar.style.width = steg.p + "%";
-    txt.textContent = steg.t;
-    sub.textContent = steg.p + "%";
-    emo.textContent = steg.e;
-    i++;
-    setTimeout(nesteSteg, 1800);
+// ── FARGEPALETT / TEMAVELGER ──
+const TEMAER = [
+  {
+    id:"istria", navn:"istria", standard:true,
+    sirkel:["#C4A882","#1C2B35"],
+    vars:{
+      "--bg":"#F4EFE6","--card":"#fff","--text":"#1a1a1a","--muted":"#888",
+      "--acc":"#B85228","--gold":"#C4982B","--bdr":"#E2D8CC","--dark":"#1C2B35",
+      "--sub":"#7AA0B0","--label":"#4A6A8A",
+      "--hero-g1":"#1C2B35","--hero-g2":"#2D4A3E","--hero-txt":"#fff","--hero-sub":"#8AABB8",
+      "--tk-g1":"#1C2B35","--tk-g2":"#2D4A3E",
+      "--tema-panel":"#fff","--tema-paneltxt":"#1a1a1a","--tema-accent":"#B85228"
+    },
+    bgExtra:null,
+    preview:{bg:"#F4EFE6",card:"#fff",tittel:"#1a1a1a",sub:"#888",
+             btn:"#B85228",btnTxt:"#fff",muted:"#F0E8DC",mutedTxt:"#B85228"}
+  },
+  {
+    id:"dsfl", navn:"dsfl!™", standard:false,
+    sirkel:["#B8B8F3","#1C2B45"],
+    vars:{
+      "--bg":"#B8B8F3","--card":"#1C2B45","--text":"#FFFFFF","--muted":"#9090C8",
+      "--acc":"#E8C84A","--gold":"#E8C84A","--bdr":"#7070A8","--dark":"#0E1A2E",
+      "--sub":"#B0B8E8","--label":"#9090C8",
+      "--hero-g1":"#0E1A2E","--hero-g2":"#1C2B55","--hero-txt":"#FFFFFF","--hero-sub":"#9090C8",
+      "--tk-g1":"#0E1A2E","--tk-g2":"#1C2B55",
+      "--tema-panel":"#1C2B45","--tema-paneltxt":"#FFFFFF","--tema-accent":"#E8C84A"
+    },
+    bgExtra:null,
+    preview:{bg:"#B8B8F3",card:"#1C2B45",tittel:"#FFFFFF",sub:"rgba(255,255,255,0.6)",
+             btn:"#E8C84A",btnTxt:"#1C2B45",muted:"#243860",mutedTxt:"#A8902A"}
+  },
+  {
+    id:"minerva", navn:"minerva", standard:false,
+    sirkel:["#0D0D0D","#7B2FBE"],
+    vars:{
+      "--bg":"#FFFFFF","--card":"#0D0D0D","--text":"#FFFFFF","--muted":"#C090E0",
+      "--acc":"#7B2FBE","--gold":"#9B4FDE","--bdr":"#3A1060","--dark":"#050505",
+      "--sub":"#C090E0","--label":"#9B6BC4",
+      "--hero-g1":"#1A0030","--hero-g2":"#3A0870","--hero-txt":"#FFFFFF","--hero-sub":"#C090E0",
+      "--tk-g1":"#1A0030","--tk-g2":"#3A0870",
+      "--tema-panel":"#0D0D0D","--tema-paneltxt":"#FFFFFF","--tema-accent":"#7B2FBE"
+    },
+    bgExtra:null,
+    preview:{bg:"#FFFFFF",card:"#0D0D0D",tittel:"#FFFFFF",sub:"rgba(255,255,255,0.55)",
+             btn:"#7B2FBE",btnTxt:"#fff",muted:"#111",mutedTxt:"#9B6BC4"}
+  },
+  {
+    id:"vrangs", navn:"vrangs", standard:false,
+    sirkel:["#E8B84A","#2B3FAD"],
+    vars:{
+      "--bg":"#C0C8F0","--card":"#2B3FAD","--text":"#FFFFFF","--muted":"#9AAAE0",
+      "--acc":"#E8B84A","--gold":"#E8B84A","--bdr":"#1A2870","--dark":"#182070",
+      "--sub":"#B0B8E8","--label":"#9AAAE0",
+      "--hero-g1":"#182070","--hero-g2":"#2B3FAD","--hero-txt":"#FFFFFF","--hero-sub":"#9AAAE0",
+      "--tk-g1":"#182070","--tk-g2":"#2B3FAD",
+      "--tema-panel":"#2B3FAD","--tema-paneltxt":"#FFFFFF","--tema-accent":"#E8B84A"
+    },
+    bgExtra:null,
+    preview:{bg:"#C0C8F0",card:"#2B3FAD",tittel:"#FFFFFF",sub:"rgba(255,255,255,0.6)",
+             btn:"#E8B84A",btnTxt:"#1A2880",muted:"#2438A8",mutedTxt:"#A8782A"}
+  },
+  {
+    id:"elefant", navn:"elefant", standard:false,
+    sirkel:["#F020A0","#111111"],
+    vars:{
+      "--bg":"#F020A0","--card":"#111111","--text":"#FFFFFF","--muted":"rgba(255,255,255,0.7)",
+      "--acc":"#FFFFFF","--gold":"#C01080","--bdr":"#C01080","--dark":"#080808",
+      "--sub":"rgba(255,255,255,0.5)","--label":"rgba(255,255,255,0.4)",
+      "--hero-g1":"#080808","--hero-g2":"#2A0020","--hero-txt":"#FFFFFF","--hero-sub":"rgba(255,255,255,0.6)",
+      "--tk-g1":"#080808","--tk-g2":"#2A0020",
+      "--tema-panel":"#111111","--tema-paneltxt":"#FFFFFF","--tema-accent":"#FFFFFF"
+    },
+    bgExtra:null,
+    preview:{bg:"#F020A0",card:"#111111",tittel:"#FFFFFF",sub:"rgba(255,255,255,0.65)",
+             btn:"#FFFFFF",btnTxt:"#111111",muted:"#0D0D0D",mutedTxt:"rgba(255,255,255,0.55)"}
+  },
+  {
+    id:"else", navn:"else", standard:false,
+    sirkel:["#2A8035","#1A5525"],
+    vars:{
+      "--bg":"#2A8035","--card":"#C42B2B","--text":"#FFFFFF","--muted":"rgba(255,255,255,0.75)",
+      "--acc":"#D4A82B","--gold":"#D4A82B","--bdr":"#1E6028","--dark":"#163020",
+      "--sub":"rgba(255,255,255,0.55)","--label":"rgba(255,255,255,0.45)",
+      "--hero-g1":"#163020","--hero-g2":"#1E4828","--hero-txt":"#FFFFFF","--hero-sub":"rgba(255,255,255,0.6)",
+      "--tk-g1":"#163020","--tk-g2":"#1E4828",
+      "--tema-panel":"#C42B2B","--tema-paneltxt":"#FFFFFF","--tema-accent":"#D4A82B"
+    },
+    bgExtra:null,
+    preview:{bg:"#2A8035",card:"#C42B2B",tittel:"#FFFFFF",sub:"rgba(255,255,255,0.65)",
+             btn:"#D4A82B",btnTxt:"#1A1A1A",muted:"#B52525",mutedTxt:"rgba(255,255,255,0.6)"}
+  },
+  {
+    id:"zebra", navn:"zebra", standard:false,
+    sirkel:["#F5F5F5","#111111"],
+    vars:{
+      "--bg":"#F5F5F5","--card":"#111111","--text":"#FFFFFF","--muted":"#AAAAAA",
+      "--acc":"#888888","--gold":"#888888","--bdr":"#333333","--dark":"#050505",
+      "--sub":"#AAAAAA","--label":"#CCCCCC",
+      "--hero-g1":"#050505","--hero-g2":"#222222","--hero-txt":"#FFFFFF","--hero-sub":"#AAAAAA",
+      "--tk-g1":"#050505","--tk-g2":"#222222",
+      "--tema-panel":"#111111","--tema-paneltxt":"#F5F5F5","--tema-accent":"#888888"
+    },
+    bgExtra:"repeating-linear-gradient(180deg,#111111 0px,#111111 12px,#F5F5F5 12px,#F5F5F5 24px)",
+    preview:{bg:"#F5F5F5",card:"#111111",tittel:"#FFFFFF",sub:"rgba(245,245,245,0.6)",
+             btn:"#888888",btnTxt:"#F5F5F5",muted:"#0A0A0A",mutedTxt:"rgba(245,245,245,0.5)"}
+  },
+  {
+    id:"diksias", navn:"diksias", standard:false,
+    sirkel:["#FFFFFF","#1A3A6B"],
+    vars:{
+      "--bg":"#E8F0F8","--card":"#1A3A6B","--text":"#FFFFFF","--muted":"#90B8E0",
+      "--acc":"#FFFFFF","--gold":"#A0C8E8","--bdr":"#0E2248","--dark":"#0E2248",
+      "--sub":"#90B8E0","--label":"#6A90B8",
+      "--hero-g1":"#0E2248","--hero-g2":"#1A3A6B","--hero-txt":"#FFFFFF","--hero-sub":"#90B8E0",
+      "--tk-g1":"#0E2248","--tk-g2":"#1A3A6B",
+      "--tema-panel":"#1A3A6B","--tema-paneltxt":"#FFFFFF","--tema-accent":"#4A8AB8"
+    },
+    bgExtra:"repeating-linear-gradient(180deg,#FFFFFF 0px,#FFFFFF 12px,#1A3A6B 12px,#1A3A6B 24px)",
+    preview:{bg:"#E8F0F8",card:"#1A3A6B",tittel:"#FFFFFF",sub:"rgba(255,255,255,0.6)",
+             btn:"#4A8AB8",btnTxt:"#fff",muted:"#133060",mutedTxt:"rgba(255,255,255,0.5)"}
+  },
+  {
+    id:"cassa", navn:"cassa", standard:false,
+    sirkel:["#F5C842","#C41E3A"],
+    vars:{
+      "--bg":"#F5F5F5","--card":"#C41E3A","--text":"#FFFFFF","--muted":"rgba(255,255,255,0.75)",
+      "--acc":"#F5C842","--gold":"#F5C842","--bdr":"#7A0A1A","--dark":"#7A0A1A",
+      "--sub":"rgba(255,255,255,0.65)","--label":"rgba(255,255,255,0.5)",
+      "--hero-g1":"#7A0A1A","--hero-g2":"#C41E3A","--hero-txt":"#FFFFFF","--hero-sub":"rgba(255,255,255,0.65)",
+      "--tk-g1":"#7A0A1A","--tk-g2":"#C41E3A",
+      "--tema-panel":"#C41E3A","--tema-paneltxt":"#FFFFFF","--tema-accent":"#F5C842"
+    },
+    bgExtra:"repeating-linear-gradient(90deg,#F5C842 0px,#F5C842 12px,#C41E3A 12px,#C41E3A 24px)",
+    preview:{bg:"#F5F5F5",card:"#C41E3A",tittel:"#FFFFFF",sub:"rgba(255,255,255,0.65)",
+             btn:"#F5C842",btnTxt:"#8B1020",muted:"#B51A35",mutedTxt:"rgba(255,255,255,0.55)"}
+  },
+  {
+    id:"ellar", navn:"ell\u00e5r", standard:false,
+    sirkel:["#111111","#8B1A1A"],
+    vars:{
+      "--bg":"#111111","--card":"#8B1A1A","--text":"#E8DCC0","--muted":"rgba(232,220,192,0.6)",
+      "--acc":"#D4C4A0","--gold":"#A08A60","--bdr":"#2A1010","--dark":"#050505",
+      "--sub":"rgba(232,220,192,0.45)","--label":"rgba(232,220,192,0.35)",
+      "--hero-g1":"#050505","--hero-g2":"#2A0808","--hero-txt":"#E8DCC0","--hero-sub":"rgba(232,220,192,0.55)",
+      "--tk-g1":"#050505","--tk-g2":"#2A0808",
+      "--tema-panel":"#8B1A1A","--tema-paneltxt":"#E8DCC0","--tema-accent":"#D4C4A0"
+    },
+    bgExtra:null,
+    preview:{bg:"#111111",card:"#8B1A1A",tittel:"#E8DCC0",sub:"rgba(232,220,192,0.6)",
+             btn:"#D4C4A0",btnTxt:"#111111",muted:"#6A1010",mutedTxt:"rgba(232,220,192,0.5)"}
   }
-  nesteSteg();
+];
+
+let aktivtTema = localStorage.getItem("kk_tema") || "istria";
+let forhandsvisningTema = aktivtTema;
+
+function settTema(id, fade){
+  const t = TEMAER.find(x=>x.id===id);
+  if(!t) return;
+  aktivtTema = id;
+  localStorage.setItem("kk_tema", id);
+  const root = document.documentElement;
+  if(fade){
+    document.body.style.transition = "background .4s,color .4s";
+    setTimeout(()=>{ document.body.style.transition = ""; }, 600);
+  }
+  Object.entries(t.vars).forEach(([k,v])=> root.style.setProperty(k,v));
+  // Bakgrunnsstriper
+  document.body.style.backgroundImage = t.bgExtra || "";
 }
+
+function oppdaterPreview(id){
+  forhandsvisningTema = id;
+  const t = TEMAER.find(x=>x.id===id);
+  if(!t) return;
+  const p = t.preview;
+  const bg   = document.getElementById("tema-preview-bg");
+  const card = document.getElementById("tema-preview-card");
+  const lbl  = document.getElementById("tema-preview-label");
+  const ttl  = document.getElementById("tema-preview-title");
+  const sub  = document.getElementById("tema-preview-sub");
+  const btn  = document.getElementById("tema-preview-btn");
+  const muted= document.getElementById("tema-preview-muted");
+  if(!bg||!card) return;
+  bg.style.background   = p.bg;
+  card.style.background = p.card;
+  card.style.boxShadow  = "0 2px 12px rgba(0,0,0,0.18)";
+  lbl.style.color       = p.sub;
+  ttl.style.color       = p.tittel;
+  sub.style.color       = p.sub;
+  btn.style.background  = p.btn;
+  btn.style.color       = p.btnTxt;
+  muted.style.background= p.muted;
+  muted.style.color     = p.mutedTxt;
+  // Fremhev aktiv rad i lista
+  document.querySelectorAll(".tema-rad").forEach(el=>{
+    const aktiv = el.dataset.tid === id;
+    el.style.background = aktiv ? "rgba(255,255,255,0.15)" : "transparent";
+    el.style.borderColor = aktiv ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.08)";
+  });
+}
+
+function byggTemaListe(){
+  const liste = document.getElementById("tema-liste");
+  if(!liste) return;
+  liste.innerHTML = "";
+  TEMAER.forEach(t=>{
+    const rad = document.createElement("div");
+    rad.className = "tema-rad";
+    rad.dataset.tid = t.id;
+    rad.style.cssText = "display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1.5px solid rgba(255,255,255,0.07);cursor:pointer;transition:background .15s,border-color .15s;-webkit-tap-highlight-color:transparent";
+    // Sirkel (to halvsirkler)
+    const [vL, vR] = t.sirkel;
+    const sirkel = `<svg width="32" height="32" viewBox="0 0 32 32" style="flex-shrink:0">
+      <clipPath id="cp-l-${t.id}"><rect x="0" y="0" width="16" height="32"/></clipPath>
+      <clipPath id="cp-r-${t.id}"><rect x="16" y="0" width="16" height="32"/></clipPath>
+      <circle cx="16" cy="16" r="14" fill="${vL}" clip-path="url(#cp-l-${t.id})"/>
+      <circle cx="16" cy="16" r="14" fill="${vR}" clip-path="url(#cp-r-${t.id})"/>
+      <circle cx="16" cy="16" r="14" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    </svg>`;
+    const standardMark = t.standard ? ' <span style="font-size:9px;opacity:.5;font-weight:400">(standard)</span>' : "";
+    rad.innerHTML = sirkel + `<span style="font-size:14px;font-weight:800;color:#fff;letter-spacing:.01em">${t.navn}${standardMark}</span>`;
+    rad.onclick = ()=> oppdaterPreview(t.id);
+    liste.appendChild(rad);
+  });
+}
+
+function apneTemavelger(){
+  const modal = document.getElementById("tema-modal");
+  if(!modal) return;
+  modal.style.display = "flex";
+  modal.style.opacity = "0";
+  byggTemaListe();
+  oppdaterPreview(aktivtTema);
+  setTimeout(()=>{ modal.style.opacity = "1"; }, 10);
+  statTellEgg("Temavelger (palett-meny)");
+}
+
+function lukkTemavelger(){
+  const modal = document.getElementById("tema-modal");
+  if(!modal) return;
+  modal.style.opacity = "0";
+  setTimeout(()=>{ modal.style.display = "none"; }, 250);
+}
+
+function brukValgtTema(){
+  settTema(forhandsvisningTema, true);
+  lukkTemavelger();
+}
+
+// Init: last lagret tema ved oppstart
+(function initTema(){
+  const lagret = localStorage.getItem("kk_tema") || "istria";
+  settTema(lagret, false);
+})();
 
 // ── RISTE-EASTER EGG ──
 const SHAKE_FRASER = [
@@ -4310,7 +4547,7 @@ function logoTap(){
 function launchMainConfetti(target){
   const el=document.getElementById("main-confetti");
   if(!el)return;
-  const cols=["#C4982B","#E05020","#fff","#3b82f6","#22c55e","#f97316","#a855f7","#ec4899","#f5c518"];
+  const cols=["var(--gold)","#E05020","#fff","#3b82f6","#22c55e","#f97316","#a855f7","#ec4899","#f5c518"];
   for(let i=0;i<120;i++){
     const p=document.createElement("div");
     const sz=Math.random()*11+5;
@@ -4378,7 +4615,7 @@ function setFreeCellColor(taps){
     return;
   }
   const t=Math.min(taps/6,1);
-  const col=lerpColor("#C4982B","#e00515",t);
+  const col=lerpColor("var(--gold)","#e00515",t);
   cell.style.background=col;cell.style.borderColor=col;
   cell.style.color=t>0.5?"#fff":"#111";
 }
@@ -5341,7 +5578,7 @@ function buildFlyLeg(fra_tid, fra_sted, til_tid, til_sted, flyNr, varighet, dark
   const placeColor = darkBg ? "#9BB4C4" : "var(--muted)";
   const badgeBg = darkBg ? "#0C1624" : "var(--card)";
   const badgeBdr = darkBg ? "#243444" : "var(--bdr)";
-  const badgeColor = darkBg ? "#C4982B" : "var(--muted)";
+  const badgeColor = darkBg ? "var(--gold)" : "var(--muted)";
   const durColor = darkBg ? "#9BB4C4" : "var(--muted)";
   const durBdr = darkBg ? "#243444" : "var(--bdr)";
   return `<div class="fly-leg">
@@ -5360,24 +5597,24 @@ function buildFlyLeg(fra_tid, fra_sted, til_tid, til_sted, flyNr, varighet, dark
 
 function buildFlyReiseNed(){
   return `
-    <div style="padding:0 16px 4px;font-size:12px;font-weight:800;color:#7AA0B0;letter-spacing:.05em">REISE NED — FRE. 2. OKTOBER</div>
+    <div style="padding:0 16px 4px;font-size:12px;font-weight:800;color:var(--sub);letter-spacing:.05em">REISE NED — FRE. 2. OKTOBER</div>
     <div style="background:#0C1624;border-radius:10px;padding:14px 16px;margin:0 8px 12px;border:1px solid #1E3A5A">
       ${buildFlyLeg("09:10","Trondheim Værnes (TRD)","10:20","Bergen (BGO)","WF 1302","1t 10min",true)}
       ${buildFlyLeg("13:35","Bergen (BGO)","15:40","Frankfurt (FRA)","LH 873","2t 05min",true)}
       ${buildFlyLeg("17:00","Frankfurt (FRA)","18:30","Pula (PUY)","LH 1398","1t 30min",true)}
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:10px;border-top:1px solid #243444">
         <div style="font-size:20px">🏖️</div>
-        <div style="font-size:12px;color:#7AA0B0;font-weight:700">Ankomst Pula 18:30 — velkommen til Kroatia!</div>
+        <div style="font-size:12px;color:var(--sub);font-weight:700">Ankomst Pula 18:30 — velkommen til Kroatia!</div>
       </div>
     </div>
-    <div style="padding:0 16px 4px;font-size:12px;font-weight:800;color:#7AA0B0;letter-spacing:.05em">HJEMREISE — SØN. 11. OKTOBER</div>
+    <div style="padding:0 16px 4px;font-size:12px;font-weight:800;color:var(--sub);letter-spacing:.05em">HJEMREISE — SØN. 11. OKTOBER</div>
     <div style="background:#0C1624;border-radius:10px;padding:14px 16px;margin:0 8px 8px;border:1px solid #1E3A5A">
       ${buildFlyLeg("09:40","Pula (PUY)","10:45","Munich (MUC)","EN 8393","1t 05min",true)}
       ${buildFlyLeg("12:00","Munich (MUC)","13:00","Frankfurt (FRA)","LH 103","1t 00min",true)}
       ${buildFlyLeg("15:25","Frankfurt (FRA)","17:50","Trondheim Værnes (TRD)","LH 856","2t 25min",true)}
       <div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:10px;border-top:1px solid #243444">
         <div style="font-size:20px">🏔️</div>
-        <div style="font-size:12px;color:#7AA0B0;font-weight:700">Hjemme på Værnes 17:50 — takk for turen!</div>
+        <div style="font-size:12px;color:var(--sub);font-weight:700">Hjemme på Værnes 17:50 — takk for turen!</div>
       </div>
     </div>`;
 }
@@ -5610,13 +5847,13 @@ function openSettings(){
 async function lastGjettOversikt(){
   const liste = document.getElementById("gjett-oversikt-liste");
   if(!liste) return;
-  liste.innerHTML = '<div style="color:#4A6A8A;text-align:center;padding:8px">Henter…</div>';
+  liste.innerHTML = '<div style="color:var(--label);text-align:center;padding:8px">Henter…</div>';
   try{
     const data = await jbGet(true);
     const gjett = data?.gjett || {};
     const navn = Object.keys(gjett);
     if(!navn.length){
-      liste.innerHTML = '<div style="color:#4A6A8A;text-align:center;padding:8px">Ingen har gjettet ennå</div>';
+      liste.innerHTML = '<div style="color:var(--label);text-align:center;padding:8px">Ingen har gjettet ennå</div>';
       return;
     }
     const medDist = navn.map(n=>{
@@ -5625,16 +5862,16 @@ async function lastGjettOversikt(){
       return {navn:n, km, ts:g.ts};
     }).sort((a,b)=>a.km-b.km);
     const medaljer = ["🥇","🥈","🥉"];
-    liste.innerHTML = `<div style="font-size:12px;color:#C4982B;font-weight:700;margin-bottom:6px">${navn.length} personer har gjettet</div>` +
+    liste.innerHTML = `<div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px">${navn.length} personer har gjettet</div>` +
       medDist.map((g,i)=>{
         const tid = g.ts ? new Date(g.ts).toLocaleString("nb-NO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
         return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0C1624;border-radius:10px;border:1px solid #1E3A5A">
           <span style="font-size:16px;flex-shrink:0">${medaljer[i]||`${i+1}.`}</span>
           <div style="flex:1;min-width:0">
             <div style="font-weight:700;color:#e8ddd0">${escHTML(g.navn)}</div>
-            <div style="font-size:11px;color:#4A6A8A">${tid}</div>
+            <div style="font-size:11px;color:var(--label)">${tid}</div>
           </div>
-          <span style="font-size:13px;font-weight:800;color:${i===0?"#f5c518":"#7AA0B0"}">${g.km.toLocaleString("nb-NO")} km</span>
+          <span style="font-size:13px;font-weight:800;color:${i===0?"#f5c518":"var(--sub)"}">${g.km.toLocaleString("nb-NO")} km</span>
         </div>`;
       }).join("");
   }catch(e){
@@ -6121,7 +6358,7 @@ function startReveal(){
 function launchConfetti(){
   const el=document.getElementById("spl-confetti");
   if(!el)return;
-  const cols=["#C4982B","#E05020","#fff","#3b82f6","#22c55e","#f97316","#a855f7","#ec4899","#f5c518"];
+  const cols=["var(--gold)","#E05020","#fff","#3b82f6","#22c55e","#f97316","#a855f7","#ec4899","#f5c518"];
   for(let i=0;i<100;i++){
     const p=document.createElement("div");
     const sz=Math.random()*10+5;
@@ -6253,7 +6490,7 @@ function apptursOppdaterSpotlight(selector){
     spot.style.width=(r.width+pad*2)+"px";
     spot.style.height=(r.height+pad*2)+"px";
     spot.style.boxShadow="0 0 0 9999px rgba(6,10,16,.82)";
-    spot.style.border="2px solid #C4982B";
+    spot.style.border="2px solid var(--gold)";
   }, 350); // vent til scrollIntoView faktisk har flyttet elementet på plass
 }
 
@@ -6269,7 +6506,7 @@ function apptursOppdaterBoks(steg){
   if(titleEl) titleEl.textContent = steg.titleFn ? steg.titleFn() : steg.title;
   if(bodyEl) bodyEl.textContent = steg.body;
   if(dotsEl) dotsEl.innerHTML = APPTUR_STEG.map((s,i)=>
-    `<div style="width:6px;height:6px;border-radius:50%;background:${i===obIdx?'#C4982B':'rgba(255,255,255,.25)'}"></div>`
+    `<div style="width:6px;height:6px;border-radius:50%;background:${i===obIdx?'var(--gold)':'rgba(255,255,255,.25)'}"></div>`
   ).join("");
   if(prevBtn) prevBtn.style.visibility = obIdx===0 ? "hidden" : "visible";
   if(nextBtn) nextBtn.textContent = (obIdx===APPTUR_STEG.length-1) ? "Sett i gang →" : "Neste →";
@@ -6325,49 +6562,49 @@ function apptursLukk(fromBack){
     <div style="background:#1C2B38;border-radius:12px;margin-bottom:8px;border:1px solid #243444;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div>
         <div style="font-size:14px;font-weight:800;color:#e8ddd0">Hopp over IDEPA-passord</div>
-        <div style="font-size:12px;color:#4A6A8A;margin-top:2px">Skru av på andres telefon!</div>
+        <div style="font-size:12px;color:var(--label);margin-top:2px">Skru av på andres telefon!</div>
       </div>
       <label style="position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0">
         <input type="checkbox" id="bypass-idepa-toggle" onchange="toggleBypassIdepa(this.checked)"
           style="opacity:0;width:0;height:0;position:absolute">
-        <span id="bypass-idepa-track" style="position:absolute;inset:0;border-radius:13px;background:#2A3D4A;transition:background .2s;cursor:pointer"></span>
+        <span id="bypass-idepa-track" style="position:absolute;inset:0;border-radius:13px;background:var(--bdr);transition:background .2s;cursor:pointer"></span>
         <span id="bypass-idepa-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;pointer-events:none"></span>
       </label>
     </div>
     <div style="background:#1C2B38;border-radius:12px;margin-bottom:8px;border:1px solid #243444;overflow:hidden">
       <div onclick="toggleKol('pw-app')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent">
         <div style="font-size:14px;font-weight:800;color:#e8ddd0">Vis alle app-passord</div>
-        <span class="kol-ico closed" id="ki-pw-app" style="color:#7AA0B0">▼</span>
+        <span class="kol-ico closed" id="ki-pw-app" style="color:var(--sub)">▼</span>
       </div>
       <div class="kol-body closed" id="kb-pw-app">
         <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Splash-avsløring</span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">BLATUR</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Overnatting (bosted + busstopp)</span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">VELKOMMEN</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">8. okt — Felles utflukt</span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">UTFLUCT</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">9. okt — Amazing Race-lås</span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">PULARACE</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Komitémeny</span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">IDEPA</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px"><span style="font-size:13px;color:#9BB4C4;display:block;margin-bottom:6px">Villa-skattejakt (5 steg)</span><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:13px;font-weight:800;color:#C4982B;background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA1</span><span style="font-size:13px;font-weight:800;color:#C4982B;background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA2</span><span style="font-size:13px;font-weight:800;color:#C4982B;background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA3</span><span style="font-size:13px;font-weight:800;color:#C4982B;background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA4</span><span style="font-size:13px;font-weight:800;color:#C4982B;background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA5</span></div></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Splash-avsløring</span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">BLATUR</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Overnatting (bosted + busstopp)</span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">VELKOMMEN</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">8. okt — Felles utflukt</span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">UTFLUCT</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">9. okt — Amazing Race-lås</span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">PULARACE</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Komitémeny</span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">IDEPA</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px"><span style="font-size:13px;color:#9BB4C4;display:block;margin-bottom:6px">Villa-skattejakt (5 steg)</span><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:13px;font-weight:800;color:var(--gold);background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA1</span><span style="font-size:13px;font-weight:800;color:var(--gold);background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA2</span><span style="font-size:13px;font-weight:800;color:var(--gold);background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA3</span><span style="font-size:13px;font-weight:800;color:var(--gold);background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA4</span><span style="font-size:13px;font-weight:800;color:var(--gold);background:#1C2B38;border:1px solid #243444;border-radius:6px;padding:3px 8px">VILLA5</span></div></div>
         </div>
       </div>
     </div>
     <div style="background:#1C2B38;border-radius:12px;margin-bottom:8px;border:1px solid #243444;overflow:hidden">
       <div onclick="toggleKol('pw-race')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent">
         <div style="font-size:14px;font-weight:800;color:#e8ddd0">Race-passord</div>
-        <span class="kol-ico closed" id="ki-pw-race" style="color:#7AA0B0">▼</span>
+        <span class="kol-ico closed" id="ki-pw-race" style="color:var(--sub)">▼</span>
       </div>
       <div class="kol-body closed" id="kb-pw-race">
         <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Lås opp Amazing Race-dagen</span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">PULARACE</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Pula Arena — Start <small style="display:block;color:#4A6A8A;font-weight:400">Andreas</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">BUEN</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Sergius-buen <small style="display:block;color:#4A6A8A;font-weight:400">Ingen. Få godkjenning fra Andreas.</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">MARKET</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Tržnica — Green Market <small style="display:block;color:#4A6A8A;font-weight:400">Petter</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">OKSE</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Forum & Auguststempelet <small style="display:block;color:#4A6A8A;font-weight:400">Erik</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">KASTEL</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Kaštel-festningen <small style="display:block;color:#4A6A8A;font-weight:400">Daniel</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">VISTA</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Havnepromenaden <small style="display:block;color:#4A6A8A;font-weight:400">Ingvild</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">BRAVO</span></div>
-          <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#4A6A8A;padding:10px 2px 2px">Ankomstkoder</div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Tržnica — Green Market (ankomst) <small style="display:block;color:#4A6A8A;font-weight:400">Petter</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">NAMNAM</span></div>
-          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Havnepromenaden (ankomst) <small style="display:block;color:#4A6A8A;font-weight:400">Ingvild</small></span><span style="font-size:14px;font-weight:800;color:#C4982B;letter-spacing:.05em">TJOISES</span></div>
-          <div style="font-size:11px;color:#4A6A8A;line-height:1.5;padding:8px 2px 0">Identisk med Race Control-listen inne i selve Amazing Race-appen.</div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Lås opp Amazing Race-dagen</span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">PULARACE</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Pula Arena — Start <small style="display:block;color:var(--label);font-weight:400">Andreas</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">BUEN</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Sergius-buen <small style="display:block;color:var(--label);font-weight:400">Ingen. Få godkjenning fra Andreas.</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">MARKET</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Tržnica — Green Market <small style="display:block;color:var(--label);font-weight:400">Petter</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">OKSE</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Forum & Auguststempelet <small style="display:block;color:var(--label);font-weight:400">Erik</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">KASTEL</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Kaštel-festningen <small style="display:block;color:var(--label);font-weight:400">Daniel</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">VISTA</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Havnepromenaden <small style="display:block;color:var(--label);font-weight:400">Ingvild</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">BRAVO</span></div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--label);padding:10px 2px 2px">Ankomstkoder</div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Tržnica — Green Market (ankomst) <small style="display:block;color:var(--label);font-weight:400">Petter</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">NAMNAM</span></div>
+          <div style="background:#0C1624;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:#9BB4C4">Havnepromenaden (ankomst) <small style="display:block;color:var(--label);font-weight:400">Ingvild</small></span><span style="font-size:14px;font-weight:800;color:var(--gold);letter-spacing:.05em">TJOISES</span></div>
+          <div style="font-size:11px;color:var(--label);line-height:1.5;padding:8px 2px 0">Identisk med Race Control-listen inne i selve Amazing Race-appen.</div>
         </div>
       </div>
     </div>
@@ -6376,7 +6613,7 @@ function apptursLukk(fromBack){
     <div style="background:#1C2B38;border-radius:12px;margin-bottom:8px;border:1px solid #243444;overflow:hidden">
       <div onclick="toggleKol('fly-settings')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent">
         <div style="font-size:14px;font-weight:800;color:#e8ddd0">Vis flyreiser</div>
-        <span class="kol-ico closed" id="ki-fly-settings" style="color:#7AA0B0">▼</span>
+        <span class="kol-ico closed" id="ki-fly-settings" style="color:var(--sub)">▼</span>
       </div>
       <div class="kol-body closed" id="kb-fly-settings">
         <div id="settings-fly-ned" style="padding:0 0 12px"></div>
@@ -6389,31 +6626,31 @@ function apptursLukk(fromBack){
       style="width:100%;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:10px;color:#fff;font-size:15px;padding:12px 14px;outline:none;resize:none;box-sizing:border-box;margin-bottom:12px;font-family:inherit"></textarea>
     <div style="display:flex;gap:12px;margin-bottom:12px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;padding:10px 12px;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:10px">
-        <input type="checkbox" id="varsel-check-app" checked style="width:18px;height:18px;accent-color:#C4982B;flex-shrink:0">
+        <input type="checkbox" id="varsel-check-app" checked style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0">
         <div>
           <div style="font-size:13px;font-weight:700;color:#e8ddd0">📱 Appvarsel</div>
-          <div style="font-size:10px;color:#4A6A8A;margin-top:1px">Banner i appen</div>
+          <div style="font-size:10px;color:var(--label);margin-top:1px">Banner i appen</div>
         </div>
       </label>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;padding:10px 12px;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:10px">
-        <input type="checkbox" id="varsel-check-push" style="width:18px;height:18px;accent-color:#C4982B;flex-shrink:0">
+        <input type="checkbox" id="varsel-check-push" style="width:18px;height:18px;accent-color:var(--gold);flex-shrink:0">
         <div>
           <div style="font-size:13px;font-weight:700;color:#e8ddd0">🔔 Pushvarsel</div>
-          <div style="font-size:10px;color:#4A6A8A;margin-top:1px">Til alle telefoner</div>
+          <div style="font-size:10px;color:var(--label);margin-top:1px">Til alle telefoner</div>
         </div>
       </label>
     </div>
     <div style="display:flex;gap:8px">
       <button onclick="settingsSendVarsel()" class="hdr-set-btn"
-        style="flex:1;padding:11px;font-size:13px;font-weight:700;background:#C4982B;color:#111;border:none;border-radius:10px;cursor:pointer">
+        style="flex:1;padding:11px;font-size:13px;font-weight:700;background:var(--gold);color:#111;border:none;border-radius:10px;cursor:pointer">
         📤 Send varsel
       </button>
       <button onclick="settingsNullstillVarsel()" class="hdr-set-btn"
-        style="flex:1;padding:11px;font-size:13px;font-weight:700;background:#1C2B38;color:#7AA0B0;border:1px solid #2A3D4A;border-radius:10px;cursor:pointer">
+        style="flex:1;padding:11px;font-size:13px;font-weight:700;background:#1C2B38;color:var(--sub);border:1px solid var(--bdr);border-radius:10px;cursor:pointer">
         🗑 Nullstill
       </button>
     </div>
-    <div id="varsel-status" style="font-size:12px;color:#7AA0B0;margin-top:8px;min-height:16px;text-align:center"></div>
+    <div id="varsel-status" style="font-size:12px;color:var(--sub);margin-top:8px;min-height:16px;text-align:center"></div>
   </div>
 
   <div class="set-grp-h">🎭 Avsløring & låser</div>
@@ -6457,7 +6694,7 @@ function apptursLukk(fromBack){
     <input class="navn-edit-in" id="settings-navn-in" type="text" placeholder="Ikke satt" autocapitalize="words" maxlength="20">
     <button class="navn-edit-btn" onclick="lagreNavn()">Lagre</button>
   </div>
-  <div id="settings-navn-st" style="font-size:11px;color:#7AA0B0;margin-top:4px;min-height:14px;padding-left:4px"></div>
+  <div id="settings-navn-st" style="font-size:11px;color:var(--sub);margin-top:4px;min-height:14px;padding-left:4px"></div>
   <div class="set-row" onclick="toggleDark()">
     <div><div class="set-row-h">Mørk/lys modus</div><div class="set-row-s">Bytt mellom mørkt og lyst tema</div></div>
     <div class="set-row-ico" id="set-dark-ico">🌙</div>
@@ -6467,7 +6704,7 @@ function apptursLukk(fromBack){
   <div style="background:#1C2B38;border-radius:12px;padding:14px 16px;margin-bottom:8px;border:1px solid #243444">
     <input id="prep-nm" type="text" placeholder="Lagnavn" autocorrect="off" autocomplete="off" autocapitalize="words"
       style="width:100%;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:10px;color:#fff;font-size:17px;padding:12px 14px;outline:none;margin-bottom:12px;-webkit-appearance:none;display:block;box-sizing:border-box">
-    <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#4A6A8A;margin-bottom:8px">Velg lag</div>
+    <div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--label);margin-bottom:8px">Velg lag</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
       <button onclick="pickPrepClr(this,'#ef4444')" data-lagnr="1"  style="width:56px;height:56px;border-radius:12px;border:3px solid transparent;cursor:pointer;-webkit-appearance:none;background:#ef4444;flex-shrink:0;font-size:13px;font-weight:800;color:#fff;line-height:1">Lag<br>1</button>
       <button onclick="pickPrepClr(this,'#f97316')" data-lagnr="2"  style="width:56px;height:56px;border-radius:12px;border:3px solid transparent;cursor:pointer;-webkit-appearance:none;background:#f97316;flex-shrink:0;font-size:13px;font-weight:800;color:#fff;line-height:1">Lag<br>2</button>
@@ -6481,13 +6718,13 @@ function apptursLukk(fromBack){
       <button onclick="pickPrepClr(this,'#a78bfa')" data-lagnr="10" style="width:56px;height:56px;border-radius:12px;border:3px solid transparent;cursor:pointer;-webkit-appearance:none;background:#a78bfa;flex-shrink:0;font-size:13px;font-weight:800;color:#fff;line-height:1">Lag<br>10</button>
     </div>
     <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0C1624;border:1.5px solid #1E3A5A;border-radius:10px;margin-bottom:14px;cursor:pointer">
-      <input type="checkbox" id="prep-lagleder" style="width:20px;height:20px;accent-color:#C4982B;flex-shrink:0">
+      <input type="checkbox" id="prep-lagleder" style="width:20px;height:20px;accent-color:var(--gold);flex-shrink:0">
       <div>
         <div style="font-size:14px;font-weight:700;color:#e8ddd0">Jeg er lagleder</div>
-        <div style="font-size:11px;color:#4A6A8A;margin-top:2px">Kun lagledere sender fremgang til live-trackeren</div>
+        <div style="font-size:11px;color:var(--label);margin-top:2px">Kun lagledere sender fremgang til live-trackeren</div>
       </div>
     </label>
-    <button onclick="prepTeam()" style="width:100%;background:#C4982B;color:#111;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;-webkit-appearance:none">
+    <button onclick="prepTeam()" style="width:100%;background:var(--gold);color:#111;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;-webkit-appearance:none">
       &#127937; Klargjør og åpne Amazing Race-appen →
     </button>
   </div>
@@ -6496,14 +6733,14 @@ function apptursLukk(fromBack){
   <div style="background:#1C2B38;border-radius:12px;margin-bottom:8px;border:1px solid #243444;overflow:hidden">
     <div onclick="toggleKol('gjett-rang')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent">
       <div style="font-size:14px;font-weight:800;color:#e8ddd0">Hvem har gjettet?</div>
-      <span class="kol-ico closed" id="ki-gjett-rang" style="color:#7AA0B0">▼</span>
+      <span class="kol-ico closed" id="ki-gjett-rang" style="color:var(--sub)">▼</span>
     </div>
     <div class="kol-body closed" id="kb-gjett-rang">
       <div style="padding:0 16px 12px">
-        <div style="font-size:11px;color:#4A6A8A;margin-bottom:10px;line-height:1.5">
+        <div style="font-size:11px;color:var(--label);margin-bottom:10px;line-height:1.5">
           Rangering etter avstand til Pula — kun synlig for komiteen, deltakerne ser aldri dette.
         </div>
-        <button onclick="lastGjettOversikt()" style="width:100%;background:#0C1624;border:1.5px solid #C4982B;color:#C4982B;border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px">🔄 Hent oversikt</button>
+        <button onclick="lastGjettOversikt()" style="width:100%;background:#0C1624;border:1.5px solid var(--gold);color:var(--gold);border-radius:10px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px">🔄 Hent oversikt</button>
         <div id="gjett-oversikt-liste" style="display:flex;flex-direction:column;gap:8px;font-size:13px"></div>
       </div>
     </div>
@@ -6514,7 +6751,7 @@ function apptursLukk(fromBack){
     <div><div class="set-row-h">Nullstill hele appen</div><div class="set-row-s">Fjerner all fremgang og laster siden på nytt</div></div>
     <div class="set-row-ico">&#9888;&#65039;</div>
   </div>
-  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:#4A6A8A;letter-spacing:.05em">KKTurneprogram v26.07.12-06</div>
+  <div style="text-align:center;padding:20px 0 8px;font-size:11px;color:var(--label);letter-spacing:.05em">KKTurneprogram v26.07.18-03</div>
 </div>
 
 
@@ -6531,7 +6768,7 @@ function apptursLukk(fromBack){
     <button onclick="closeAR()" style="background:#2a2a2a;border:none;color:#ccc;border-radius:50%;width:34px;height:34px;font-size:20px;cursor:pointer;-webkit-appearance:none;display:flex;align-items:center;justify-content:center">&#8592;</button>
     <span style="color:#555;font-size:13px;font-family:system-ui,-apple-system,sans-serif">Tilbake til turnéprogram</span>
   </div>
-  <div id="ar-varsel-banner" onclick="visBannerToast()" style="display:none;background:linear-gradient(90deg,#b85228,#c4982b);color:#fff;padding:9px 16px;font-size:13px;font-weight:700;align-items:center;gap:8px;cursor:pointer;flex-shrink:0"><span style="font-size:16px;flex-shrink:0">📢</span><span id="ar-varsel-txt" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span><span style="font-size:10px;opacity:.7;flex-shrink:0;font-weight:400">trykk for mer</span></div>
+  <div id="ar-varsel-banner" onclick="visBannerToast()" style="display:none;background:linear-gradient(90deg,var(--acc),var(--gold));color:#fff;padding:9px 16px;font-size:13px;font-weight:700;align-items:center;gap:8px;cursor:pointer;flex-shrink:0"><span style="font-size:16px;flex-shrink:0">📢</span><span id="ar-varsel-txt" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span><span style="font-size:10px;opacity:.7;flex-shrink:0;font-weight:400">trykk for mer</span></div>
   <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;position:relative">
 <div class="screen on" id="s-setup">
   <div class="s-logo">&#127937;</div>
@@ -6555,7 +6792,7 @@ function apptursLukk(fromBack){
         <input type="checkbox" id="ar-lagleder-check" style="width:20px;height:20px;accent-color:#f5c518;flex-shrink:0">
         <div>
           <div style="font-size:14px;font-weight:700;color:#e8e0d4">Jeg er lagleder</div>
-          <div style="font-size:11px;color:#4a6a8a;margin-top:2px">Kun lagleder sender fremgang til live-trackeren</div>
+          <div style="font-size:11px;color:var(--label);margin-top:2px">Kun lagleder sender fremgang til live-trackeren</div>
         </div>
       </label>
       <button class="go-btn" id="ar-start-btn" onclick="arStartFraOppslag()" style="margin-bottom:0">Start løpet →</button>
