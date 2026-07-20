@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BigBoss Admin">
+<link rel="manifest" href="./bigboss-manifest.json">
+<link rel="apple-touch-icon" href="../icon-192.png">
+<title>BigBoss Admin — Knauskoret Pula 2026</title>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<style>
+  :root {
+    --bg: #080e14;
+    --card: #0f1a24;
+    --card2: #162030;
+    --border: #1e3040;
+    --gold: #f5c518;
+    --green: #22c55e;
+    --red: #e00515;
+    --blue: #60a0f0;
+    --purple: #c084fc;
+    --text: #e8e0d4;
+    --muted: #4a6a8a;
+    --dim: #2a4a6a;
+  }
+  body.lys {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --card2: #e8eef4;
+    --border: #c8d8e8;
+    --gold: #c49a00;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --text: #1a2a3a;
+    --muted: #6a8aaa;
+    --dim: #a0b8cc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100dvh;
+    transition: background .25s, color .25s;
+  }
+
+  /* HEADER */
+  .hdr {
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .hdr-title { font-size: 15px; font-weight: 800; color: var(--gold); letter-spacing: -.3px; }
+  .hdr-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .refresh-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-appearance: none;
+  }
+  .refresh-btn.spinning { opacity: .6; pointer-events: none; }
+  .refresh-btn.spinning .spin { animation: spin .8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .theme-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  /* PASSWORD GATE */
+  #pw-gate {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    gap: 18px;
+    text-align: center;
+  }
+  #pw-gate .ico { font-size: 44px; }
+  #pw-gate .lbl { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  #pw-gate-form { display: flex; gap: 8px; width: 100%; max-width: 300px; }
+  #pw-gate-in {
+    flex: 1;
+    background: var(--card2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 11px 14px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  #pw-gate-btn {
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  #pw-gate-err { font-size: 12px; color: var(--red); min-height: 16px; }
+
+  /* MAIN CONTENT */
+  #app-main { display: none; padding: 16px; max-width: 640px; margin: 0 auto; }
+  .sec-lbl { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); margin: 20px 0 12px; }
+  .sec-lbl:first-child { margin-top: 0; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .stat-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .stat-box { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 900; color: var(--gold); }
+  .stat-lbl { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .list-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .list-row:last-child { border-bottom: none; }
+  .list-row .v { font-weight: 800; color: var(--gold); }
+  .person-card { background: var(--card2); border-radius: 8px; padding: 9px 11px; margin-bottom: 6px; }
+  .person-name { font-weight: 800; font-size: 12.5px; }
+  .person-count { font-weight: 800; color: var(--gold); font-size: 12.5px; }
+  .person-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .empty-msg { font-size: 12px; color: var(--muted); text-align: center; padding: 8px 0; }
+
+  .main-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #0a1520;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 57px;
+    z-index: 90;
+  }
+  .main-tab-btn {
+    flex: 1 1 auto;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-appearance: none;
+  }
+  .main-tab-btn.active {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+  }
+
+  .stat-tab-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 9px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .stat-tab-btn.active {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+  }
+  .bb-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .bb-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+  .bb-toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: var(--border);
+    transition: background .2s;
+    cursor: pointer;
+    display: block;
+  }
+  .bb-toggle input:checked + .bb-toggle-track {
+    background: var(--gold);
+  }
+  .bb-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .2s;
+    pointer-events: none;
+  }
+  .bb-toggle input:checked ~ .bb-toggle-track .bb-toggle-thumb {
+    transform: translateX(20px);
+  }
+  .person-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .person-nav-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .person-nav-btn:disabled { opacity: .3; cursor: default; }
+  .person-nav-lbl { font-size: 12px; color: var(--muted); text-align: center; flex: 1; }
+  .person-detail-name { font-size: 18px; font-weight: 900; color: var(--gold); text-align: center; margin-bottom: 4px; }
+
+  /* KNAUSBOT INNBOKS (mirrors index.html boss-conv styling) */
+  .boss-conv-list { display: flex; flex-direction: column; gap: 6px; }
+  .boss-conv-item { display: flex; align-items: center; gap: 10px; background: var(--card2); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+  .boss-conv-item.new { border: 1px solid var(--gold); }
+  .boss-conv-name { font-weight: 800; font-size: 13px; }
+  .boss-conv-preview { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .boss-conv-badge { background: var(--gold); color: #111; font-size: 9.5px; font-weight: 900; border-radius: 6px; padding: 2px 6px; flex-shrink: 0; }
+  .boss-conv-time { font-size: 10.5px; color: var(--muted); flex-shrink: 0; }
+  .boss-chat-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .boss-chat-hdr { display: flex; align-items: center; gap: 10px; }
+  .boss-chat-back { background: transparent; border: none; color: var(--text); font-size: 18px; cursor: pointer; }
+  .boss-chat-navn { font-weight: 800; font-size: 14px; flex: 1; }
+  .boss-msg-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; padding: 4px; }
+  .boss-msg-user, .boss-msg-bot { border-radius: 10px; padding: 8px 10px; max-width: 85%; }
+  .boss-msg-user { background: var(--card2); align-self: flex-start; }
+  .boss-msg-bot { background: var(--gold); color: #111; align-self: flex-end; }
+  .boss-msg-fra { font-size: 10px; font-weight: 800; opacity: .7; margin-bottom: 2px; }
+  .boss-msg-txt { font-size: 13px; line-height: 1.4; }
+  .boss-msg-time { font-size: 9.5px; opacity: .6; margin-top: 3px; text-align: right; }
+  .ai-reply-in { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; padding: 9px 10px; outline: none; flex: 1; -webkit-appearance: none; }
+  .ai-reply-btn { background: var(--gold); color: #111; border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 800; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="pw-gate">
+  <div class="ico">👑</div>
+  <div class="lbl">BigBoss Admin</div>
+  <form id="pw-gate-form">
+    <input id="pw-gate-in" type="password" placeholder="KODE" autocapitalize="characters" autocomplete="off" maxlength="12">
+    <button id="pw-gate-btn" type="button">&#8594;</button>
+  </form>
+  <div id="pw-gate-err"></div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px">
+    <label class="bb-toggle">
+      <input type="checkbox" id="bb-husk-pw-toggle">
+      <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+    </label>
+    <span style="font-size:12px;color:var(--muted)">Husk kode på denne telefonen</span>
+  </div>
+</div>
+
+<div id="app-main">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title" onclick="bbTittelTrykk()" style="cursor:pointer;user-select:none">👑 BigBoss Admin</div>
+      <div class="hdr-sub">Knauskoret Pula 2026</div>
+      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.07.20-01</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px">
+      <button id="bb-varsel-btn" class="theme-btn" onclick="bbVisVarslerPanel()" title="Varsler" style="position:relative">
+        🔔<span id="bb-varsel-badge" style="display:none;position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:9px;font-weight:900;border-radius:8px;min-width:15px;height:15px;line-height:15px;text-align:center;padding:0 3px"></span>
+      </button>
+      <button id="theme-btn" class="theme-btn" onclick="byttTema()" title="Mørk/lys modus">🌙</button>
+    </div>
+  </div>
+
+  <div class="main-tabs">
+    <button id="main-tab-varsler" class="main-tab-btn active" onclick="bbByttHovedfane('varsler')">🔔 Varsler</button>
+    <button id="main-tab-stats" class="main-tab-btn" onclick="bbByttHovedfane('stats')">📈 Statistikk</button>
+    <button id="main-tab-knausbot" class="main-tab-btn" onclick="bbByttHovedfane('knausbot')">🤖 KnausBot</button>
+    <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 App-varsler</button>
+    <button id="main-tab-hendelser" class="main-tab-btn" onclick="bbByttHovedfane('hendelser')">🗂️ Viktige hendelser</button>
+    <button id="main-tab-fanebytte" class="main-tab-btn" onclick="bbByttHovedfane('fanebytte')">📊 Fanebytte</button>
+    <button id="main-tab-gjettelek" class="main-tab-btn" onclick="bbByttHovedfane('gjettelek')">🗺️ Gjettelek</button>
+  </div>
+
+  <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
+    <div class="card" id="bb-push-card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:800">🔔 Push-varsler til denne telefonen</div>
+          <div id="bb-push-status" style="font-size:11px;color:var(--muted);margin-top:2px">Sjekker status...</div>
+        </div>
+        <button id="bb-push-btn" class="refresh-btn" onclick="bbAktiverPush()" style="flex-shrink:0;font-size:11.5px;padding:9px 12px">Aktiver</button>
+      </div>
+    </div>
+    <div class="card" id="bb-varsel-innst-card" style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;margin-bottom:10px">⚙️ Varseltyper (push)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:12.5px;font-weight:700">🤖 KnausBot-meldinger</div>
+        </div>
+        <label class="bb-toggle">
+          <input type="checkbox" id="bb-innst-knausbot" checked onchange="bbLagreVarselInnst()">
+          <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0">
+        <div>
+          <div style="font-size:12.5px;font-weight:700">🔒 Feilede passordforsøk</div>
+        </div>
+        <label class="bb-toggle">
+          <input type="checkbox" id="bb-innst-feilpw" checked onchange="bbLagreVarselInnst()">
+          <span class="bb-toggle-track"><span class="bb-toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div id="bb-innst-status" style="font-size:10.5px;color:var(--muted);margin-top:8px;min-height:14px"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-varsel-refresh-btn" class="refresh-btn" onclick="bbHentVarsler()" style="flex:1;justify-content:center">
+        <span id="bb-varsel-refresh-ico" class="spin">&#128260;</span> Sjekk nå
+      </button>
+      <button class="refresh-btn" onclick="bbMerkAlleLest()" style="flex-shrink:0">✓ Merk alle lest</button>
+    </div>
+    <div id="bb-varsler-wrap" style="margin-bottom:20px">
+      <div class="empty-msg">Trykk «Sjekk nå» for å hente varsler</div>
+    </div>
+  </div>
+
+  <div id="main-sec-stats" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="stats-tab-oversikt" class="stat-tab-btn active" onclick="statByttFane('oversikt')" style="flex:1">📊 Oversikt</button>
+      <button id="stats-tab-person" class="stat-tab-btn" onclick="statByttFane('person')" style="flex:1">👤 Per person</button>
+      <button id="stats-tab-dager" class="stat-tab-btn" onclick="statByttFane('dager')" style="flex:1">📅 Dag for dag</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="dev-stats-btn" class="refresh-btn" onclick="statVisDevPanel()" style="flex:1;justify-content:center">
+        <span id="dev-stats-btn-ico" class="spin">&#128260;</span>
+        <span id="dev-stats-btn-txt">Oppdater statistikk</span>
+      </button>
+    </div>
+    <div id="dev-stats-wrap">
+      <div class="empty-msg">Trykk for å hente statistikk</div>
+    </div>
+    <div id="dev-person-wrap" style="display:none">
+      <div class="empty-msg">Trykk «Oppdater statistikk» først</div>
+    </div>
+    <div id="dev-dager-wrap" style="display:none">
+      <div class="empty-msg">Trykk «Oppdater statistikk» først</div>
+    </div>
+  </div>
+
+  <div id="main-sec-knausbot" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button class="refresh-btn" onclick="hentAIInnboks()" style="flex:1;justify-content:center">
+        &#128260; Hent meldinger
+      </button>
+    </div>
+    <div id="ai-innboks-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk for å hente meldinger</div>
+    </div>
+  </div>
+
+  <div id="main-sec-logg" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Oversikt over alle komité-varsler sendt via komitémenyen — hvem, når, og hvilke kanaler som ble brukt.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-logg-refresh-btn" class="refresh-btn" onclick="bbHentKomiteLogg()" style="flex:1;justify-content:center">
+        <span id="bb-logg-refresh-ico" class="spin">&#128260;</span> Hent logg
+      </button>
+    </div>
+    <div id="bb-komite-logg-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
+    </div>
+  </div>
+
+  <div id="main-sec-hendelser" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Kronologisk logg over viktige hendelser. Lagres i eget bin, ingen automatisk sletting.
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button id="hendelser-tab-apninger" class="main-tab-btn active" onclick="bbByttHendelserFane('apninger')" style="flex:1">📱 App-åpninger</button>
+      <button id="hendelser-tab-andre" class="main-tab-btn" onclick="bbByttHendelserFane('andre')" style="flex:1">🗂️ Andre hendelser</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-hendelser-refresh-btn" class="refresh-btn" onclick="bbHentHendelseslogg()" style="flex:1;justify-content:center">
+        <span id="bb-hendelser-refresh-ico" class="spin">&#128260;</span> Hent logg
+      </button>
+      <button class="refresh-btn" onclick="bbEksporterCSV()" style="flex-shrink:0">⬇️ Eksporter CSV</button>
+    </div>
+    <div id="bb-hendelser-status" style="font-size:10.5px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
+    <div id="bb-hendelser-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
+    </div>
+  </div>
+
+  <div id="main-sec-fanebytte" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Kronologisk logg over hvert fane-bytte i appen (Hjem, Program, Kart osv.) — hvem, når og hvilken fane. Eget bin siden dette er den mest høyfrekvente hendelsestypen.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-fanebytte-refresh-btn" class="refresh-btn" onclick="bbHentFaneloggData()" style="flex:1;justify-content:center">
+        <span id="bb-fanebytte-refresh-ico" class="spin">&#128260;</span> Hent logg
+      </button>
+      <button class="refresh-btn" onclick="bbEksporterFaneCSV()" style="flex-shrink:0">⬇️ Eksporter CSV</button>
+    </div>
+    <div id="bb-fanebytte-status" style="font-size:10.5px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
+    <div id="bb-fanebytte-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
+    </div>
+  </div>
+
+  <div id="main-sec-gjettelek" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Rangering av hvem som gjettet nærmest Pula på gjettekartet i splash-siden. Kun synlig her — deltakerne ser aldri resultatet selv.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-gjett-refresh-btn" class="refresh-btn" onclick="bbHentGjettData()" style="flex:1;justify-content:center">
+        <span id="bb-gjett-refresh-ico" class="spin">&#128260;</span> Hent gjett
+      </button>
+    </div>
+    <div id="bb-gjett-status" style="font-size:10.5px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
+    <div id="bb-gjett-wrap" style="margin-bottom:24px">
+      <div class="empty-msg">Trykk «Hent gjett» for å se rangering</div>
+    </div>
+    <div class="card" style="border-color:var(--gold);margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;margin-bottom:6px;color:var(--gold)">🎭 Dilemma — lengst unna</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+        Finner automatisk personen som gjettet lengst unna Pula, og gir dem valget om å avsløre splash-passordet alene først eller dele det med alle med en gang.
+      </div>
+      <input id="bb-dilemma-pw" type="text" placeholder="Nytt splash-passord (f.eks. neste sitt)" autocapitalize="characters" maxlength="20"
+        style="width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:9px 10px;margin-bottom:10px;outline:none">
+      <button class="refresh-btn" onclick="bbStartDilemma()" style="width:100%;justify-content:center;border-color:var(--gold);color:var(--gold)">🎭 Start dilemma nå</button>
+      <div id="bb-dilemma-status" style="font-size:10.5px;color:var(--muted);margin-top:8px;min-height:14px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── JSONBIN-TILKOBLING ──
+const JB_BIN_ID = "6a5dafc6f5f4af5e29a60c24";
+const JB_KEY    = "$2a$10$jue8mbEpng4LHJ0RoO/YS.HXiwlcyeSwxTr.OHC2OzbnIJ6MJochK";
+const JB_URL    = `https://api.jsonbin.io/v3/b/${JB_BIN_ID}`;
+
+let _jbCache = null, _jbCacheTs = 0;
+const JB_CACHE_TTL = 30000;
+
+async function jbGet(bustCache=false){
+  if(!bustCache && _jbCache && Date.now()-_jbCacheTs < JB_CACHE_TTL) return _jbCache;
+  try {
+    const res = await fetch(`${JB_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    _jbCache = data.record || null;
+    _jbCacheTs = Date.now();
+    return _jbCache;
+  } catch(e){ return _jbCache; }
+}
+
+async function jbSave(record){
+  try {
+    const res = await fetch(JB_URL, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
+      body: JSON.stringify(record)
+    });
+    if(res.ok){ _jbCache = record; _jbCacheTs = Date.now(); }
+    return res.ok;
+  } catch(e){ return false; }
+}
+
+function escHTML(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function tidsstempel(){
+  const n = new Date();
+  return `${n.getHours().toString().padStart(2,"0")}:${n.getMinutes().toString().padStart(2,"0")}`;
+}
+function statFormatDato(iso){
+  if(!iso) return "aldri";
+  return new Date(iso).toLocaleString("nb-NO",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+}
+
+// ── VARSLINGSSYSTEM (KnausBot-meldinger + feilede koder) ──
+// Poller bbVarsel-feltet i JSONBin mens denne siden er åpen. Dette er IKKE ekte
+// push-varsling til telefonen når appen er lukket - kun live-oppdatering mens
+// fanen er åpen og aktiv.
+const BB_VARSEL_POLL_INTERVALL = 20000; // 20 sek
+let bbVarslerListe = [];
+let bbVarselLestIds = new Set(JSON.parse(localStorage.getItem("bb_varsel_lest") || "[]"));
+let bbVarselAudioCtx = null;
+let bbVarselPollTimer = null;
+
+function bbLagreLestIds(){
+  // Behold maks 200 IDer for å unngå at localStorage vokser ubegrenset
+  const arr = Array.from(bbVarselLestIds).slice(-200);
+  localStorage.setItem("bb_varsel_lest", JSON.stringify(arr));
+}
+
+function bbSpillVarselLyd(){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    if(!bbVarselAudioCtx) bbVarselAudioCtx = new AC();
+    if(bbVarselAudioCtx.state === "suspended") bbVarselAudioCtx.resume();
+    const osc = bbVarselAudioCtx.createOscillator();
+    const gain = bbVarselAudioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = 880;
+    const now = bbVarselAudioCtx.currentTime;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.2, now+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now+0.18);
+    osc.connect(gain);
+    gain.connect(bbVarselAudioCtx.destination);
+    osc.start(now);
+    osc.stop(now+0.2);
+  }catch(e){ /* lyd er ikke kritisk */ }
+}
+
+function bbOppdaterBadge(){
+  const badge = document.getElementById("bb-varsel-badge");
+  if(!badge) return;
+  const uleste = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+  if(uleste > 0){
+    badge.textContent = uleste > 99 ? "99+" : String(uleste);
+    badge.style.display = "block";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+async function bbHentVarsler(varslLydVedNytt=true){
+  const ico = document.getElementById("bb-varsel-refresh-ico");
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const nyeListe = (data && data.bbVarsel) ? data.bbVarsel : [];
+    const forrigeAntallUlest = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+    bbVarslerListe = nyeListe;
+    const nyAntallUlest = bbVarslerListe.filter(v => !bbVarselLestIds.has(v.id)).length;
+    if(varslLydVedNytt && nyAntallUlest > forrigeAntallUlest){
+      bbSpillVarselLyd();
+    }
+    bbRenderVarsler();
+    bbOppdaterBadge();
+  }catch(e){ /* nettverksfeil - prøver igjen neste poll-syklus */ }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbRenderVarsler(){
+  const wrap = document.getElementById("bb-varsler-wrap");
+  if(!wrap) return;
+  if(!bbVarslerListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen varsler ennå</div>';
+    return;
+  }
+  const sortert = bbVarslerListe.slice().reverse(); // nyeste øverst
+  wrap.innerHTML = sortert.map(v=>{
+    const erLest = bbVarselLestIds.has(v.id);
+    const ico = v.type === "knausbot" ? "🤖" : "🔒";
+    const fargeStil = erLest ? "opacity:.5" : "";
+    return `<div class="card" style="${fargeStil};display:flex;gap:10px;align-items:flex-start;margin-bottom:6px" onclick="bbMerkLest('${v.id}')">
+      <span style="font-size:18px;flex-shrink:0">${ico}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:800">${escHTML(v.navn)}${erLest?'':' <span style=\"color:var(--gold)\">• NYTT</span>'}</div>
+        <div style="font-size:12px;color:var(--text);margin-top:2px;word-break:break-word">${escHTML(v.tekst)}</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:3px">${statFormatDato(v.ts)}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function bbMerkLest(id){
+  bbVarselLestIds.add(id);
+  bbLagreLestIds();
+  bbRenderVarsler();
+  bbOppdaterBadge();
+}
+
+function bbMerkAlleLest(){
+  bbVarslerListe.forEach(v => bbVarselLestIds.add(v.id));
+  bbLagreLestIds();
+  bbRenderVarsler();
+  bbOppdaterBadge();
+}
+
+function bbVisVarslerPanel(){
+  bbByttHovedfane("varsler");
+}
+
+function bbByttHovedfane(fane){
+  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte", "gjettelek"];
+  faner.forEach(f=>{
+    const btn = document.getElementById("main-tab-"+f);
+    const sec = document.getElementById("main-sec-"+f);
+    if(btn) btn.classList.toggle("active", f===fane);
+    if(sec) sec.style.display = f===fane ? "block" : "none";
+  });
+}
+
+function bbStartPolling(){
+  if(bbVarselPollTimer) clearInterval(bbVarselPollTimer);
+  bbVarselPollTimer = setInterval(()=>bbHentVarsler(true), BB_VARSEL_POLL_INTERVALL);
+}
+
+// ── PASSORDLÅS ──
+const BOSS_PW = "GRIBB67";
+function bbFullforInnlogging(){
+  document.getElementById("pw-gate").style.display = "none";
+  document.getElementById("app-main").style.display = "block";
+  hentAIInnboks();
+  bbHentVarsler(false);
+  bbStartPolling();
+  bbOppdaterPushStatus();
+  bbLastVarselInnst();
+}
+
+function sjekkAdminPw(e){
+  if(e) e.preventDefault();
+  const inp = document.getElementById("pw-gate-in");
+  const err = document.getElementById("pw-gate-err");
+  const huskToggle = document.getElementById("bb-husk-pw-toggle");
+  if(!inp) return false;
+  if(inp.value.trim().toUpperCase() === BOSS_PW){
+    sessionStorage.setItem("bb_admin_ok", "1");
+    // Husk-bryter: lagre permanent på denne telefonen hvis skrudd på
+    if(huskToggle && huskToggle.checked){
+      localStorage.setItem("bb_husk_pw", "1");
+    } else {
+      localStorage.removeItem("bb_husk_pw");
+    }
+    bbFullforInnlogging();
+  } else {
+    inp.value = "";
+    if(err){ err.textContent = "Feil kode!"; setTimeout(()=>err.textContent="", 2000); }
+  }
+  return false;
+}
+// Eksplisitt JS-binding i stedet for kun inline onsubmit i HTML-en - mer robust
+// på tvers av standalone PWA-modus og ulike Android/Chrome-versjoner, siden
+// skjema-submit-oppførsel kan variere i installert PWA-kontekst.
+function bbBindPwGate(){
+  const btn = document.getElementById("pw-gate-btn");
+  const inp = document.getElementById("pw-gate-in");
+  const huskToggle = document.getElementById("bb-husk-pw-toggle");
+  if(btn) btn.addEventListener("click", (e)=>sjekkAdminPw(e));
+  if(inp) inp.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") sjekkAdminPw(e);
+  });
+  // Sett bryteren til på hvis den allerede er huket av fra tidligere
+  if(huskToggle && localStorage.getItem("bb_husk_pw") === "1"){
+    huskToggle.checked = true;
+  }
+}
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", bbBindPwGate);
+} else {
+  bbBindPwGate();
+}
+// Husk innlogging: enten for resten av nettleser-økten (sessionStorage), eller
+// permanent på denne telefonen hvis husk-bryteren er skrudd på (localStorage).
+if(sessionStorage.getItem("bb_admin_ok") === "1" || localStorage.getItem("bb_husk_pw") === "1"){
+  document.addEventListener("DOMContentLoaded", bbFullforInnlogging);
+}
+
+// ── PWA / SERVICE WORKER ──
+// Registreringen av bigboss-sw.js skjer via OneSignal.init() nedenfor
+// (serviceWorkerPath/serviceWorkerParam) - siden bigboss-sw.js er en kombinert
+// fil (OneSignal + egen cache-logikk), skal den KUN registreres én gang derfra.
+// En separat, manuell navigator.serviceWorker.register()-kall her ville gitt en
+// konkurrerende registrering på samme scope, noe som ikke er tillatt.
+
+// ── PUSH-VARSLER (OneSignal, kun til denne telefonen) ──
+// Siste utvei: fang opp helt uventede feil (f.eks. hvis selve OneSignal-scriptet
+// fra CDN feiler å laste) som ellers ville vært usynlige for brukeren, siden vi
+// ikke har tilgang til telefonens DevTools-konsoll.
+window.addEventListener("error", (e)=>{
+  if(e && e.message && e.message.toLowerCase().includes("onesignal")){
+    window.bbOneSignalInitFeilet = true;
+    window.bbOneSignalInitFeilTekst = e.message;
+    const statusEl = document.getElementById("bb-push-status");
+    if(statusEl) statusEl.textContent = "❌ Global feil: " + e.message;
+  }
+});
+
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.bbOneSignalInitFeilet = false;
+OneSignalDeferred.push(async function(OneSignal){
+  try{
+    await OneSignal.init({
+      appId: "b049b249-665b-41ab-8cf8-8c2256b7c541",
+      safari_web_id: "web.onesignal.auto.b049b249-665b-41ab-8cf8-8c2256b7c541",
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true,
+      serviceWorkerParam: { scope: "/bigboss/" },
+      serviceWorkerPath: "bigboss-sw.js",
+    });
+  }catch(e){
+    // Hvis init() selv feiler, blir ALLE senere OneSignalDeferred.push(...)-kall
+    // (inkludert bbAktiverPush) hengende for alltid, siden de venter i samme kø.
+    // Denne flagget lar bbAktiverPush oppdage det og vise en tydelig feilmelding
+    // i stedet for å bare henge på "Ber om tillatelse..." uten forklaring.
+    window.bbOneSignalInitFeilet = true;
+    window.bbOneSignalInitFeilTekst = (e && e.message) ? e.message : String(e);
+    const statusEl = document.getElementById("bb-push-status");
+    if(statusEl) statusEl.textContent = "❌ OneSignal-feil: " + window.bbOneSignalInitFeilTekst;
+    console.log("OneSignal.init() feilet:", e);
+  }
+});
+
+async function bbOppdaterPushStatus(){
+  const statusEl = document.getElementById("bb-push-status");
+  const btn = document.getElementById("bb-push-btn");
+  if(!statusEl || !btn) return;
+  if(!window.OneSignalDeferred){
+    statusEl.textContent = "Push-varsler ikke tilgjengelig i denne nettleseren";
+    btn.style.display = "none";
+    return;
+  }
+  statusEl.textContent = "Sjekker status...";
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      const optedIn = OneSignal.User.PushSubscription.optedIn;
+      if(optedIn){
+        let tags = {};
+        try{ tags = await OneSignal.User.getTags(); }catch(e){}
+        if(tags && tags.rolle === "bigboss"){
+          statusEl.textContent = "✅ Aktivert på denne telefonen";
+        } else {
+          statusEl.textContent = "⚠️ Aktivert, men mangler tag - trykk Aktiver på nytt";
+        }
+        btn.textContent = "Deaktiver";
+        btn.onclick = bbDeaktiverPush;
+      } else {
+        statusEl.textContent = "Ikke aktivert ennå";
+        btn.textContent = "Aktiver";
+        btn.onclick = bbAktiverPush;
+      }
+    }catch(e){
+      statusEl.textContent = "Kunne ikke sjekke status";
+    }
+  });
+}
+
+function bbAktiverPush(){
+  const statusEl = document.getElementById("bb-push-status");
+  // Sjekk eksisterende nettleser-tillatelse FØR vi ber om ny - moderne nettlesere
+  // viser aldri en ny dialog hvis brukeren allerede har blokkert varsler for
+  // dette domenet tidligere. Uten denne sjekken henger statusteksten på
+  // "Ber om tillatelse..." for alltid uten noen forklaring.
+  if(typeof Notification !== "undefined" && Notification.permission === "denied"){
+    if(statusEl) statusEl.textContent = "❌ Blokkert i nettleseren — gå til nettleser-innstillinger → Nettstedsinnstillinger → Varsler og tillat kkturne.no manuelt";
+    return;
+  }
+  if(window.bbOneSignalInitFeilet){
+    const detaljer = window.bbOneSignalInitFeilTekst || "ukjent feil";
+    if(statusEl) statusEl.textContent = "❌ OneSignal-feil: " + detaljer;
+    return;
+  }
+  if(statusEl) statusEl.textContent = "Ber om tillatelse...";
+  // Sikkerhetsnett: hvis ingenting har skjedd etter 5 sekunder, anta at forespørselen
+  // hang stille (skjer på enkelte nettlesere/OS-kombinasjoner) og gi beskjed i stedet
+  // for å la statusteksten henge for alltid.
+  let ferdig = false;
+  setTimeout(()=>{
+    if(!ferdig && statusEl && statusEl.textContent === "Ber om tillatelse..."){
+      statusEl.textContent = "⚠️ Fikk ikke svar fra OneSignal — last siden på nytt (kan skje første gang etter installasjon)";
+    }
+  }, 5000);
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.Notifications.requestPermission();
+      ferdig = true;
+      // requestPermission() ber kun om nettleser-tillatelse - den registrerer IKKE
+      // automatisk en aktiv push-subscription hos OneSignal. Må kalles eksplisitt,
+      // ellers kan "rolle"-taggen bli satt på en bruker uten faktiv subscription,
+      // og push vil da aldri leveres selv om alt ser riktig ut i UI.
+      if(OneSignal.Notifications.permission){
+        await OneSignal.User.PushSubscription.optIn();
+        await OneSignal.User.addTag("rolle", "bigboss");
+        if(statusEl) statusEl.textContent = "Aktiverer...";
+        // Liten pause for å la subscription faktisk registreres hos OneSignal før vi sjekker status
+        setTimeout(bbOppdaterPushStatus, 1200);
+      } else {
+        if(statusEl) statusEl.textContent = "Tillatelse ble ikke gitt — sjekk nettleser-innstillinger";
+      }
+    }catch(e){
+      ferdig = true;
+      if(statusEl) statusEl.textContent = "Kunne ikke aktivere — sjekk nettleser-innstillinger";
+    }
+  });
+}
+
+function bbDeaktiverPush(){
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.User.removeTag("rolle");
+      await OneSignal.User.PushSubscription.optOut();
+      bbOppdaterPushStatus();
+    }catch(e){}
+  });
+}
+
+// ── VARSELTYPE-INNSTILLINGER (styrer hva index.html faktisk sender push for) ──
+async function bbLastVarselInnst(){
+  try{
+    const data = await jbGet(true);
+    const innst = (data && data.bbVarselInnst) ? data.bbVarselInnst : {knausbot:true, feilpw:true};
+    const kbEl = document.getElementById("bb-innst-knausbot");
+    const fpEl = document.getElementById("bb-innst-feilpw");
+    if(kbEl) kbEl.checked = innst.knausbot !== false;
+    if(fpEl) fpEl.checked = innst.feilpw !== false;
+  }catch(e){ /* beholder default (begge på) hvis noe feiler */ }
+}
+
+async function bbLagreVarselInnst(){
+  const statusEl = document.getElementById("bb-innst-status");
+  const kbEl = document.getElementById("bb-innst-knausbot");
+  const fpEl = document.getElementById("bb-innst-feilpw");
+  if(statusEl) statusEl.textContent = "Lagrer...";
+  try{
+    const data = (await jbGet(true)) || {};
+    data.bbVarselInnst = {
+      knausbot: kbEl ? kbEl.checked : true,
+      feilpw: fpEl ? fpEl.checked : true
+    };
+    const ok = await jbSave(data);
+    if(statusEl){
+      statusEl.textContent = ok ? "✅ Lagret" : "❌ Kunne ikke lagre";
+      setTimeout(()=>{ if(statusEl) statusEl.textContent=""; }, 2000);
+    }
+  }catch(e){
+    if(statusEl) statusEl.textContent = "❌ Kunne ikke lagre";
+  }
+}
+
+// ── SKJULT TILGANG TIL NULLSTILLING (5 raske trykk på tittelen) ──
+let bbTittelTrykkCount = 0;
+let bbTittelTrykkTimer = null;
+function bbTittelTrykk(){
+  bbTittelTrykkCount++;
+  clearTimeout(bbTittelTrykkTimer);
+  if(bbTittelTrykkCount >= 5){
+    bbTittelTrykkCount = 0;
+    bbApneNullstillDialog();
+    return;
+  }
+  // Nullstill telleren hvis det går mer enn 1.5 sek mellom trykk
+  bbTittelTrykkTimer = setTimeout(()=>{ bbTittelTrykkCount = 0; }, 1500);
+}
+
+// ── NULLSTILL LOGGER (farlig sone, kun for testing før lansering) ──
+// Eget passord adskilt fra BOSS_PW, som en ekstra sikkerhetsbarriere mot at
+// noen trykker feil ved uhell midt i turnéuken.
+const NULLSTILL_PW = "SLETT2026";
+
+function bbApneNullstillDialog(){
+  const pw = prompt('Skriv "' + NULLSTILL_PW + '" for å bekrefte nullstilling av ALLE logger. Dette kan IKKE angres!');
+  if(pw === null) return; // avbrutt
+  if(pw.trim().toUpperCase() !== NULLSTILL_PW){
+    alert("Feil kode. Nullstilling avbrutt.");
+    return;
+  }
+  if(!confirm("Helt sikker? Dette sletter all statistikk, hendelseslogg og fanebytte-logg permanent.")) return;
+  bbNullstillAlleLogger();
+}
+
+async function bbNullstillAlleLogger(){
+  const resultater = [];
+  // 1) Hoved-bin: nullstill KUN stats-feltet, la varsel/chat/race_tracker/os_key/gjett/breakout stå urørt
+  try{
+    const data = (await jbGet(true)) || {};
+    data.stats = {totalAapninger:0, faner:{}, toner:0, egg:{}, personer:{}, feilPw:[], zebraSist:null, dager:{}, sistOppdatert:new Date().toISOString()};
+    const ok1 = await jbSave(data);
+    resultater.push(ok1 ? "✅ Statistikk nullstilt" : "❌ Statistikk feilet");
+  }catch(e){ resultater.push("❌ Statistikk feilet"); }
+
+  // 2) Hendelseslogg-bin: nullstill hele innholdet (dedikert bin, ingenting annet ligger her)
+  try{
+    const res = await fetch(JBLOGG_URL, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
+      body: JSON.stringify({logg:[]})
+    });
+    resultater.push(res.ok ? "✅ Hendelseslogg nullstilt" : "❌ Hendelseslogg feilet");
+  }catch(e){ resultater.push("❌ Hendelseslogg feilet"); }
+
+  // 3) Fanebytte-logg-bin: nullstill hele innholdet
+  try{
+    const res = await fetch(JBFANE_URL, {
+      method: "PUT",
+      headers: { "Content-Type":"application/json", "X-Master-Key": JB_KEY },
+      body: JSON.stringify({faneLogg:[]})
+    });
+    resultater.push(res.ok ? "✅ Fanebytte-logg nullstilt" : "❌ Fanebytte-logg feilet");
+  }catch(e){ resultater.push("❌ Fanebytte-logg feilet"); }
+
+  alert(resultater.join("\n"));
+  // Oppdater visningen slik at nullstillingen reflekteres umiddelbart
+  statCache = null;
+  _bbHendelserCache = [];
+  _bbFaneloggCache = [];
+  if(statAktivFane === "oversikt") statVisDevPanel();
+}
+
+// ── KOMITÉ-VARSEL-LOGG (hvem sendte hva, når, via hvilke kanaler) ──
+async function bbHentKomiteLogg(){
+  const wrap = document.getElementById("bb-komite-logg-wrap");
+  const ico = document.getElementById("bb-logg-refresh-ico");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const logg = (data && data.komiteVarselLogg) ? data.komiteVarselLogg.slice().reverse() : [];
+    if(!logg.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen komité-varsler sendt ennå</div>';
+    } else {
+      wrap.innerHTML = logg.map(v=>{
+        const kanalTekst = (v.kanaler && v.kanaler.length)
+          ? v.kanaler.map(k=> k==="app" ? "📱 app" : "🔔 push").join(" · ")
+          : "(ingen kanal registrert)";
+        return `<div class="card" style="margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+            <span style="font-size:12.5px;font-weight:800">${escHTML(v.navn||"Ukjent")}</span>
+            <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(v.ts)}</span>
+          </div>
+          <div style="font-size:12px;margin-top:4px;word-break:break-word">${escHTML(v.melding||"")}</div>
+          <div style="font-size:10.5px;color:var(--gold);margin-top:4px">${kanalTekst}</div>
+        </div>`;
+      }).join("");
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+// ── FULL HENDELSESLOGG (eget bin, kronologisk, ingen automatisk sletting) ──
+const JBLOGG_BIN_ID = "6a5db023f5f4af5e29a60d1a";
+const JBLOGG_URL     = `https://api.jsonbin.io/v3/b/${JBLOGG_BIN_ID}`;
+let _bbHendelserCache = [];
+
+async function jbLoggGet(){
+  try{
+    const res = await fetch(`${JBLOGG_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data.record || null;
+  }catch(e){ return null; }
+}
+
+const HENDELSE_IKON = {apning:"📱", egg:"🥚", feilpw:"🔒", knausbot:"🤖", zebra:"🎫", praktisk:"🌍", moro:"🦓"};
+const HENDELSE_NAVN = {apning:"App åpnet", egg:"Easter egg", feilpw:"Feilet passord", knausbot:"KnausBot-melding", zebra:"Zebraen sier", praktisk:"Praktisk", moro:"Moro"};
+
+let hendelserAktivFane = "apninger";
+
+function bbByttHendelserFane(fane){
+  hendelserAktivFane = fane;
+  document.getElementById("hendelser-tab-apninger").classList.toggle("active", fane==="apninger");
+  document.getElementById("hendelser-tab-andre").classList.toggle("active", fane==="andre");
+  bbVisHendelser(); // re-render med cachet data, ikke nytt nettverkskall
+}
+
+async function bbHentHendelseslogg(){
+  const wrap = document.getElementById("bb-hendelser-wrap");
+  const ico = document.getElementById("bb-hendelser-refresh-ico");
+  const statusEl = document.getElementById("bb-hendelser-status");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbLoggGet();
+    _bbHendelserCache = (data && data.logg) ? data.logg : [];
+    bbVisHendelser();
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbVisHendelser(){
+  const wrap = document.getElementById("bb-hendelser-wrap");
+  const statusEl = document.getElementById("bb-hendelser-status");
+  if(!wrap) return;
+  const filtrert = hendelserAktivFane==="apninger"
+    ? _bbHendelserCache.filter(h => h.type==="apning")
+    : _bbHendelserCache.filter(h => h.type!=="apning");
+  const logg = filtrert.slice().reverse(); // nyeste først
+  if(statusEl) statusEl.textContent = `${filtrert.length} ${hendelserAktivFane==="apninger"?"app-åpninger":"andre hendelser"} registrert`;
+  if(!logg.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen hendelser registrert ennå</div>';
+  } else {
+    // Vis kun de siste 200 i selve listen for ytelse - full eksport via CSV uansett
+    const DETALJ_KATEGORIER = new Set(["egg","praktisk","moro","feilpw","knausbot"]);
+    wrap.innerHTML = logg.slice(0,200).map(h=>{
+      const ico = HENDELSE_IKON[h.type] || "•";
+      const navn = HENDELSE_NAVN[h.type] || h.type;
+      const visDetalj = DETALJ_KATEGORIER.has(h.type) && h.detalj;
+      const navnTekst = visDetalj ? `${navn} - ${escHTML(h.detalj)}` : navn;
+      return `<div class="list-row">
+        <span>${ico} ${escHTML(h.navn||"Ukjent")} <span style="color:var(--muted)">— ${navnTekst}</span></span>
+        <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(h.ts)}</span>
+      </div>`;
+    }).join("");
+    if(logg.length > 200){
+      wrap.innerHTML += `<div class="empty-msg">... og ${logg.length-200} eldre hendelser (kun synlig i CSV-eksport)</div>`;
+    }
+  }
+}
+
+function bbEksporterCSV(){
+  const statusEl = document.getElementById("bb-hendelser-status");
+  if(!_bbHendelserCache.length){
+    if(statusEl) statusEl.textContent = "Ingen data å eksportere — trykk «Hent logg» først";
+    return;
+  }
+  // Sorter kronologisk (eldste først) for regneark-vennlig rekkefølge
+  const sortert = _bbHendelserCache.slice().sort((a,b)=> (a.ts||"").localeCompare(b.ts||""));
+  const rader = [["Dato","Klokkeslett","Type","Navn","Detalj"]];
+  sortert.forEach(h=>{
+    const d = h.ts ? new Date(h.ts) : null;
+    const dato = d ? d.toLocaleDateString("nb-NO") : "";
+    const klokke = d ? d.toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "";
+    const type = HENDELSE_NAVN[h.type] || h.type || "";
+    rader.push([dato, klokke, type, h.navn||"", h.detalj||""]);
+  });
+  // CSV-escaping: pakk inn felt med komma/anførselstegn/linjeskift i anførselstegn
+  const csvInnhold = rader.map(rad =>
+    rad.map(felt => {
+      const s = String(felt).replace(/"/g,'""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    }).join(",")
+  ).join("\r\n");
+  const bom = "\uFEFF"; // sikrer riktig visning av æøå i Excel
+  const blob = new Blob([bom + csvInnhold], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `kkturne-hendelseslogg-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if(statusEl) statusEl.textContent = `✅ Eksportert ${sortert.length} hendelser`;
+}
+
+// ── FANE-BYTTE-LOGG (eget bin, høyfrekvent) ──
+const JBFANE_BIN_ID = "6a5db043f5f4af5e29a60d6e";
+const JBFANE_URL     = `https://api.jsonbin.io/v3/b/${JBFANE_BIN_ID}`;
+let _bbFaneloggCache = [];
+const FANE_NAVN = {hjem:"Hjem",program:"Program",praktisk:"Praktisk",kart:"Kart",gloser:"Gloser",fakta:"Fakta",moro:"Moro",bilder:"Bilder"};
+
+async function bbHentFaneloggData(){
+  const wrap = document.getElementById("bb-fanebytte-wrap");
+  const ico = document.getElementById("bb-fanebytte-refresh-ico");
+  const statusEl = document.getElementById("bb-fanebytte-status");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const res = await fetch(`${JBFANE_URL}/latest`, {
+      headers: { "X-Master-Key": JB_KEY },
+      cache: "no-store"
+    });
+    const json = res.ok ? await res.json() : null;
+    const data = json ? json.record : null;
+    const logg = (data && data.faneLogg) ? data.faneLogg.slice().reverse() : []; // nyeste først
+    _bbFaneloggCache = (data && data.faneLogg) ? data.faneLogg : [];
+    if(statusEl) statusEl.textContent = `${_bbFaneloggCache.length} fane-bytter registrert totalt`;
+    if(!logg.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen fane-bytter registrert ennå</div>';
+    } else {
+      // Vis kun de siste 200 for ytelse - full eksport via CSV uansett
+      wrap.innerHTML = logg.slice(0,200).map(f=>{
+        const faneVisning = FANE_NAVN[f.fane] || f.fane;
+        return `<div class="list-row">
+          <span>${escHTML(f.navn||"Ukjent")} <span style="color:var(--muted)">→ ${escHTML(faneVisning)}</span></span>
+          <span style="font-size:10.5px;color:var(--muted);flex-shrink:0">${statFormatDato(f.ts)}</span>
+        </div>`;
+      }).join("");
+      if(logg.length > 200){
+        wrap.innerHTML += `<div class="empty-msg">... og ${logg.length-200} eldre fane-bytter (kun synlig i CSV-eksport)</div>`;
+      }
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+function bbEksporterFaneCSV(){
+  const statusEl = document.getElementById("bb-fanebytte-status");
+  if(!_bbFaneloggCache.length){
+    if(statusEl) statusEl.textContent = "Ingen data å eksportere — trykk «Hent logg» først";
+    return;
+  }
+  const sortert = _bbFaneloggCache.slice().sort((a,b)=> (a.ts||"").localeCompare(b.ts||""));
+  const rader = [["Dato","Klokkeslett","Navn","Fane"]];
+  sortert.forEach(f=>{
+    const d = f.ts ? new Date(f.ts) : null;
+    const dato = d ? d.toLocaleDateString("nb-NO") : "";
+    const klokke = d ? d.toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit",second:"2-digit"}) : "";
+    const faneVisning = FANE_NAVN[f.fane] || f.fane || "";
+    rader.push([dato, klokke, f.navn||"", faneVisning]);
+  });
+  const csvInnhold = rader.map(rad =>
+    rad.map(felt => {
+      const s = String(felt).replace(/"/g,'""');
+      return /[",\n]/.test(s) ? `"${s}"` : s;
+    }).join(",")
+  ).join("\r\n");
+  const bom = "\uFEFF";
+  const blob = new Blob([bom + csvInnhold], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `kkturne-fanebytte-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if(statusEl) statusEl.textContent = `✅ Eksportert ${sortert.length} fane-bytter`;
+}
+
+// ── GJETTELEK (rangering etter avstand til Pula) ──
+const PULA = {lat: 44.87, lng: 13.85};
+
+function splAvstand(lat1, lng1, lat2, lng2){
+  // Haversine-formel - storsirkelavstand mellom to koordinater i km
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function bbHentGjettData(){
+  const wrap = document.getElementById("bb-gjett-wrap");
+  const ico = document.getElementById("bb-gjett-refresh-ico");
+  const statusEl = document.getElementById("bb-gjett-status");
+  if(!wrap) return;
+  if(ico) ico.parentElement.classList.add("spinning");
+  try{
+    const data = await jbGet(true);
+    const gjett = (data && data.gjett) ? data.gjett : {};
+    const navn = Object.keys(gjett);
+    if(statusEl) statusEl.textContent = `${navn.length} personer har gjettet`;
+    if(!navn.length){
+      wrap.innerHTML = '<div class="empty-msg">Ingen gjett registrert ennå</div>';
+    } else {
+      const medDist = navn.map(n=>{
+        const g = gjett[n];
+        const km = Math.round(splAvstand(g.lat, g.lng, PULA.lat, PULA.lng));
+        return {navn:n, km, ts:g.ts};
+      }).sort((a,b)=>a.km-b.km);
+      const medaljer = ["🥇","🥈","🥉"];
+      wrap.innerHTML = medDist.map((g,i)=>`
+        <div class="card" style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-size:18px;flex-shrink:0">${medaljer[i]||`${i+1}.`}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:13px">${escHTML(g.navn)}</div>
+            <div style="font-size:10.5px;color:var(--muted)">${statFormatDato(g.ts)}</div>
+          </div>
+          <span style="font-size:13px;font-weight:800;color:${i===0?'var(--gold)':'var(--muted)'}">${g.km.toLocaleString("nb-NO")} km</span>
+          <button onclick="bbSlettGjett('${escHTML(g.navn).replace(/'/g,"\\'")}')" style="background:transparent;border:none;color:var(--red);font-size:16px;cursor:pointer;flex-shrink:0;padding:4px" title="Slett gjett">🗑️</button>
+        </div>`).join("");
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>';
+  }
+  if(ico) ico.parentElement.classList.remove("spinning");
+}
+
+async function bbSlettGjett(navn){
+  if(!confirm(`Slette gjettet til ${navn}? Dette kan ikke angres, og ${navn} må selv bruke "Nullstill hele appen" i komitémenyen for å kunne gjette på nytt.`)) return;
+  const statusEl = document.getElementById("bb-gjett-status");
+  try{
+    const data = (await jbGet(true)) || {};
+    if(data.gjett && data.gjett[navn]){
+      delete data.gjett[navn];
+      const ok = await jbSave(data);
+      if(statusEl) statusEl.textContent = ok ? `✅ Slettet gjettet til ${navn}` : "❌ Kunne ikke slette";
+    }
+    bbHentGjettData();
+  }catch(e){
+    if(statusEl) statusEl.textContent = "❌ Kunne ikke slette";
+  }
+}
+
+async function bbStartDilemma(){
+  const pwInp = document.getElementById("bb-dilemma-pw");
+  const statusEl = document.getElementById("bb-dilemma-status");
+  const passord = pwInp ? pwInp.value.trim().toUpperCase() : "";
+  if(!passord){
+    if(statusEl) statusEl.textContent = "❌ Skriv inn passordet som skal avsløres først";
+    return;
+  }
+  if(statusEl) statusEl.textContent = "Finner personen lengst unna...";
+  try{
+    const data = (await jbGet(true)) || {};
+    const gjett = data.gjett || {};
+    const navnListe = Object.keys(gjett);
+    if(!navnListe.length){
+      if(statusEl) statusEl.textContent = "❌ Ingen har gjettet ennå";
+      return;
+    }
+    const medDist = navnListe.map(n=>{
+      const g = gjett[n];
+      const km = Math.round(splAvstand(g.lat, g.lng, PULA.lat, PULA.lng));
+      return {navn:n, km};
+    }).sort((a,b)=>b.km-a.km); // lengst unna først
+    const vinner = medDist[0];
+    if(!confirm(`Start dilemma for ${vinner.navn} (${vinner.km.toLocaleString("nb-NO")} km unna)?\n\nPassord som avsløres: ${passord}`)) return;
+
+    data.dilemma = {
+      navn: vinner.navn,
+      status: "venter",
+      passord: passord,
+      sistOppdatert: new Date().toISOString()
+    };
+    const ok = await jbSave(data);
+    if(statusEl){
+      statusEl.textContent = ok
+        ? `✅ Dilemma startet for ${vinner.navn} (${vinner.km.toLocaleString("nb-NO")} km unna)`
+        : "❌ Kunne ikke lagre";
+    }
+  }catch(e){
+    if(statusEl) statusEl.textContent = "❌ Noe gikk galt";
+  }
+}
+
+// ── TEMA (mørk/lys) ──
+function statOppdaterTemaIkon(){
+  const btn = document.getElementById("theme-btn");
+  if(!btn) return;
+  const erLys = document.body.classList.contains("lys");
+  btn.textContent = erLys ? "🌙" : "☀️";
+}
+function byttTema(){
+  const lys = document.body.classList.toggle("lys");
+  localStorage.setItem("bb_tema", lys ? "lys" : "mork");
+  statOppdaterTemaIkon();
+}
+if(localStorage.getItem("bb_tema") === "lys"){
+  document.body.classList.add("lys");
+}
+document.addEventListener("DOMContentLoaded", statOppdaterTemaIkon);
+
+// ── BRUKSSTATISTIKK (DEV MODE) — leser samme data-struktur som index.html skriver til ──
+async function statHentServerData(){
+  const data = await jbGet(true);
+  return (data && data.stats) ? data.stats : {totalAapninger:0, faner:{}, toner:0, egg:{}, personer:{}, feilPw:[], zebraSist:null, dager:{}, sistOppdatert:""};
+}
+
+// ── BRUKSSTATISTIKK: OVERSIKT + PER-PERSON-NAVIGASJON ──
+let statCache = null;
+let statAktivFane = "oversikt";
+let statPersonIdx = 0;
+
+// Sjekkliste-eggene - de "finn dette skjulte elementet"-easter eggene som skal
+// vises som en avhukingsliste per person. Nøklene må matche EKSAKT det som
+// sendes til statTellEgg(...) i index.html.
+const SJEKKLISTE_EGG = [
+  {key:"Rakett-emoji", ico:"🚀", navn:"Rakett-emoji (Program)"},
+  {key:"Breakout-spillet", ico:"🕹️", navn:"Breakout-spillet (Fakta)"},
+  {key:"After-Dark-Bingo", ico:"🍑", navn:"After-Dark-Bingo låst opp"},
+  {key:"Orakel-bruk", ico:"🔮", navn:"Brukt Orakelet"},
+  {key:"Valutakalkulator", ico:"💶", navn:"Brukt valutakalkulator"},
+  {key:"Kart-knapp", ico:"🗺️", navn:"Åpnet kart-knappen"},
+  {key:"Crazy-panel (emoji-sekvens)", ico:"🎹", navn:"Crazy-panelet (emoji-sekvens)"},
+];
+
+function statByttFane(fane){
+  statAktivFane = fane;
+  document.getElementById("stats-tab-oversikt").classList.toggle("active", fane==="oversikt");
+  document.getElementById("stats-tab-person").classList.toggle("active", fane==="person");
+  document.getElementById("stats-tab-dager").classList.toggle("active", fane==="dager");
+  document.getElementById("dev-stats-wrap").style.display = fane==="oversikt" ? "block" : "none";
+  document.getElementById("dev-person-wrap").style.display = fane==="person" ? "block" : "none";
+  document.getElementById("dev-dager-wrap").style.display = fane==="dager" ? "block" : "none";
+  if(fane==="person" && statCache) statVisPersonListe();
+  if(fane==="dager" && statCache) statVisDagerListe();
+}
+
+function statVisDevPanel(){
+  const btn = document.getElementById("dev-stats-btn");
+  const ico = document.getElementById("dev-stats-btn-ico");
+  const txt = document.getElementById("dev-stats-btn-txt");
+  if(btn) btn.classList.add("spinning");
+  if(txt) txt.textContent = "Henter...";
+  statHentServerData().then(stats=>{
+    if(btn) btn.classList.remove("spinning");
+    if(txt){
+      txt.textContent = "Oppdatert! ✓";
+      setTimeout(()=>{ if(txt) txt.textContent = "Oppdater statistikk"; }, 1800);
+    }
+    statCache = stats;
+    statPersonIdx = 0;
+    statRenderOversikt(stats);
+    if(statAktivFane==="person") statVisPersonListe();
+    if(statAktivFane==="dager") statVisDagerListe();
+  });
+}
+
+function statRenderOversikt(stats){
+  const wrap = document.getElementById("dev-stats-wrap");
+  if(!wrap) return;
+  const faneNavn = {hjem:"Hjem",program:"Program",guide:"Guide",moro:"Moro",bilder:"Bilder"};
+  const faneListe = Object.entries(stats.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+
+  // Antall UNIKE personer som har funnet hver sjekkliste-egg (ikke totalt antall trykk)
+  const personEntries = Object.entries(stats.personer||{});
+  const sjekklisteOversikt = SJEKKLISTE_EGG.map(egg=>{
+    const antall = personEntries.filter(([,p]) => p.egg && p.egg[egg.key] > 0).length;
+    return `<div class="list-row"><span>${egg.ico} ${egg.navn}</span><span class="v">${antall}</span></div>`;
+  }).join("");
+
+  const sjekklisteKeys = new Set(SJEKKLISTE_EGG.map(e=>e.key));
+  const eggListe = Object.entries(stats.egg||{})
+    .filter(([k]) => !sjekklisteKeys.has(k))
+    .sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${k}</span><span class="v">${v}</span></div>`).join("");
+  const sist = statFormatDato(stats.sistOppdatert);
+
+  const feilPwListe = (stats.feilPw||[]).slice().reverse().slice(0,20).map(f=>`
+    <div class="list-row">
+      <span>${escHTML(f.navn)} <span style="color:var(--muted)">@ ${escHTML(f.sted)}</span></span>
+      <span style="font-weight:700;color:var(--red)">"${escHTML(f.forsokt)}"</span>
+    </div>`).join("");
+
+  const zebraHtml = stats.zebraSist
+    ? `<div style="font-size:12.5px">${escHTML(stats.zebraSist.navn)} <span style="color:var(--muted)">— ${statFormatDato(stats.zebraSist.ts)}</span></div>`
+    : `<div class="empty-msg">Ingen innsendinger ennå</div>`;
+
+  const antallPersoner = Object.keys(stats.personer||{}).length;
+
+  wrap.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${stats.totalAapninger||0}</div>
+        <div class="stat-lbl">App-åpninger</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${stats.toner||0}</div>
+        <div class="stat-lbl">Emoji-toner spilt</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${antallPersoner}</div>
+        <div class="stat-lbl">Personer registrert</div>
+      </div>
+    </div>
+    <div class="sec-lbl">📊 Fane-besøk (totalt)</div>
+    <div class="card">${faneListe || '<div class="empty-msg">Ingen data ennå</div>'}</div>
+    <div class="sec-lbl">🦓 Zebraen sier — sist innsendt</div>
+    <div class="card">${zebraHtml}</div>
+    <div class="sec-lbl">🔒 Feilede passordforsøk (siste 20)</div>
+    <div class="card">${feilPwListe || '<div class="empty-msg">Ingen feilforsøk registrert</div>'}</div>
+    <div class="sec-lbl">🥚 Sjekkliste-easter eggs (antall som har funnet)</div>
+    <div class="card">${sjekklisteOversikt}</div>
+    <div class="sec-lbl">🎲 Andre easter eggs funnet</div>
+    <div class="card">${eggListe || '<div class="empty-msg">Ingen data ennå</div>'}</div>
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-top:14px">Sist oppdatert: ${sist}</div>
+  `;
+}
+
+function statVisPersonListe(){
+  const wrap = document.getElementById("dev-person-wrap");
+  if(!wrap || !statCache) return;
+  const personListe = Object.entries(statCache.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
+
+  if(!personListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen personer registrert ennå</div>';
+    return;
+  }
+
+  const rader = personListe.map(([navn,p],idx)=>{
+    const funnet = SJEKKLISTE_EGG.filter(e => p.egg && p.egg[e.key] > 0).length;
+    return `<div class="person-card" style="cursor:pointer" onclick="statVisPerson(${idx})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="person-name">${escHTML(navn)}</span>
+        <span class="person-count">${p.aapninger||0}× åpnet</span>
+      </div>
+      <div class="person-sub">🥚 ${funnet}/${SJEKKLISTE_EGG.length} egg funnet · Sist aktiv: ${statFormatDato(p.sistAktiv)}</div>
+    </div>`;
+  }).join("");
+
+  wrap.innerHTML = `<div class="sec-lbl" style="margin-top:0">👤 Alle personer (${personListe.length})</div>${rader}`;
+}
+
+// ── DAG-FOR-DAG-OVERSIKT ──
+function statVisDagerListe(){
+  const wrap = document.getElementById("dev-dager-wrap");
+  if(!wrap || !statCache) return;
+  const dager = Object.entries(statCache.dager||{}).sort((a,b)=> b[0].localeCompare(a[0])); // nyeste dato først
+
+  if(!dager.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen dagsdata registrert ennå</div>';
+    return;
+  }
+
+  const rader = dager.map(([dato,d])=>{
+    const antallPersoner = Object.keys(d.personer||{}).length;
+    const datoLabel = new Date(dato+"T00:00:00").toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
+    return `<div class="person-card" style="cursor:pointer" onclick="statVisDag('${dato}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="person-name">${datoLabel}</span>
+        <span class="person-count">${d.aapninger||0}× åpnet</span>
+      </div>
+      <div class="person-sub">👤 ${antallPersoner} aktive personer · 🎵 ${d.toner||0} toner</div>
+    </div>`;
+  }).join("");
+
+  wrap.innerHTML = `<div class="sec-lbl" style="margin-top:0">📅 Alle dager (${dager.length})</div>${rader}`;
+}
+
+function statVisDag(dato){
+  const wrap = document.getElementById("dev-dager-wrap");
+  if(!wrap || !statCache || !statCache.dager || !statCache.dager[dato]) return;
+  const d = statCache.dager[dato];
+  const faneNavn = {hjem:"Hjem",program:"Program",guide:"Guide",moro:"Moro",bilder:"Bilder"};
+  const datoLabel = new Date(dato+"T00:00:00").toLocaleDateString("nb-NO",{weekday:"long",day:"numeric",month:"long"});
+
+  const faneRader = Object.entries(d.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+
+  const eggRader = Object.entries(d.egg||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${k}</span><span class="v">${v}</span></div>`).join("");
+
+  // Personer aktive denne dagen, sortert etter aktivitet
+  const personEntries = Object.entries(d.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
+  const personRader = personEntries.map(([navn,p])=>{
+    const eggAntall = Object.keys(p.egg||{}).length;
+    return `<div class="list-row">
+      <span>${escHTML(navn)}</span>
+      <span class="v">${p.aapninger||0}× · 🥚${eggAntall}</span>
+    </div>`;
+  }).join("");
+
+  wrap.innerHTML = `
+    <button class="refresh-btn" onclick="statVisDagerListe()" style="margin-bottom:12px">&#8592; Tilbake til liste</button>
+    <div class="person-detail-name" style="font-size:16px">${datoLabel}</div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${d.aapninger||0}</div>
+        <div class="stat-lbl">App-åpninger</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${d.toner||0}</div>
+        <div class="stat-lbl">Emoji-toner</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${personEntries.length}</div>
+        <div class="stat-lbl">Aktive personer</div>
+      </div>
+    </div>
+    <div class="sec-lbl">👤 Personer aktive denne dagen</div>
+    <div class="card">${personRader || '<div class="empty-msg">Ingen personer registrert</div>'}</div>
+    <div class="sec-lbl">📊 Fane-besøk denne dagen</div>
+    <div class="card">${faneRader || '<div class="empty-msg">Ingen fane-besøk registrert</div>'}</div>
+    <div class="sec-lbl">🥚 Easter eggs funnet denne dagen</div>
+    <div class="card">${eggRader || '<div class="empty-msg">Ingen egg funnet</div>'}</div>
+  `;
+}
+
+function statVisPerson(idx){
+  const wrap = document.getElementById("dev-person-wrap");
+  if(!wrap || !statCache) return;
+  const faneNavn = {hjem:"Hjem",program:"Program",guide:"Guide",moro:"Moro",bilder:"Bilder"};
+  const personListe = Object.entries(statCache.personer||{}).sort((a,b)=>(b[1].aapninger||0)-(a[1].aapninger||0));
+
+  if(!personListe.length){
+    wrap.innerHTML = '<div class="empty-msg">Ingen personer registrert ennå</div>';
+    return;
+  }
+  if(idx < 0) idx = 0;
+  if(idx >= personListe.length) idx = personListe.length - 1;
+  statPersonIdx = idx;
+
+  const [navn, p] = personListe[idx];
+  const faneRader = Object.entries(p.faner||{}).sort((a,b)=>b[1]-a[1])
+    .map(([k,v])=>`<div class="list-row"><span>${faneNavn[k]||k}</span><span class="v">${v}</span></div>`).join("");
+
+  // Egne feilede passord og zebra-innsendinger for denne personen
+  const egneFeil = (statCache.feilPw||[]).filter(f=>f.navn===navn).slice().reverse().slice(0,10);
+  const egneFeilHtml = egneFeil.map(f=>`
+    <div class="list-row">
+      <span style="color:var(--muted)">@ ${escHTML(f.sted)} — ${statFormatDato(f.ts)}</span>
+      <span style="font-weight:700;color:var(--red)">"${escHTML(f.forsokt)}"</span>
+    </div>`).join("");
+
+  // Sjekkliste over easter eggs for akkurat denne personen
+  const sjekklisteHtml = SJEKKLISTE_EGG.map(egg=>{
+    const antall = (p.egg && p.egg[egg.key]) || 0;
+    const funnet = antall > 0;
+    return `<div class="list-row">
+      <span>${egg.ico} ${egg.navn}</span>
+      <span style="font-weight:800;color:${funnet?'var(--green)':'var(--muted)'}">${funnet?'✅':'❌'}${funnet && antall>1 ? ' ('+antall+'x)' : ''}</span>
+    </div>`;
+  }).join("");
+
+  wrap.innerHTML = `
+    <button class="refresh-btn" onclick="statVisPersonListe()" style="margin-bottom:12px">&#8592; Tilbake til liste</button>
+    <div class="person-detail-name">${escHTML(navn)}</div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-num">${p.aapninger||0}</div>
+        <div class="stat-lbl">Ganger åpnet</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">${p.toner||0}</div>
+        <div class="stat-lbl">Emoji-toner spilt</div>
+      </div>
+    </div>
+    <div style="font-size:10.5px;color:var(--muted);text-align:center;margin-bottom:14px">Sist aktiv: ${statFormatDato(p.sistAktiv)}</div>
+    <div class="sec-lbl">🥚 Easter egg-sjekkliste</div>
+    <div class="card">${sjekklisteHtml}</div>
+    <div class="sec-lbl">📊 Fane-besøk</div>
+    <div class="card">${faneRader || '<div class="empty-msg">Ingen fane-besøk registrert</div>'}</div>
+    <div class="sec-lbl">🔒 Feilede passordforsøk</div>
+    <div class="card">${egneFeilHtml || '<div class="empty-msg">Ingen feilforsøk registrert</div>'}</div>
+  `;
+}
+
+// ── KNAUSBOT-INNBOKS ──
+let bossAktivSamtale = null;
+let bossLestTs = JSON.parse(localStorage.getItem("bb_boss_lest") || "{}");
+
+async function hentAIInnboks(){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  wrap.innerHTML = `<div class="empty-msg">Laster...</div>`;
+  const data = await jbGet();
+  if(!data){ wrap.innerHTML = `<div class="empty-msg" style="color:var(--red)">Feil ved henting</div>`; return; }
+  const chatData = data.chat || {meldinger:[], svar:[]};
+  if(!chatData.meldinger || !chatData.meldinger.length){ wrap.innerHTML = `<div class="empty-msg">Ingen meldinger ennå</div>`; return; }
+
+  const alleMeldinger = (chatData.meldinger || []).filter(m => m.type === "user");
+  const samtaler = {};
+  alleMeldinger.forEach(m => {
+    const navn = m.fra || "Anonym";
+    if(!samtaler[navn]) samtaler[navn] = {meldinger:[], sistTs:0};
+    samtaler[navn].meldinger.push(m);
+    if(m.ts > samtaler[navn].sistTs) samtaler[navn].sistTs = m.ts;
+  });
+  (chatData.svar || []).forEach(s => {
+    if(samtaler[s.til]) samtaler[s.til].meldinger.push(s);
+  });
+
+  if(!Object.keys(samtaler).length){
+    wrap.innerHTML = `<div class="empty-msg">Ingen meldinger ennå</div>`; return;
+  }
+
+  const sorted = Object.keys(samtaler).sort((a,b) => {
+    const aNew = samtaler[a].sistTs > (bossLestTs[a]||0);
+    const bNew = samtaler[b].sistTs > (bossLestTs[b]||0);
+    if(aNew && !bNew) return -1;
+    if(!aNew && bNew) return 1;
+    return a.localeCompare(b);
+  });
+
+  if(bossAktivSamtale && samtaler[bossAktivSamtale]){
+    visBossSamtale(bossAktivSamtale, samtaler[bossAktivSamtale].meldinger, chatData);
+  } else {
+    visBossListe(sorted, samtaler, chatData);
+  }
+}
+
+function visBossListe(sorted, samtaler, chatData){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="boss-conv-list">
+      ${sorted.map(navn => {
+        const s = samtaler[navn];
+        const erNy = s.sistTs > (bossLestTs[navn]||0);
+        const sisteMsg = s.meldinger.filter(m=>m.type==="user").slice(-1)[0];
+        return `<div class="boss-conv-item${erNy?' new':''}" onclick="aapneBossSamtale('${escHTML(navn)}')">
+          <div style="flex:1;min-width:0">
+            <div class="boss-conv-name">${escHTML(navn)}</div>
+            <div class="boss-conv-preview">${sisteMsg?escHTML(sisteMsg.txt.substring(0,50)):'...'}</div>
+          </div>
+          ${erNy?`<span class="boss-conv-badge">NY</span>`:''}
+          <div class="boss-conv-time">${sisteMsg?sisteMsg.tid||'':''}</div>
+        </div>`;
+      }).join("")}
+    </div>`;
+  wrap._chatData = chatData;
+  wrap._samtaler = samtaler;
+}
+
+function aapneBossSamtale(navn){
+  bossAktivSamtale = navn;
+  bossLestTs[navn] = Date.now();
+  localStorage.setItem("bb_boss_lest", JSON.stringify(bossLestTs));
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(wrap && wrap._samtaler && wrap._samtaler[navn]){
+    visBossSamtale(navn, wrap._samtaler[navn].meldinger, wrap._chatData);
+  } else {
+    hentAIInnboks();
+  }
+}
+
+function visBossSamtale(navn, meldinger, chatData){
+  const wrap = document.getElementById("ai-innboks-wrap");
+  if(!wrap) return;
+  const sorted = [...meldinger].sort((a,b)=>(a.ts||0)-(b.ts||0));
+  const replyId = "boss-reply-"+Date.now();
+  wrap.innerHTML = `
+    <div class="boss-chat-wrap">
+      <div class="boss-chat-hdr">
+        <button class="boss-chat-back" onclick="bossAktivSamtale=null;hentAIInnboks()">&#8592;</button>
+        <div class="boss-chat-navn">${escHTML(navn)}</div>
+        <button onclick="hentAIInnboks()" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer">&#128260;</button>
+      </div>
+      <div class="boss-msg-list" id="boss-msg-list">
+        ${sorted.map(m => m.type==="user"
+          ? `<div class="boss-msg-user"><div class="boss-msg-fra">${escHTML(m.fra||navn)}</div><div class="boss-msg-txt">${escHTML(m.txt)}</div><div class="boss-msg-time">${m.tid||''}</div></div>`
+          : `<div class="boss-msg-bot"><div class="boss-msg-fra">KnausBot 3000</div><div class="boss-msg-txt">${escHTML(m.txt)}</div><div class="boss-msg-time">${m.tid||''}</div></div>`
+        ).join("")}
+      </div>
+      <div style="display:flex;gap:6px">
+        <input id="${replyId}" class="ai-reply-in" type="text" placeholder="Svar som KnausBot..." onkeydown="if(event.key==='Enter')sendBossSvar('${escHTML(navn)}','${replyId}')">
+        <button class="ai-reply-btn" onclick="sendBossSvar('${escHTML(navn)}','${replyId}')">Send</button>
+      </div>
+      <div id="boss-svar-st" style="font-size:11px;color:var(--muted);margin-top:6px;min-height:14px"></div>
+    </div>`;
+  setTimeout(()=>{ const l=document.getElementById("boss-msg-list"); if(l)l.scrollTop=l.scrollHeight; }, 50);
+}
+
+async function sendBossSvar(til, inputId){
+  const inp = document.getElementById(inputId);
+  const st  = document.getElementById("boss-svar-st");
+  if(!inp || !inp.value.trim()) return;
+  const svarTxt = inp.value.trim();
+  if(st) st.textContent = "Sender...";
+  const data = (await jbGet()) || {varsel:{melding:"",aktiv:false}, chat:{meldinger:[],svar:[]}};
+  if(!data.chat) data.chat = {meldinger:[], svar:[]};
+  if(!data.chat.svar) data.chat.svar = [];
+  data.chat.svar.push({
+    id: "svar-" + Date.now(),
+    til, txt: svarTxt,
+    tid: tidsstempel(),
+    ts: Date.now(),
+    type: "bot"
+  });
+  if(data.chat.svar.length > 200) data.chat.svar = data.chat.svar.slice(-200);
+  const ok = await jbSave(data);
+  if(ok){
+    inp.value = "";
+    if(st) st.textContent = "✅ Sendt!";
+    setTimeout(()=>{ if(st) st.textContent=""; }, 2000);
+    hentAIInnboks();
+  } else {
+    if(st) st.textContent = "❌ Feil";
+  }
+}
+</script>
+</body>
+</html>
