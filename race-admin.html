@@ -793,37 +793,39 @@ function byttTab(tab, el){
 // ── Lagkonstanter (synkronisert med index.html v0.9.80) ──
 const LAG_FARGER = {
   "Lag 1":"#ef4444","Lag 2":"#f97316","Lag 3":"#eab308","Lag 4":"#22c55e",
-  "Lag 5":"#14b8a6","Lag 6":"#3b82f6"
+  "Lag 5":"#14b8a6"
 };
 const LAG_AVGANG = {
-  "Lag 1":"10:20","Lag 2":"10:26","Lag 3":"10:32","Lag 4":"10:38",
-  "Lag 5":"10:44","Lag 6":"10:50"
+  "Lag 1":"10:50","Lag 2":"10:56","Lag 3":"11:02","Lag 4":"11:08","Lag 5":"11:14"
 };
 const DELTAKERE = {
-  "Ada":              {lag:"Lag 1", status:"Kruser",stemme:"1.sopran"},
-  "Emilie":           {lag:"Lag 1", status:"Aktiv", stemme:"1.alt"},
-  "Henrik":           {lag:"Lag 1", status:"Aktiv", stemme:"1.tenor"},
-  "Jonas":            {lag:"Lag 1", status:"Aktiv", stemme:"2.tenor"},
-  "Anette":           {lag:"Lag 2", status:"Aktiv", stemme:"1.sopran"},
-  "Ingerid":          {lag:"Lag 2", status:"Kruser",stemme:"2.alt"},
-  "Balder":           {lag:"Lag 2", status:"Aktiv", stemme:"2.tenor"},
-  "Marius":           {lag:"Lag 2", status:"Aktiv", stemme:"2.bass"},
-  "Eila":             {lag:"Lag 3", status:"Kruser",stemme:"2.sopran"},
-  "Eirin":            {lag:"Lag 3", status:"Aktiv", stemme:"2.alt"},
-  "Torbjørn Eriksen": {lag:"Lag 3", status:"Kruser",stemme:"1.tenor"},
-  "Sander":           {lag:"Lag 3", status:"Aktiv", stemme:"2.bass"},
-  "Marie":            {lag:"Lag 4", status:"Aktiv", stemme:"2.sopran"},
-  "Nina":             {lag:"Lag 4", status:"Aktiv", stemme:"2.alt"},
-  "Torbjørn Aune":    {lag:"Lag 4", status:"Kruser",stemme:"1.tenor"},
-  "Iver":             {lag:"Lag 4", status:"Kruser",stemme:"2.bass"},
-  "Amanda":           {lag:"Lag 5", status:"Aktiv", stemme:"2.sopran"},
-  "Vera":             {lag:"Lag 5", status:"Aktiv", stemme:"1.alt"},
-  "Anders":           {lag:"Lag 5", status:"Kruser",stemme:"1.tenor"},
-  "Jørgen":           {lag:"Lag 5", status:"Kruser",stemme:"2.tenor"},
-  "Allis":            {lag:"Lag 6", status:"Aktiv", stemme:"1.sopran"},
-  "Anine":            {lag:"Lag 6", status:"Kruser",stemme:"2.sopran"},
-  "Thien":            {lag:"Lag 6", status:"Aktiv", stemme:"2.tenor"},
-  "OJ":               {lag:"Lag 6", status:"Kruser",stemme:"1.bass"},
+  "Anette":           {lag:"Lag 1", status:"Aktiv",  stemme:"1.sopran"},
+  "Amanda":           {lag:"Lag 1", status:"Aktiv",  stemme:"2.sopran"},
+  "Torbjørn Aune":    {lag:"Lag 1", status:"Kruser", stemme:"1.tenor"},
+  "Sander":           {lag:"Lag 1", status:"Aktiv",  stemme:"2.bass"},
+  "Anine":            {lag:"Lag 2", status:"Kruser", stemme:"2.sopran"},
+  "Emilie":           {lag:"Lag 2", status:"Aktiv",  stemme:"1.alt"},
+  "Henrik":           {lag:"Lag 2", status:"Aktiv",  stemme:"1.tenor"},
+  "Balder":           {lag:"Lag 2", status:"Aktiv",  stemme:"2.tenor"},
+  "OJ":               {lag:"Lag 2", status:"Kruser", stemme:"1.bass"},
+  "Allis":            {lag:"Lag 3", status:"Aktiv",  stemme:"1.sopran"},
+  "Eila":             {lag:"Lag 3", status:"Kruser", stemme:"2.sopran"},
+  "Eirin":            {lag:"Lag 3", status:"Aktiv",  stemme:"2.alt"},
+  "Torbjørn Eriksen": {lag:"Lag 3", status:"Kruser", stemme:"1.tenor"},
+  "Thien":            {lag:"Lag 3", status:"Aktiv",  stemme:"2.tenor"},
+  "Marie":            {lag:"Lag 4", status:"Aktiv",  stemme:"2.sopran"},
+  "Vera":             {lag:"Lag 4", status:"Aktiv",  stemme:"1.alt"},
+  "Ingerid":          {lag:"Lag 4", status:"Kruser", stemme:"2.alt"},
+  "Anders":           {lag:"Lag 4", status:"Kruser", stemme:"1.tenor"},
+  "Jonas":            {lag:"Lag 4", status:"Aktiv",  stemme:"2.tenor"},
+  "Ada":              {lag:"Lag 5", status:"Kruser", stemme:"1.sopran"},
+  "Nina":             {lag:"Lag 5", status:"Aktiv",  stemme:"2.alt"},
+  "Jørgen":           {lag:"Lag 5", status:"Kruser", stemme:"2.tenor"},
+  "Marius":           {lag:"Lag 5", status:"Aktiv",  stemme:"2.bass"},
+  "Torbjørn Aune":    {lag:"Lag 7",  status:"Kruser",stemme:"1.tenor"},
+  "Torbjørn Eriksen": {lag:"Lag 9",  status:"Kruser",stemme:"1.tenor"},
+  "Vera":             {lag:"Lag 5",  status:"Aktiv", stemme:"1.alt"},
+  "Vy":               {lag:"Lag 10", status:"Kruser",stemme:"2.alt"},
 };
 
 // Bygg lag→deltakerliste for rask oppslag
