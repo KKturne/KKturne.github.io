@@ -317,6 +317,7 @@
     <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 App-varsler</button>
     <button id="main-tab-hendelser" class="main-tab-btn" onclick="bbByttHovedfane('hendelser')">🗂️ Viktige hendelser</button>
     <button id="main-tab-fanebytte" class="main-tab-btn" onclick="bbByttHovedfane('fanebytte')">📊 Fanebytte</button>
+    <button id="main-tab-nullstill" class="main-tab-btn" onclick="bbByttHovedfane('nullstill')" style="color:#e05050">🗑️ Nullstill</button>
     <button id="main-tab-gjettelek" class="main-tab-btn" onclick="bbByttHovedfane('gjettelek')">🗺️ Gjettelek</button>
   </div>
 
@@ -445,6 +446,19 @@
     <div id="bb-fanebytte-wrap" style="margin-bottom:24px">
       <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
     </div>
+  </div>
+
+  <div id="main-sec-nullstill" class="main-sec" style="display:none;padding:16px">
+    <div style="background:#1a0808;border:1px solid #5a1a1a;border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:800;color:#e05050;margin-bottom:6px">⚠️ Farlig sone</div>
+      <div style="font-size:12px;color:#c08080;line-height:1.6">Dette sletter all statistikk og logger permanent og kan ikke angres. Bruk kun rett før lansering for å fjerne testdata.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="bbApneNullstillDialog()" style="background:#2a0808;border:1.5px solid #e05050;color:#e05050;border-radius:10px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">
+        🗑️ Nullstill ALLE logger og statistikk
+      </button>
+    </div>
+    <div id="bb-nullstill-status" style="font-size:12px;color:var(--muted);margin-top:12px;min-height:16px;text-align:center"></div>
   </div>
 
   <div id="main-sec-gjettelek" class="main-sec" style="display:none;padding:16px 16px 0">
@@ -628,7 +642,7 @@ function bbVisVarslerPanel(){
 }
 
 function bbByttHovedfane(fane){
-  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte", "gjettelek"];
+  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte", "nullstill", "gjettelek"];
   faner.forEach(f=>{
     const btn = document.getElementById("main-tab-"+f);
     const sec = document.getElementById("main-sec-"+f);
