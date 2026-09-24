@@ -300,7 +300,7 @@
     <div>
       <div class="hdr-title" onclick="bbTittelTrykk()" style="cursor:pointer;user-select:none">👑 BigBoss Admin</div>
       <div class="hdr-sub">Knauskoret Pula 2026</div>
-      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.07.20-01</div>
+      <div class="hdr-sub" style="opacity:.5;font-size:10px">v26.07.13-01</div>
     </div>
     <div style="display:flex;align-items:center;gap:4px">
       <button id="bb-varsel-btn" class="theme-btn" onclick="bbVisVarslerPanel()" title="Varsler" style="position:relative">
@@ -317,6 +317,8 @@
     <button id="main-tab-logg" class="main-tab-btn" onclick="bbByttHovedfane('logg')">📋 App-varsler</button>
     <button id="main-tab-hendelser" class="main-tab-btn" onclick="bbByttHovedfane('hendelser')">🗂️ Viktige hendelser</button>
     <button id="main-tab-fanebytte" class="main-tab-btn" onclick="bbByttHovedfane('fanebytte')">📊 Fanebytte</button>
+    <button id="main-tab-push" class="main-tab-btn" onclick="bbByttHovedfane('push')">🔔 Push</button>
+    <button id="main-tab-nullstill" class="main-tab-btn" onclick="bbByttHovedfane('nullstill')" style="color:#e05050">🗑️ Nullstill</button>
     <button id="main-tab-gjettelek" class="main-tab-btn" onclick="bbByttHovedfane('gjettelek')">🗺️ Gjettelek</button>
   </div>
 
@@ -445,6 +447,34 @@
     <div id="bb-fanebytte-wrap" style="margin-bottom:24px">
       <div class="empty-msg">Trykk «Hent logg» for å se historikk</div>
     </div>
+  </div>
+
+  <div id="main-sec-push" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Oversikt over hvem som har aktivert push-varsler i appen. Registreres automatisk første gang en bruker slår på push.
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button id="bb-push-refresh-btn" class="refresh-btn" onclick="bbHentPushAbonnenter()" style="flex:1;justify-content:center">
+        <span id="bb-push-refresh-ico" class="spin">&#128260;</span> Hent liste
+      </button>
+    </div>
+    <div id="bb-push-status" style="font-size:11px;color:var(--muted);margin-bottom:10px;min-height:14px"></div>
+    <div id="bb-push-wrap">
+      <div class="empty-msg">Trykk «Hent liste» for å se hvem som har push på</div>
+    </div>
+  </div>
+
+  <div id="main-sec-nullstill" class="main-sec" style="display:none;padding:16px">
+    <div style="background:#1a0808;border:1px solid #5a1a1a;border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:800;color:#e05050;margin-bottom:6px">⚠️ Farlig sone</div>
+      <div style="font-size:12px;color:#c08080;line-height:1.6">Dette sletter all statistikk og logger permanent og kan ikke angres. Bruk kun rett før lansering for å fjerne testdata.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="bbApneNullstillDialog()" style="background:#2a0808;border:1.5px solid #e05050;color:#e05050;border-radius:10px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">
+        🗑️ Nullstill ALLE logger og statistikk
+      </button>
+    </div>
+    <div id="bb-nullstill-status" style="font-size:12px;color:var(--muted);margin-top:12px;min-height:16px;text-align:center"></div>
   </div>
 
   <div id="main-sec-gjettelek" class="main-sec" style="display:none;padding:16px 16px 0">
@@ -628,13 +658,52 @@ function bbVisVarslerPanel(){
 }
 
 function bbByttHovedfane(fane){
-  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte", "gjettelek"];
+  const faner = ["varsler", "stats", "knausbot", "logg", "hendelser", "fanebytte", "push", "nullstill", "gjettelek"];
   faner.forEach(f=>{
     const btn = document.getElementById("main-tab-"+f);
     const sec = document.getElementById("main-sec-"+f);
     if(btn) btn.classList.toggle("active", f===fane);
     if(sec) sec.style.display = f===fane ? "block" : "none";
   });
+}
+
+async function bbHentPushAbonnenter(){
+  const ico = document.getElementById("bb-push-refresh-ico");
+  const wrap = document.getElementById("bb-push-wrap");
+  const status = document.getElementById("bb-push-status");
+  if(ico) ico.classList.add("spin");
+  try{
+    const data = await jbGet(true);
+    const liste = (data && data.push_abonnenter) ? [...data.push_abonnenter] : [];
+    if(ico) ico.classList.remove("spin");
+    if(status) status.textContent = `${liste.length} av ~35 deltakere har push aktivert`;
+    if(!liste.length){
+      wrap.innerHTML = `<div class="empty-msg">Ingen registrert ennå</div>`;
+      return;
+    }
+    // Sorter alfabetisk
+    liste.sort((a,b)=>a.navn.localeCompare(b.navn,"nb"));
+    wrap.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        ${liste.map(p=>{
+          const dato = new Date(p.ts);
+          const datoStr = dato.toLocaleDateString("nb-NO",{day:"numeric",month:"short"})+" "+dato.toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit"});
+          return `<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:16px">🔔</span>
+            <div>
+              <div style="font-size:13px;font-weight:800;color:var(--text)">${p.navn}</div>
+              <div style="font-size:10px;color:var(--muted)">${datoStr}</div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+      <div style="font-size:11px;color:var(--muted);padding:8px 0">
+        Mangler: ${35 - liste.length} deltakere ikke registrert
+      </div>`;
+  }catch(e){
+    if(ico) ico.classList.remove("spin");
+    if(status) status.textContent = "❌ Kunne ikke hente data";
+  }
 }
 
 function bbStartPolling(){
