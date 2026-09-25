@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gjettekart-oversikt — Knauskoret Pula 2026</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root {
     --bg: #080e14;
@@ -216,6 +216,11 @@ async function hentOgVisGjett(){
   if(statusEl) statusEl.textContent = "Henter gjett...";
 
   const data = await jbGet();
+  if(!data){
+    if(statusEl) statusEl.textContent = "❌ Kunne ikke hente data fra JSONBin — sjekk nettforbindelsen";
+    if(btn) btn.classList.remove("spinning");
+    return;
+  }
   const gjett = (data && data.gjett) ? data.gjett : {};
   const navn = Object.keys(gjett);
 
