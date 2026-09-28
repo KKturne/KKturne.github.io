@@ -323,7 +323,15 @@
   </div>
 
   <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
-    <div class="card" id="bb-push-card" style="margin-bottom:14px">
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <div style="font-size:13px;font-weight:800">🗳️ Dilemma-polling</div>
+          <div id="dilemma-poll-status" style="font-size:11px;color:var(--muted);margin-top:2px">Sjekker...</div>
+        </div>
+        <button id="dilemma-poll-btn" onclick="bbToggleDilemma()" style="background:#2D5A3D;border:none;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;flex-shrink:0">Laster...</button>
+      </div>
+    </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div>
           <div style="font-size:13px;font-weight:800">🔔 Push-varsler til denne telefonen</div>
@@ -721,6 +729,7 @@ function bbFullforInnlogging(){
   bbStartPolling();
   bbOppdaterPushStatus();
   bbLastVarselInnst();
+  bbSjekkDilemmaStatus();
 }
 
 function sjekkAdminPw(e){
@@ -848,6 +857,27 @@ async function bbOppdaterPushStatus(){
       statusEl.textContent = "Kunne ikke sjekke status";
     }
   });
+}
+
+async function bbSjekkDilemmaStatus(){
+  const statusEl = document.getElementById("dilemma-poll-status");
+  const btn = document.getElementById("dilemma-poll-btn");
+  try{
+    const data = await jbGet(true);
+    const er_paa = data && data.dilemma_poll_on === true;
+    if(statusEl) statusEl.textContent = er_paa ? "✅ Polling er PÅ — appen sjekker hvert 5. min" : "🔕 Polling er AV";
+    if(btn){ btn.textContent = er_paa ? "Skru AV" : "Skru PÅ"; btn.style.background = er_paa ? "#8C2020" : "#2D5A3D"; }
+  }catch(e){ if(statusEl) statusEl.textContent = "❌ Kunne ikke hente status"; }
+}
+async function bbToggleDilemma(){
+  const btn = document.getElementById("dilemma-poll-btn");
+  if(btn) btn.textContent = "...";
+  try{
+    const data = await jbGet(true);
+    data.dilemma_poll_on = !(data && data.dilemma_poll_on === true);
+    await jbSave(data);
+    bbSjekkDilemmaStatus();
+  }catch(e){ alert("Feil: " + e.message); }
 }
 
 function bbAktiverPush(){
