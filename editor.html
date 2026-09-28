@@ -5,69 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KKTurneprogram — Teksteditor</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, sans-serif; background: #0f1923; color: #e8ddd0; min-height: 100vh; }
-
-  .topbar { background: #1C2B35; border-bottom: 1px solid #2A3D4A; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-  .topbar h1 { font-size: 16px; font-weight: 800; color: #C4982B; }
-  .topbar .version { font-size: 11px; color: #5A8090; margin-top: 2px; }
-  .topbar-right { display: flex; gap: 10px; align-items: center; }
-
-  .btn { padding: 9px 18px; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; transition: opacity .15s; }
-  .btn:hover { opacity: .85; }
-  .btn-gold { background: #C4982B; color: #111; }
-  .btn-muted { background: #1C2B35; color: #5A8090; border: 1px solid #2A3D4A; }
-  .btn-red { background: #8C2020; color: #fff; }
-
-  .token-wrap { background: #1C2B35; border-radius: 12px; border: 1px solid #2A3D4A; padding: 16px 20px; margin: 20px 24px; }
-  .token-wrap label { font-size: 11px; font-weight: 800; color: #5A8090; letter-spacing: .06em; display: block; margin-bottom: 8px; }
-  .token-wrap input { width: 100%; background: #0f1923; border: 1px solid #2A3D4A; border-radius: 8px; padding: 10px 12px; color: #e8ddd0; font-size: 13px; font-family: monospace; }
-  .token-wrap .hint { font-size: 11px; color: #5A8090; margin-top: 8px; line-height: 1.5; }
-  .token-wrap a { color: #C4982B; }
-
-  .main { max-width: 900px; margin: 0 auto; padding: 0 24px 60px; }
-
-  .section { margin-bottom: 32px; }
-  .section-hdr { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #5A8090; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #2A3D4A; }
-
-  .dag-card { background: #1C2B35; border-radius: 12px; border: 1px solid #2A3D4A; padding: 16px; margin-bottom: 12px; }
-  .dag-title { font-size: 13px; font-weight: 800; color: #C4982B; margin-bottom: 12px; }
-  .dag-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .dag-meta input { background: #0f1923; border: 1px solid #2A3D4A; border-radius: 8px; padding: 8px 10px; color: #e8ddd0; font-size: 12px; font-family: inherit; }
-  .dag-meta label { font-size: 10px; color: #5A8090; display: block; margin-bottom: 4px; }
-
-  .ev-row { display: grid; grid-template-columns: 120px 1fr; gap: 8px; margin-bottom: 8px; }
-  .ev-row input, .ev-row textarea { background: #0f1923; border: 1px solid #2A3D4A; border-radius: 8px; padding: 8px 10px; color: #e8ddd0; font-size: 13px; font-family: inherit; }
-  .ev-row textarea { resize: vertical; min-height: 60px; line-height: 1.5; }
-  .ev-row .ev-t-input { font-size: 12px; font-weight: 700; color: #C4982B; }
-  .add-ev { font-size: 12px; color: #C4982B; background: none; border: 1px dashed #2A3D4A; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-family: inherit; margin-top: 4px; }
-
-  .list-item { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
-  .list-item input, .list-item textarea { flex: 1; background: #0f1923; border: 1px solid #2A3D4A; border-radius: 8px; padding: 8px 10px; color: #e8ddd0; font-size: 13px; font-family: inherit; resize: vertical; min-height: 44px; }
-  .list-item .nr { font-size: 11px; color: #5A8090; width: 24px; flex-shrink: 0; padding-top: 10px; text-align: right; }
-  .list-item .del-btn { background: none; border: none; color: #5A8090; cursor: pointer; font-size: 16px; padding: 6px 4px; flex-shrink: 0; }
-  .list-item .del-btn:hover { color: #e05050; }
-  .add-btn { font-size: 12px; color: #C4982B; background: none; border: 1px dashed #2A3D4A; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-family: inherit; margin-top: 4px; }
-
-  .kat-label { font-size: 11px; font-weight: 800; color: #C4982B; margin: 16px 0 8px; letter-spacing: .04em; }
-
-  .status { position: fixed; bottom: 20px; right: 20px; background: #1C2B35; border: 1px solid #2A3D4A; border-radius: 12px; padding: 12px 18px; font-size: 13px; font-weight: 700; display: none; z-index: 200; }
-  .status.ok { border-color: #2D5A3D; color: #4CAF50; }
-  .status.err { border-color: #5A2020; color: #e05050; }
-  .status.loading { border-color: #C4982B; color: #C4982B; }
-
-  .locked-note { font-size: 11px; color: #5A8090; background: #0f1923; border-radius: 6px; padding: 6px 10px; margin-bottom: 10px; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f1923;color:#e8ddd0;min-height:100vh}
+.topbar{background:#1C2B35;border-bottom:1px solid #2A3D4A;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap}
+.topbar-title{font-size:15px;font-weight:800;color:#C4982B}
+.topbar-ver{font-size:11px;color:#5A8090;margin-top:2px}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.btn{padding:9px 16px;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn-gold{background:#C4982B;color:#111}
+.btn-muted{background:#1C2B35;color:#5A8090;border:1px solid #2A3D4A}
+.token-wrap{background:#1C2B35;border-radius:12px;border:1px solid #2A3D4A;padding:14px 18px;margin:16px 20px}
+.token-wrap label{font-size:10px;font-weight:800;color:#5A8090;letter-spacing:.06em;display:block;margin-bottom:7px}
+.token-wrap input{width:100%;background:#0f1923;border:1px solid #2A3D4A;border-radius:8px;padding:9px 12px;color:#e8ddd0;font-size:13px;font-family:monospace}
+.token-wrap .hint{font-size:11px;color:#5A8090;margin-top:8px;line-height:1.6}
+.token-wrap a{color:#C4982B}
+.main{max-width:860px;margin:0 auto;padding:0 20px 80px}
+.sec{margin-bottom:28px}
+.sec-hdr{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#5A8090;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #2A3D4A;cursor:pointer;display:flex;justify-content:space-between}
+.sec-hdr:hover{color:#C4982B}
+.sec-body{display:block}
+.sec-body.hidden{display:none}
+.dag-card{background:#1C2B35;border-radius:12px;border:1px solid #2A3D4A;padding:14px;margin-bottom:10px}
+.dag-title-bar{font-size:12px;font-weight:800;color:#C4982B;margin-bottom:10px}
+.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.field-wrap label{font-size:10px;color:#5A8090;display:block;margin-bottom:4px}
+.field-wrap input,.field-wrap textarea{width:100%;background:#0f1923;border:1px solid #2A3D4A;border-radius:8px;padding:8px 10px;color:#e8ddd0;font-size:13px;font-family:inherit;resize:vertical}
+.ev-rows{margin-bottom:6px}
+.ev-row{display:grid;grid-template-columns:110px 1fr 28px;gap:6px;margin-bottom:6px;align-items:start}
+.ev-row input{background:#0f1923;border:1px solid #2A3D4A;border-radius:8px;padding:7px 9px;color:#C4982B;font-size:12px;font-weight:700;font-family:inherit;width:100%}
+.ev-row textarea{background:#0f1923;border:1px solid #2A3D4A;border-radius:8px;padding:7px 9px;color:#e8ddd0;font-size:13px;font-family:inherit;resize:vertical;min-height:52px;line-height:1.5;width:100%}
+.del-btn{background:none;border:none;color:#5A8090;cursor:pointer;font-size:15px;padding:6px 2px;line-height:1}
+.del-btn:hover{color:#e05050}
+.add-btn{font-size:12px;color:#C4982B;background:none;border:1px dashed #2A3D4A;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit}
+.locked-note{font-size:11px;color:#5A8090;background:#0f1923;border-radius:6px;padding:5px 10px;margin-bottom:8px}
+.list-item{display:flex;gap:7px;margin-bottom:7px;align-items:flex-start}
+.list-nr{font-size:11px;color:#5A8090;width:22px;flex-shrink:0;padding-top:9px;text-align:right}
+.list-item textarea{flex:1;background:#0f1923;border:1px solid #2A3D4A;border-radius:8px;padding:7px 10px;color:#e8ddd0;font-size:13px;font-family:inherit;resize:vertical;min-height:42px;line-height:1.5}
+.kat-lbl{font-size:11px;font-weight:800;color:#C4982B;margin:14px 0 7px;letter-spacing:.04em}
+.status{position:fixed;bottom:18px;right:18px;background:#1C2B35;border:1px solid #2A3D4A;border-radius:12px;padding:11px 16px;font-size:13px;font-weight:700;display:none;z-index:200;max-width:300px}
+.status.ok{border-color:#2D5A3D;color:#4CAF50}
+.status.err{border-color:#5A2020;color:#e05050}
+.status.loading{border-color:#C4982B;color:#C4982B}
+.guide-sec{background:#1C2B35;border-radius:10px;border:1px solid #2A3D4A;padding:12px 14px;margin-bottom:10px}
+.guide-sec label{font-size:10px;color:#5A8090;display:block;margin-bottom:5px;font-weight:800;letter-spacing:.04em}
+.guide-sec textarea{width:100%;background:#0f1923;border:1px solid #2A3D4A;border-radius:8px;padding:8px 10px;color:#e8ddd0;font-size:13px;font-family:inherit;resize:vertical;min-height:60px;line-height:1.5}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div>
-    <div class="topbar h1" style="font-size:16px;font-weight:800;color:#C4982B">🦓 KKTurneprogram Editor</div>
-    <div class="version" id="ver-display">Laster...</div>
+    <div class="topbar-title">🦓 KKTurneprogram Editor</div>
+    <div class="topbar-ver" id="ver-display">Laster...</div>
   </div>
   <div class="topbar-right">
-    <button class="btn btn-muted" onclick="lastInn()">↻ Last inn på nytt</button>
+    <button class="btn btn-muted" onclick="lastInn()">↻ Last inn</button>
     <button class="btn btn-gold" onclick="lagreTilGitHub()">💾 Lagre til GitHub</button>
   </div>
 </div>
@@ -75,388 +68,292 @@
 <div class="token-wrap">
   <label>GITHUB PERSONAL ACCESS TOKEN</label>
   <input type="password" id="gh-token" placeholder="github_pat_..." oninput="lagreToken()">
-  <div class="hint">
-    Trenger du token? Gå til <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → velg «Classic» → huk av <strong>repo</strong> → «Generate token». Limes inn her og lagres på denne enheten.
-  </div>
+  <div class="hint">Trenger token? <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → Classic → huk av <strong>repo</strong>. Limes inn her og huskes på denne enheten.</div>
 </div>
 
 <div class="main" id="main">
-  <div style="color:#5A8090;text-align:center;padding:40px">Trykk «Last inn på nytt» for å hente innholdet fra GitHub...</div>
+  <div style="color:#5A8090;text-align:center;padding:40px">Trykk «Last inn» for å hente innholdet fra GitHub...</div>
 </div>
 
 <div class="status" id="status"></div>
 
 <script>
-// UTF-8-sikre base64-funksjoner
-function b64EncodeUTF8(str){
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode('0x'+p)));
-}
-function b64DecodeUTF8(str){
-  return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-}
-const REPO  = "kkturne/kkturne.github.io";
-const FILE  = "index.html";
-const BRANCH= "main";
-const API   = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+const REPO="kkturne/kkturne.github.io", FILE="index.html", BRANCH="main";
+const API=`https://api.github.com/repos/${REPO}/contents/${FILE}`;
+let fileSHA=null, rawContent="";
 
-let fileSHA = null;
-let rawContent = "";
+function lagreToken(){ localStorage.setItem("kk_gh_token",document.getElementById("gh-token").value.trim()); }
+function hentToken(){ return localStorage.getItem("kk_gh_token")||""; }
+window.onload=()=>{ const t=hentToken(); if(t) document.getElementById("gh-token").value=t; };
 
-function lagreToken(){
-  localStorage.setItem("kk_gh_token", document.getElementById("gh-token").value.trim());
-}
-function hentToken(){
-  return localStorage.getItem("kk_gh_token") || "";
+function visStatus(txt,type="loading"){
+  const el=document.getElementById("status");
+  el.textContent=txt; el.className="status "+type; el.style.display="block";
+  if(type!=="loading") setTimeout(()=>{ el.style.display="none"; },4000);
 }
 
-window.onload = () => {
-  const t = hentToken();
-  if(t) document.getElementById("gh-token").value = t;
-};
-
-function visStatus(txt, type="loading"){
-  const el = document.getElementById("status");
-  el.textContent = txt;
-  el.className = "status " + type;
-  el.style.display = "block";
-  if(type !== "loading") setTimeout(()=>{ el.style.display="none"; }, 3000);
-}
+function b64Enc(str){ return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode('0x'+p))); }
+function b64Dec(str){ return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')); }
 
 // ── LAST INN ──
 async function lastInn(){
-  const token = hentToken();
+  const token=hentToken();
   if(!token){ alert("Lim inn GitHub-token øverst!"); return; }
   visStatus("Henter fra GitHub...");
   try{
-    const r = await fetch(API + "?ref=" + BRANCH, {
-      headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" }
-    });
-    if(!r.ok) throw new Error("HTTP " + r.status);
-    const data = await r.json();
-    fileSHA = data.sha;
-    rawContent = b64DecodeUTF8(data.content.replace(/\n/g,""));
+    const r=await fetch(API+"?ref="+BRANCH,{headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json"}});
+    if(!r.ok) throw new Error("HTTP "+r.status+" — "+r.statusText);
+    const data=await r.json();
+    fileSHA=data.sha;
+    rawContent=b64Dec(data.content.replace(/\n/g,""));
     byggEditor(rawContent);
-    visStatus("Innlastet!", "ok");
-  }catch(e){
-    visStatus("Feil: " + e.message, "err");
+    visStatus("Innlastet!","ok");
+  }catch(e){ visStatus("Feil: "+e.message,"err"); }
+}
+
+// ── PARSE DAYS ──
+function parseDays(html){
+  const m=html.match(/const DAYS=\[([\s\S]*?)\];\s*\n\s*const GLOSER/);
+  if(!m) return [];
+  const raw=m[1];
+  const days=[];
+  let i=0;
+  while(i<raw.length){
+    const start=raw.indexOf('{d:"',i);
+    if(start===-1) break;
+    const dM=raw.slice(start).match(/^\{d:"(\d+)",m:"(\w+)",title:"((?:[^"\\]|\\.)*)"/);
+    if(!dM){ i=start+1; continue; }
+    const dag={d:dM[1],m:dM[2],title:dM[3],sub:"",ansvar:"",body:[],preBody:[],locked:null};
+    let pos=start+dM[0].length;
+    const subM=raw.slice(pos).match(/^,sub:"((?:[^"\\]|\\.)*)"/); if(subM){dag.sub=subM[1];pos+=subM[0].length;}
+    const ansM=raw.slice(pos).match(/^,ansvar:"((?:[^"\\]|\\.)*)"/); if(ansM){dag.ansvar=ansM[1];pos+=ansM[0].length;}
+    let depth=1,dagEnd=start+1;
+    while(dagEnd<raw.length&&depth>0){ if(raw[dagEnd]==='{')depth++; else if(raw[dagEnd]==='}')depth--; dagEnd++; }
+    const slice=raw.slice(start,dagEnd);
+    const bodyM=slice.match(/body:\[([\s\S]*?)\](?=\s*[,}])/);
+    if(bodyM){
+      const evRx=/\{t:"((?:[^"\\]|\\.)*)",v:(`(?:[^`]|\\.)*`|"(?:[^"\\]|\\.)*")\}/g;
+      let em;
+      while((em=evRx.exec(bodyM[1]))!==null){
+        let v=em[2];
+        if(v.startsWith('`')) v=v.slice(1,-1);
+        else v=v.slice(1,-1).replace(/\\"/g,'"').replace(/\\n/g,'\n');
+        dag.body.push({t:em[1],v});
+      }
+    }
+    const preM=slice.match(/preBody:\[([\s\S]*?)\]/);
+    if(preM){
+      const rx2=/\{t:"((?:[^"\\]|\\.)*)",v:"((?:[^"\\]|\\.)*)"\}/g;
+      let em2; while((em2=rx2.exec(preM[1]))!==null) dag.preBody.push({t:em2[1],v:em2[2]});
+    }
+    const locM=slice.match(/locked:"(\w+)"/); if(locM) dag.locked=locM[1];
+    days.push(dag);
+    i=dagEnd;
   }
+  return days;
+}
+
+function parseListeFra(html,varName){
+  const rx=new RegExp("const "+varName.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*=?\\s*\\[([\\s\\S]*?)\\];");
+  const m=html.match(rx);
+  if(!m) return [];
+  return Array.from(m[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)).map(x=>x[1]);
+}
+
+function parseDrikk(html){
+  const m=html.match(/const DRIKK_KORT=\{([\s\S]*?)\n\};/);
+  if(!m) return {};
+  const raw=m[1]; const result={};
+  for(const kat of ['sannhet','tor','fmk','pekelek','regel','hotseat']){
+    const pm=raw.match(new RegExp(kat+'\\s*:\\s*\\[([\\s\\S]*?)\\](?=\\s*,?\\s*\\n\\s*(?:\\w+\\s*:|$))'));
+    if(pm) result[kat]=Array.from(pm[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)).map(x=>x[1]);
+  }
+  return result;
 }
 
 // ── BYGG EDITOR ──
 function byggEditor(html){
-  const ver = (html.match(/KKTurneprogram (v[\d.]+)/) || [])[1] || "?";
-  document.getElementById("ver-display").textContent = "Versjon: " + ver;
+  const ver=(html.match(/KKTurneprogram (v[\d.]+)/)||[])[1]||"?";
+  document.getElementById("ver-display").textContent="Versjon: "+ver;
+  const c=document.getElementById("main"); c.innerHTML="";
 
-  const container = document.getElementById("main");
-  container.innerHTML = "";
-
-  // ── PROGRAM (DAYS) ──
-  const days = parseDays(html);
+  // PROGRAM
+  const days=parseDays(html);
   if(days.length){
-    const sec = lagSeksjon("📅 Program — Dagene", container);
-    days.forEach((dag, di) => {
-      const card = document.createElement("div");
-      card.className = "dag-card";
-      card.dataset.di = di;
-      card.innerHTML = `<div class="dag-title">Dag ${dag.d}. ${dag.m} — ${dag.title}</div>
-        <div class="dag-meta">
-          <div><label>Tittel</label><input data-field="title" value="${esc(dag.title)}"></div>
-          <div><label>Undertittel</label><input data-field="sub" value="${esc(dag.sub||'')}"></div>
-        </div>`;
-      const evWrap = document.createElement("div");
-      evWrap.dataset.evs = "1";
-      (dag.body||[]).concat(dag.preBody||[]).forEach((ev,ei) => {
-        evWrap.appendChild(lagEvRad(ev.t, ev.v));
-      });
-      const addBtn = document.createElement("button");
-      addBtn.className = "add-ev";
-      addBtn.textContent = "+ Legg til tidspunkt";
-      addBtn.onclick = () => evWrap.insertBefore(lagEvRad("",""), addBtn);
+    const sec=lagSec("📅 Program",c);
+    days.forEach((dag,di)=>{
+      const card=lagEl("div","dag-card");
+      card.dataset.di=di;
+      card.innerHTML=`<div class="dag-title-bar">Dag ${dag.d}. ${dag.m}</div>`;
+      const meta=lagEl("div","meta-row");
+      meta.appendChild(lagFelt("Tittel","title",dag.title,"input"));
+      meta.appendChild(lagFelt("Undertittel","sub",dag.sub,"input"));
+      card.appendChild(meta);
+      if(dag.locked) card.appendChild(lagEl("div","locked-note",`🔒 Låst innhold (${dag.locked}) redigeres ikke her`));
+      const evWrap=lagEl("div","ev-rows"); evWrap.dataset.evs="1";
+      (dag.preBody||[]).forEach(ev=>evWrap.appendChild(lagEvRad(ev.t,ev.v,"pre")));
+      (dag.body||[]).forEach(ev=>evWrap.appendChild(lagEvRad(ev.t,ev.v,"body")));
+      const addBtn=lagEl("button","add-btn","+ Legg til tidspunkt");
+      addBtn.onclick=()=>evWrap.insertBefore(lagEvRad("","","body"),addBtn);
       evWrap.appendChild(addBtn);
       card.appendChild(evWrap);
       sec.appendChild(card);
     });
   }
 
-  // ── ORAKEL ──
-  const orakel = parseListeFra(html, "ORAKEL_SVAR");
-  if(orakel.length) byggListeSeksjon("🔮 Orakelet", orakel, "orakel", container);
+  // ORAKEL
+  byggListeSek("🔮 Orakelet",parseListeFra(html,"ORAKEL_SVAR"),"orakel",c);
 
-  // ── BINGO ──
-  const bingo = parseListeFra(html, "BINGO=");
-  if(bingo.length) byggListeSeksjon("🎯 Turnébingo", bingo, "bingo", container);
+  // BINGO
+  byggListeSek("🎯 Turnébingo",parseListeFra(html,"BINGO="),"bingo",c);
 
-  // ── BINGO18 ──
-  const bingo18 = parseListeFra(html, "BINGO18=");
-  if(bingo18.length) byggListeSeksjon("🔞 After Dark-bingo", bingo18, "bingo18", container);
+  // BINGO18
+  byggListeSek("🔞 After Dark-bingo",parseListeFra(html,"BINGO18="),"bingo18",c);
 
-  // ── DRIKKELEK ──
-  const drikke = parseDrikk(html);
-  if(Object.keys(drikke).length){
-    const sec = lagSeksjon("🍺 Drikkelek", container);
-    const katNavn = {sannhet:"🔍 Sannhet", tor:"😈 Nødt", fmk:"💘 FMK", pekelek:"👉 Pekelek", regel:"📜 Regler", hotseat:"🔥 Hot Seat"};
-    Object.entries(drikke).forEach(([kat, items]) => {
-      const lbl = document.createElement("div");
-      lbl.className = "kat-label";
-      lbl.textContent = katNavn[kat] || kat;
-      sec.appendChild(lbl);
-      items.forEach((txt, i) => {
-        const row = document.createElement("div");
-        row.className = "list-item";
-        row.dataset.kat = kat;
-        row.innerHTML = `<span class="nr">${i+1}</span><textarea>${esc(txt)}</textarea><button class="del-btn" onclick="this.parentElement.remove()">🗑</button>`;
-        sec.appendChild(row);
+  // DRIKKELEK
+  const drikk=parseDrikk(html);
+  if(Object.keys(drikk).length){
+    const sec=lagSec("🍺 Drikkelek",c); sec.id="sek-drikk";
+    const katNavn={sannhet:"🔍 Sannhet",tor:"😈 Nødt",fmk:"💘 FMK",pekelek:"👉 Pekelek",regel:"📜 Regler",hotseat:"🔥 Hot Seat"};
+    Object.entries(drikk).forEach(([kat,items])=>{
+      const lbl=lagEl("div","kat-lbl",katNavn[kat]||kat); sec.appendChild(lbl);
+      items.forEach((txt,i)=>{
+        sec.appendChild(lagListeItem(txt,kat));
       });
-      const addBtn = document.createElement("button");
-      addBtn.className = "add-btn";
-      addBtn.textContent = "+ Legg til kort";
-      addBtn.dataset.kat = kat;
-      addBtn.onclick = (e) => {
-        const row = document.createElement("div");
-        row.className = "list-item";
-        row.dataset.kat = kat;
-        row.innerHTML = `<span class="nr">*</span><textarea placeholder="Nytt kort..."></textarea><button class="del-btn" onclick="this.parentElement.remove()">🗑</button>`;
-        e.target.before(row);
-      };
-      sec.appendChild(addBtn);
+      const ab=lagEl("button","add-btn","+ Legg til");
+      ab.dataset.kat=kat;
+      ab.onclick=e=>{ e.target.before(lagListeItem("",kat)); };
+      sec.appendChild(ab);
     });
   }
 }
 
-function lagSeksjon(tittel, container){
-  const sec = document.createElement("div");
-  sec.className = "section";
-  sec.innerHTML = `<div class="section-hdr">${tittel}</div>`;
-  container.appendChild(sec);
-  return sec;
+function lagEl(tag,cls,txt=""){
+  const el=document.createElement(tag);
+  if(cls) el.className=cls;
+  if(txt) el.textContent=txt;
+  return el;
 }
-
-function lagEvRad(t, v){
-  const row = document.createElement("div");
-  row.className = "ev-row";
-  row.innerHTML = `<input class="ev-t-input" value="${esc(t)}" placeholder="Tid/label"><textarea placeholder="Innhold...">${esc(v)}</textarea>`;
+function lagSec(tittel,container){
+  const sec=lagEl("div","sec"); sec.innerHTML=`<div class="sec-hdr" onclick="togSec(this)">${tittel} <span>▾</span></div>`;
+  const body=lagEl("div","sec-body"); sec.appendChild(body);
+  container.appendChild(sec);
+  return body;
+}
+function togSec(hdr){ const b=hdr.nextElementSibling; b.classList.toggle("hidden"); hdr.querySelector("span").textContent=b.classList.contains("hidden")?"▸":"▾"; }
+function lagFelt(lbl,field,val,type="input"){
+  const w=lagEl("div","field-wrap"); w.innerHTML=`<label>${lbl}</label>`;
+  const inp=document.createElement(type==="input"?"input":"textarea");
+  inp.className=""; inp.value=val; inp.dataset.field=field;
+  if(type==="textarea") inp.rows=2;
+  w.appendChild(inp); return w;
+}
+function lagEvRad(t,v,type="body"){
+  const row=lagEl("div","ev-row"); row.dataset.evtype=type;
+  const tIn=document.createElement("input"); tIn.value=t; tIn.placeholder="Tid/label"; tIn.className="ev-t";
+  const vTa=document.createElement("textarea"); vTa.value=v; vTa.placeholder="Innhold...";
+  const del=lagEl("button","del-btn","🗑"); del.onclick=()=>row.remove();
+  row.appendChild(tIn); row.appendChild(vTa); row.appendChild(del);
   return row;
 }
-
-function byggListeSeksjon(tittel, items, id, container){
-  const sec = lagSeksjon(tittel, container);
-  sec.id = "sek-" + id;
-  items.forEach((txt, i) => {
-    const row = document.createElement("div");
-    row.className = "list-item";
-    row.innerHTML = `<span class="nr">${i+1}</span><textarea>${esc(txt)}</textarea><button class="del-btn" onclick="this.parentElement.remove()">🗑</button>`;
-    sec.appendChild(row);
-  });
-  const addBtn = document.createElement("button");
-  addBtn.className = "add-btn";
-  addBtn.textContent = "+ Legg til";
-  addBtn.onclick = () => {
-    const row = document.createElement("div");
-    row.className = "list-item";
-    row.innerHTML = `<span class="nr">*</span><textarea placeholder="Ny tekst..."></textarea><button class="del-btn" onclick="this.parentElement.remove()">🗑</button>`;
-    addBtn.before(row);
-  };
-  sec.appendChild(addBtn);
+function byggListeSek(tittel,items,id,container){
+  const sec=lagSec(tittel,container); sec.id="sek-"+id;
+  items.forEach((txt,i)=>sec.appendChild(lagListeItem(txt,null)));
+  const ab=lagEl("button","add-btn","+ Legg til");
+  ab.onclick=()=>{ ab.before(lagListeItem("",null)); };
+  sec.appendChild(ab);
 }
-
-function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-
-// ── PARSE DAYS ──
-function parseDays(html){
-  const m = html.match(/const DAYS=\[([\s\S]*?)\];/);
-  if(!m) return [];
-  const raw = m[1];
-  const days = [];
-  const rx = /\{d:"(\d+)",m:"(\w+)",title:"((?:[^"\\]|\\.)*)",sub:"((?:[^"\\]|\\.)*)",ansvar:"((?:[^"\\]|\\.)*)"([\s\S]*?)\}/g;
-  let match;
-  while((match = rx.exec(raw)) !== null){
-    const dag = {d:match[1],m:match[2],title:match[3],sub:match[4],ansvar:match[5],body:[],preBody:[]};
-    const rest = match[6];
-    // Hent body
-    const bodyM = rest.match(/body:\[([\s\S]*?)\]/);
-    if(bodyM){
-      const evRx = /\{t:"((?:[^"\\]|\\.)*)",v:`((?:[^`\\]|\\.)*)`\}|\{t:"((?:[^"\\]|\\.)*)",v:"((?:[^"\\]|\\.)*)"\}/g;
-      let em;
-      while((em = evRx.exec(bodyM[1])) !== null){
-        dag.body.push({t: em[1]||em[3], v: em[2]||em[4]});
-      }
-    }
-    // Hent preBody
-    const preM = rest.match(/preBody:\[([\s\S]*?)\]/);
-    if(preM){
-      const evRx2 = /\{t:"((?:[^"\\]|\\.)*)",v:"((?:[^"\\]|\\.)*)"\}/g;
-      let em2;
-      while((em2 = evRx2.exec(preM[1])) !== null){
-        dag.preBody.push({t:em2[1],v:em2[2]});
-      }
-    }
-    days.push(dag);
-  }
-  return days;
+function lagListeItem(txt,kat){
+  const row=lagEl("div","list-item"); if(kat) row.dataset.kat=kat;
+  const ta=document.createElement("textarea"); ta.value=txt;
+  const del=lagEl("button","del-btn","🗑"); del.onclick=()=>row.remove();
+  row.appendChild(ta); row.appendChild(del); return row;
 }
-
-// ── PARSE LISTE ──
-function parseListeFra(html, varName){
-  const rx = new RegExp("const " + varName.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + "\\s*=?\\s*\\[([\\s\\S]*?)\\];");
-  const m = html.match(rx);
-  if(!m) return [];
-  return Array.from(m[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)).map(x=>x[1]);
-}
-
-// ── PARSE DRIKK ──
-function parseDrikk(html){
-  const m = html.match(/const DRIKK_KORT=\{([\s\S]*?)\n\};/);
-  if(!m) return {};
-  const raw = m[1];
-  const result = {};
-  for(const kat of ['sannhet','tor','fmk','pekelek','regel','hotseat']){
-    const pm = raw.match(new RegExp(kat + '\\s*:\\s*\\[([\\s\\S]*?)\\](?=\\s*,?\\s*\\n\\s*(?:\\w+\\s*:|$))'));
-    if(pm) result[kat] = Array.from(pm[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)).map(x=>x[1]);
-  }
-  return result;
-}
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 // ── LAGRE TIL GITHUB ──
 async function lagreTilGitHub(){
-  const token = hentToken();
+  const token=hentToken();
   if(!token){ alert("Lim inn GitHub-token øverst!"); return; }
   if(!fileSHA){ alert("Last inn innhold fra GitHub først!"); return; }
-
   visStatus("Bygger og lagrer...");
-
   try{
-    let ny = rawContent;
-
-    // Bump versjonsnummer
-    ny = bumpVersjon(ny);
-    const nyVer = (ny.match(/KKTurneprogram (v[\d.]+)/) || [])[1] || "?";
-
-    // Oppdater DAYS
-    ny = oppdaterDays(ny);
-
-    // Oppdater ORAKEL_SVAR
-    ny = oppdaterListe(ny, "ORAKEL_SVAR", "sek-orakel");
-
-    // Oppdater BINGO
-    ny = oppdaterListe(ny, "BINGO=", "sek-bingo");
-
-    // Oppdater BINGO18
-    ny = oppdaterListe(ny, "BINGO18=", "sek-bingo18");
-
-    // Oppdater DRIKK_KORT
-    ny = oppdaterDrikk(ny);
-
-    // Commit til GitHub
-    const body = JSON.stringify({
-      message: `Teksteditor: oppdatert til ${nyVer}`,
-      content: b64EncodeUTF8(ny),
-      sha: fileSHA,
-      branch: BRANCH
-    });
-
-    const r = await fetch(API, {
-      method: "PUT",
-      headers: {
-        Authorization: "Bearer " + token,
-        Accept: "application/vnd.github+json",
-        "Content-Type": "application/json"
-      },
-      body
-    });
-
-    if(!r.ok){
-      const err = await r.json();
-      throw new Error(err.message || "HTTP " + r.status);
-    }
-
-    const data = await r.json();
-    fileSHA = data.content.sha;
-    rawContent = ny;
-    document.getElementById("ver-display").textContent = "Versjon: " + nyVer;
-    visStatus("✅ Lagret som " + nyVer + " — GitHub oppdateres om ~1 min", "ok");
-
-  }catch(e){
-    visStatus("❌ Feil: " + e.message, "err");
-  }
+    let ny=rawContent;
+    ny=oppdaterDays(ny);
+    ny=oppdaterListe(ny,"ORAKEL_SVAR","sek-orakel");
+    ny=oppdaterListe(ny,"BINGO=","sek-bingo");
+    ny=oppdaterListe(ny,"BINGO18=","sek-bingo18");
+    ny=oppdaterDrikk(ny);
+    ny=bumpVer(ny);
+    const nyVer=(ny.match(/KKTurneprogram (v[\d.]+)/)||[])[1]||"?";
+    const r=await fetch(API,{method:"PUT",headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json","Content-Type":"application/json"},
+      body:JSON.stringify({message:`Teksteditor: ${nyVer}`,content:b64Enc(ny),sha:fileSHA,branch:BRANCH})});
+    if(!r.ok){ const e=await r.json(); throw new Error(e.message||"HTTP "+r.status); }
+    const data=await r.json(); fileSHA=data.content.sha; rawContent=ny;
+    document.getElementById("ver-display").textContent="Versjon: "+nyVer;
+    visStatus("✅ Lagret som "+nyVer+" — oppdateres om ~1 min","ok");
+  }catch(e){ visStatus("❌ "+e.message,"err"); }
 }
 
-// ── BUMP VERSJON (1.x.y → 1.x.y+1) ──
-function bumpVersjon(html){
-  return html.replace(/v(1\.\d+)\.(\d+)/g, (_, maj, min) => {
-    return `v${maj}.${String(parseInt(min)+1).padStart(2,"0")}`;
-  });
+function bumpVer(html){
+  return html.replace(/v(1\.\d+)\.(\d+)/g,(_,maj,min)=>`v${maj}.${String(parseInt(min)+1).padStart(2,"0")}`);
 }
 
-// ── OPPDATER DAYS ──
+function jsStr(s){
+  return (s||"").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n");
+}
+
 function oppdaterDays(html){
-  const cards = document.querySelectorAll(".dag-card");
+  const cards=document.querySelectorAll(".dag-card");
   if(!cards.length) return html;
-
-  let nyttDays = "const DAYS=[\n";
-  cards.forEach((card, di) => {
-    const t = v => card.querySelector(`[data-field="${v}"]`)?.value || "";
-    const d = card.dataset.di;
-    const gammel = parseDays(rawContent)[d] || {};
-
-    // Hent ev-rader
-    const evRows = card.querySelectorAll(".ev-row");
-    const evs = [];
-    evRows.forEach(row => {
-      const tid = row.children[0].value.trim();
-      const inn = row.children[1].value.trim();
-      if(inn) evs.push({t:tid, v:inn});
+  const origDays=parseDays(rawContent);
+  let nyttDays="const DAYS=[\n";
+  cards.forEach((card,ci)=>{
+    const orig=origDays[ci]||{};
+    const title=card.querySelector('[data-field="title"]')?.value||orig.title||"";
+    const sub=card.querySelector('[data-field="sub"]')?.value||orig.sub||"";
+    const ansvar=orig.ansvar||"";
+    const preEvs=[],bodyEvs=[];
+    card.querySelectorAll(".ev-row").forEach(row=>{
+      const t=row.querySelector(".ev-t")?.value?.trim()||"";
+      const v=row.querySelector("textarea")?.value?.trim()||"";
+      if(!v) return;
+      const type=row.dataset.evtype||"body";
+      const hasSpecial=v.includes('"')||v.includes('`')||v.includes('${');
+      const vStr=hasSpecial?`\`${v.replace(/\\/g,"\\\\").replace(/`/g,"\\`")}\``:`"${jsStr(v)}"`;
+      const ev=`{t:"${jsStr(t)}",v:${vStr}}`;
+      if(type==="pre") preEvs.push(ev);
+      else bodyEvs.push(ev);
     });
-
-    const tittel = t("title") || gammel.title;
-    const sub    = t("sub")   || gammel.sub || "";
-    const ansvar = gammel.ansvar || "";
-    const dagNum = gammel.d;
-    const maned  = gammel.m;
-
-    let line = `  {d:"${dagNum}",m:"${maned}",title:"${js(tittel)}",sub:"${js(sub)}",ansvar:"${js(ansvar)}"`;
-    if(evs.length){
-      line += `,body:[\n`;
-      evs.forEach(e => {
-        const valer = e.v.includes("`") || e.v.includes("${")
-          ? `\`${e.v}\``
-          : `"${js(e.v)}"`;
-        line += `    {t:"${js(e.t)}",v:${valer}},\n`;
-      });
-      line += `  ]`;
-    }
-    if(gammel.locked) line += `,locked:"${gammel.locked}"`;
-    line += `},\n`;
-    nyttDays += line;
+    let line=`  {d:"${orig.d}",m:"${orig.m}",title:"${jsStr(title)}",sub:"${jsStr(sub)}",ansvar:"${jsStr(ansvar)}"`;
+    if(preEvs.length) line+=`,preBody:[\n    ${preEvs.join(",\n    ")}\n  ]`;
+    if(bodyEvs.length) line+=`,body:[\n    ${bodyEvs.join(",\n    ")}\n  ]`;
+    if(orig.locked) line+=`,locked:"${orig.locked}"`;
+    line+=`},\n`;
+    nyttDays+=line;
   });
-  nyttDays += "];";
-
-  return html.replace(/const DAYS=\[[\s\S]*?\];/, nyttDays);
+  nyttDays+="];";
+  return html.replace(/const DAYS=\[[\s\S]*?\];\s*\n\s*const GLOSER/,nyttDays+"\n\nconst GLOSER");
 }
 
-// ── OPPDATER LISTE ──
-function oppdaterListe(html, varName, sectionId){
-  const sec = document.getElementById(sectionId);
+function oppdaterListe(html,varName,sectionId){
+  const sec=document.getElementById(sectionId);
   if(!sec) return html;
-  const items = Array.from(sec.querySelectorAll(".list-item textarea")).map(t=>t.value.trim()).filter(Boolean);
-  const rx = new RegExp("(const " + varName.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + "\\s*=?\\s*)\\[[\\s\\S]*?\\];");
-  const nyListe = `$1[\n${items.map(i=>`  "${js(i)}"`).join(",\n")}\n];`;
-  return html.replace(rx, nyListe);
+  const items=Array.from(sec.querySelectorAll("textarea")).map(t=>t.value.trim()).filter(Boolean);
+  const rx=new RegExp("(const "+varName.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*=?\\s*)\\[[\\s\\S]*?\\];");
+  return html.replace(rx,`$1[\n${items.map(i=>`  "${jsStr(i)}"`).join(",\n")}\n];`);
 }
 
-// ── OPPDATER DRIKK ──
 function oppdaterDrikk(html){
-  const kats = ['sannhet','tor','fmk','pekelek','regel','hotseat'];
-  let nyDrikk = "const DRIKK_KORT={\n";
-  kats.forEach(kat => {
-    const rows = document.querySelectorAll(`.list-item[data-kat="${kat}"] textarea`);
-    const items = Array.from(rows).map(t=>t.value.trim()).filter(Boolean);
-    nyDrikk += `  ${kat}:[\n${items.map(i=>`    "${js(i)}"`).join(",\n")}\n  ],\n`;
+  const kats=['sannhet','tor','fmk','pekelek','regel','hotseat'];
+  let ny="const DRIKK_KORT={\n";
+  kats.forEach(kat=>{
+    const items=Array.from(document.querySelectorAll(`.list-item[data-kat="${kat}"] textarea`)).map(t=>t.value.trim()).filter(Boolean);
+    ny+=`  ${kat}:[\n${items.map(i=>`    "${jsStr(i)}"`).join(",\n")}\n  ],\n`;
   });
-  nyDrikk += "};";
-  return html.replace(/const DRIKK_KORT=\{[\s\S]*?\n\};/, nyDrikk);
+  ny+="};";
+  return html.replace(/const DRIKK_KORT=\{[\s\S]*?\n\};/,ny);
 }
-
-function js(s){ return (s||"").replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n"); }
 </script>
 </body>
 </html>
