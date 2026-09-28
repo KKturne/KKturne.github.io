@@ -16,13 +16,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<link rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      crossorigin="">
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin="">
-</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root{--bg:#F4EFE6;--card:#fff;--dark:#1C2B35;--acc:var(--acc);--gold:var(--gold);--green:#2D5A3D;--blue:#1A4070;--text:#1a1a1a;--muted:#888;--bdr:#E2D8CC;--sub:var(--sub);--label:var(--label)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -592,9 +587,7 @@ body.shake-mode{animation:app-shake .5s infinite}
       <input class="spl-navn-in" id="gjett-navn" type="text" placeholder="Kun fornavn..."
         autocomplete="given-name" autocorrect="off" autocapitalize="words" maxlength="20" inputmode="text">
     </div>
-<div id="gjett-map"
-     style="width:100%;max-width:420px;height:320px;border-radius:14px;overflow:hidden;border:2px solid var(--gold,#d9b84c);background:#1a2530">
-</div>
+    <div id="gjett-map" style="width:100%;max-width:420px;height:320px;border-radius:14px;overflow:hidden;border:2px solid var(--gold,var(--gold));background:#1a2530"></div>
     <div id="gjett-valgt-info" style="font-size:12px;color:#9AB;margin-top:10px;min-height:16px;text-align:center">Ingen sted valgt ennå</div>
     <button class="spl-go" id="gjett-lock-btn" onclick="laasGjett()" disabled style="margin-top:14px;max-width:420px;width:100%;opacity:.5">Lås gjett 🔒</button>
     <div style="font-size:11px;color:#789;margin-top:10px;text-align:center;max-width:320px">Obs: Du kan IKKE endre gjettet ditt etter at du har låst det!</div>
@@ -6554,52 +6547,11 @@ const SPL_PW = "BLATUR";
     setTimeout(hentOgVisMeldingslogg, 1000);
     startDilemmaPolling();
     startKnausbotPolling();
- } else if(!gjettLast && !erKruserDato){
-
+  } else if(!gjettLast && !erKruserDato){
+    // Ikke gjettet ennå, og det er før 4. oktober - vis gjettekartet FØR passordfeltet
     document.getElementById("pw-view").style.display = "none";
     document.getElementById("gjett-view").style.display = "flex";
-
-    setTimeout(async function(){
-
-        try {
-
-            await lastInnLeafletHvisNodvendig();
-
-            initGjettKart();
-
-            setTimeout(function(){
-                if(gjettKartInstans){
-                    gjettKartInstans.invalidateSize(true);
-                }
-            }, 300);
-
-        } catch(error) {
-
-            console.error(
-                "Kunne ikke laste Leaflet:",
-                error
-            );
-
-            const mapEl =
-                document.getElementById("gjett-map");
-
-            if(mapEl){
-                mapEl.innerHTML = `
-                    <div style="
-                        padding:20px;
-                        text-align:center;
-                        color:#9AB;
-                        font-size:13px;
-                    ">
-                        Kartet kunne ikke lastes.<br>
-                        <small>Sjekk internettforbindelsen.</small>
-                    </div>
-                `;
-            }
-        }
-
-    }, 300);
-}
+    setTimeout(initGjettKart, 100); // liten forsinkelse sikrer at containeren har fått riktig størrelse i DOM-en
   } else if(lagretNavn){
     // Har gjettet (eller er kruser-dato), men ikke låst opp splash ennå — rett til passordfeltet
     if(!erKruserDato) sjekkDilemmaVedOppstart();
@@ -6621,144 +6573,42 @@ function splAvstand(lat1, lng1, lat2, lng2){
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function lastInnLeafletHvisNodvendig(){
-
-    return new Promise(function(resolve, reject){
-
-        // Leaflet er allerede lastet
-        if(typeof L !== "undefined"){
-            resolve();
-            return;
-        }
-
-        const script = document.createElement("script");
-
-        script.src =
-            "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js";
-
-        script.onload = function(){
-            console.log("Leaflet lastet via fallback-CDN.");
-            resolve();
-        };
-
-        script.onerror = function(){
-            console.error("Kunne ikke laste Leaflet.");
-            reject();
-        };
-
-        document.head.appendChild(script);
-    });
-}
-   
 function initGjettKart(){
-    const mapEl = document.getElementById("gjett-map");
+  const mapEl = document.getElementById("gjett-map");
+  if(!mapEl || gjettKartInstans) return; // ikke initialiser flere ganger
+  if(typeof L === "undefined"){
+    mapEl.innerHTML = '<div style="padding:20px;text-align:center;color:#9AB;font-size:13px">Kartet kunne ikke lastes — sjekk internettforbindelsen din.</div>';
+    return;
+  }
+  gjettKartInstans = L.map("gjett-map", {
+    worldCopyJump: true,
+    minZoom: 2
+  }).setView([20, 20], 2);
 
-    if(!mapEl || gjettKartInstans) return;
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 19,
+    subdomains: "abcd"
+  }).addTo(gjettKartInstans);
 
-    // Sjekk at Leaflet faktisk er lastet
-    if(typeof L === "undefined"){
-        mapEl.innerHTML = `
-            <div style="
-                padding:20px;
-                text-align:center;
-                color:#9AB;
-                font-size:13px;
-            ">
-                Kartet kunne ikke lastes.<br>
-                <small>Leaflet ble ikke lastet.</small>
-            </div>
-        `;
-        return;
+  gjettKartInstans.on("click", function(e){
+    gjettValgtLatLng = e.latlng;
+    if(gjettValgtMarkor){
+      gjettValgtMarkor.setLatLng(e.latlng);
+    } else {
+      gjettValgtMarkor = L.marker(e.latlng).addTo(gjettKartInstans);
     }
+    const infoEl = document.getElementById("gjett-valgt-info");
+    if(infoEl) infoEl.textContent = `📍 Valgt: ${e.latlng.lat.toFixed(2)}, ${e.latlng.lng.toFixed(2)}`;
+    const btn = document.getElementById("gjett-lock-btn");
+    if(btn){ btn.disabled = false; btn.style.opacity = "1"; }
+  });
 
-    // Opprett kartet
-    gjettKartInstans = L.map("gjett-map", {
-        worldCopyJump: true,
-        minZoom: 2,
-        zoomControl: true
-    }).setView([20, 20], 2);
-
-    // Første kartleverandør: CARTO Voyager
-    const cartoLayer = L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-        {
-            attribution:
-                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
-            maxZoom: 19,
-            subdomains: "abcd"
-        }
-    ).addTo(gjettKartInstans);
-
-    // Hvis CARTO ikke fungerer, prøver vi OpenStreetMap
-    let fallbackLayer = null;
-    let tileErrors = 0;
-
-    cartoLayer.on("tileerror", function(){
-        tileErrors++;
-
-        // Ikke bytt ved én tilfeldig feil.
-        // Bytt dersom flere kartfliser feiler.
-        if(tileErrors >= 3 && !fallbackLayer){
-
-            fallbackLayer = L.tileLayer(
-                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {
-                    attribution:
-                        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-                    maxZoom: 19
-                }
-            ).addTo(gjettKartInstans);
-        }
-    });
-
-    // Klikk på kartet for å velge sted
-    gjettKartInstans.on("click", function(e){
-
-        gjettValgtLatLng = e.latlng;
-
-        if(gjettValgtMarkor){
-            gjettValgtMarkor.setLatLng(e.latlng);
-        } else {
-            gjettValgtMarkor =
-                L.marker(e.latlng).addTo(gjettKartInstans);
-        }
-
-        const infoEl =
-            document.getElementById("gjett-valgt-info");
-
-        if(infoEl){
-            infoEl.textContent =
-                `📍 Valgt: ${e.latlng.lat.toFixed(2)}, ${e.latlng.lng.toFixed(2)}`;
-        }
-
-        const btn =
-            document.getElementById("gjett-lock-btn");
-
-        if(btn){
-            btn.disabled = false;
-            btn.style.opacity = "1";
-        }
-    });
-
-    // Leaflet kan få feil størrelse når kartet
-    // opprettes inne i et skjult element.
-    setTimeout(function(){
-        if(gjettKartInstans){
-            gjettKartInstans.invalidateSize(true);
-        }
-    }, 100);
-
-    setTimeout(function(){
-        if(gjettKartInstans){
-            gjettKartInstans.invalidateSize(true);
-        }
-    }, 500);
-
-    setTimeout(function(){
-        if(gjettKartInstans){
-            gjettKartInstans.invalidateSize(true);
-        }
-    }, 1200);
+  // Viktig: Leaflet regner ut kartstørrelse basert på containerens dimensjoner ved
+  // opprettelsestidspunktet. Siden splash kan ha vært skjult (display:none) rett
+  // før dette kjøres, tvinger vi en ny størrelsesberegning for å unngå at kartet
+  // rendres feil/ufullstendig (kjent Leaflet-fallgruve).
+  setTimeout(()=>{ if(gjettKartInstans) gjettKartInstans.invalidateSize(); }, 150);
 }
 
 async function laasGjett(){
