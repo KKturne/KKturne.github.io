@@ -333,6 +333,8 @@
   <div class="tab" onclick="byttTab('plassering', this)">🏆 Plassering</div>
   <div class="tab" onclick="byttTab('statistikk', this)">📊 Statistikk</div>
   <div class="tab" onclick="byttTab('lag', this)">👥 Lag</div>
+  <div class="tab" onclick="byttTab('poster', this)">📍 Poster</div>
+  <div class="tab" onclick="byttTab('kastel', this)">🏛️ Kaštel</div>
   <div class="tab" onclick="byttTab('admin', this)">⚙️ Admin</div>
 </div>
 
@@ -360,11 +362,47 @@
     <div id="lag-oversikt-innhold"></div>
   </div>
 
+  <div id="tab-poster" style="display:none;padding:12px">
+    <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:12px">📍 Poster og passord</div>
+    ${[
+      {post:"Pula Arena — Start",    ansvar:"Andreas",  pw:"BUEN"},
+      {post:"Sergius-buen",         ansvar:"Ingen. Godkjenn via Andreas.", pw:"MARKET"},
+      {post:"Tržnica — Green Market",ansvar:"Petter",   pw:"OKSE"},
+      {post:"Forum & Auguststempelet",ansvar:"Erik",    pw:"KASTEL"},
+      {post:"Kaštel-festningen",    ansvar:"Daniel",    pw:"VISTA"},
+      {post:"Havnepromenaden",      ansvar:"Ingvild",   pw:"BRAVO"},
+    ].map(p=>`
+      <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:800;color:#e8ddd0">${p.post}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: ${p.ansvar}</div>
+        </div>
+        <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">${p.pw}</div>
+      </div>`).join("")}
+    <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
+      Ankomst-passord: <strong style="color:var(--gold)">NAMNAM</strong> (Tržnica/Petter) · <strong style="color:var(--gold)">TJOISES</strong> (Havnepromenaden/Ingvild)
+    </div>
+  </div>
+
+
+  <div id="tab-kastel" style="display:none;padding:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:800;color:var(--gold)">🏛️ Kaštel Quiz — Resultater</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="hentKastelResultater()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">↻ Oppdater</button>
+        <button onclick="nullstillKastel()" style="background:#2a0808;border:1px solid #e05050;color:#e05050;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🗑 Nullstill</button>
+      </div>
+    </div>
+    <div id="kastel-wrap">
+      <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Trykk «Oppdater» for å hente resultater</div>
+    </div>
+  </div>
+
   <div id="tab-admin" style="display:none">
     <div class="kort-wrap">
       <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:8px">📡 JSONBin-tilkobling</div>
       <div style="font-size:12px;color:var(--muted);line-height:1.7">
-        Bin ID: <code style="color:var(--text)">6a36672af5f4af5e2913c2f1</code><br>
+        Bin ID: <code style="color:var(--text)">6a5dafc6f5f4af5e29a60c24</code><br>
         Status: <span id="conn-status" style="color:var(--muted)">sjekker…</span>
       </div>
     </div>
@@ -386,8 +424,8 @@
 </div>
 
 <script>
-const BIN = "6a36672af5f4af5e2913c2f1";
-const KEY = "$2a$10$On.B9FR9GJ81fyDwAKsbzuL81xI6InKhu8d008hvY4DVgSEhCbYTa";
+const BIN = "6a5dafc6f5f4af5e29a60c24";
+const KEY = "$2a$10$jue8mbEpng4LHJ0RoO/YS.HXiwlcyeSwxTr.OHC2OzbnIJ6MJochK";
 const API = `https://api.jsonbin.io/v3/b/${BIN}`;
 
 const POST_NAVN = [
@@ -778,10 +816,97 @@ async function nullstillTracker(){
   }catch(e){ alert("Feil — sjekk nettet"); }
 }
 
+
+async function nullstillKastel(){
+  if(!confirm("Nullstill alle Kaštel-resultater? Dette kan ikke angres.")) return;
+  try{
+    const r = await fetch(BIN_URL+"/latest",{headers:{"X-Master-Key":MASTER_KEY,"Cache-Control":"no-cache"}});
+    const data = (await r.json()).record||{};
+    data.kastel_resultater = [];
+    await fetch(BIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":MASTER_KEY},body:JSON.stringify(data)});
+    hentKastelResultater();
+  }catch(e){ alert("Feil: "+e.message); }
+}
+
+async function hentKastelResultater(){
+  const wrap = document.getElementById("kastel-wrap");
+  wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Henter...</div>';
+  try{
+    const r = await fetch(BIN_URL+"/latest",{headers:{"X-Master-Key":MASTER_KEY,"Cache-Control":"no-cache"}});
+    const data = (await r.json()).record||{};
+    const res = data.kastel_resultater||[];
+
+    if(!res.length){
+      wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Ingen resultater ennå</div>';
+      return;
+    }
+
+    // Sorter etter total tid
+    const sortert = [...res].sort((a,b)=>(a.tid_total+a.straff_min*60)-(b.tid_total+b.straff_min*60));
+
+    const lagFarger = {"Lag 1":"#e74c3c","Lag 2":"#3498db","Lag 3":"#2ecc71","Lag 4":"#f39c12","Lag 5":"#9b59b6"};
+
+    wrap.innerHTML = sortert.map((r,i)=>{
+      const totSek = r.tid_total + (r.straff_min||0)*60;
+      const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+      const farge = lagFarger[r.lag]||"#888";
+      const tid = new Date(r.fullfort).toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit"});
+
+      const sporsmalRader = (r.sporsmal||[]).map(s=>{
+        const forsokTekst = (s.forsok||[]).map(f=>
+          `<span style="color:${f.riktig?"#2ecc71":"#e74c3c"};margin-right:4px">${f.svar}</span>`
+        ).join("→ ");
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:5px 8px;color:var(--muted);font-size:11px">${s.nr}</td>
+          <td style="padding:5px 8px;font-size:11px;max-width:180px">${s.tekst}</td>
+          <td style="padding:5px 8px;font-size:11px">${forsokTekst}</td>
+          <td style="padding:5px 8px;font-size:11px;color:${s.pass?"#f39c12":"var(--text)"}">${s.pass?"PASS":"✓"}</td>
+          <td style="padding:5px 8px;font-size:11px;color:var(--muted)">${s.tid_sek}s</td>
+        </tr>`;
+      }).join("");
+
+      return `<div style="background:var(--card2);border-radius:12px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden">
+        <div style="background:${farge}22;border-bottom:1px solid var(--border);padding:12px 14px;display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:20px;font-weight:900;color:${farge}">#${i+1}</span>
+            <div>
+              <div style="font-size:14px;font-weight:800;color:${farge}">${r.lag}</div>
+              <div style="font-size:11px;color:var(--muted)">Fullført ${tid}</div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:16px;font-weight:800;color:var(--text)">${fmt(totSek)}</div>
+            <div style="font-size:10px;color:var(--muted)">${r.straff_min?`+${r.straff_min} min straff`:"Ingen straff"}</div>
+          </div>
+        </div>
+        <div style="padding:10px 14px;display:flex;gap:16px;font-size:12px;border-bottom:1px solid var(--border)">
+          <span>❌ <strong>${r.feil_forsok||0}</strong> feil</span>
+          <span>↶ <strong>${r.antall_pass||0}</strong> pass</span>
+          <span>⏱ <strong>${fmt(r.tid_total)}</strong> real</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="background:var(--card2)">
+              <th style="padding:5px 8px;text-align:left;color:var(--muted);font-size:10px">#</th>
+              <th style="padding:5px 8px;text-align:left;color:var(--muted);font-size:10px">Spørsmål</th>
+              <th style="padding:5px 8px;text-align:left;color:var(--muted);font-size:10px">Forsøk</th>
+              <th style="padding:5px 8px;text-align:left;color:var(--muted);font-size:10px">Status</th>
+              <th style="padding:5px 8px;text-align:left;color:var(--muted);font-size:10px">Tid</th>
+            </tr></thead>
+            <tbody>${sporsmalRader}</tbody>
+          </table>
+        </div>
+      </div>`;
+    }).join("");
+  }catch(e){
+    wrap.innerHTML = `<div style="color:#e74c3c;font-size:13px;text-align:center;padding:20px">Feil: ${e.message}</div>`;
+  }
+}
+
 function byttTab(tab, el){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   el.classList.add("active");
-  ["oversikt","plassering","statistikk","lag","admin"].forEach(t=>{
+  ["oversikt","plassering","statistikk","lag","poster","kastel","admin"].forEach(t=>{
     document.getElementById("tab-"+t).style.display = t===tab?"block":"none";
   });
   aktivTab = tab;

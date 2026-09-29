@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Kaštel Quiz — Pula 2026</title>
+<style>
+:root{--bg:#0f0f0f;--card:#1c1c1c;--border:#2a2a2a;--red:#e00515;--green:#22c55e;--amber:#f59e0b;--text:#f0f0f0;--muted:#666;--gold:#f5c518}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;height:100%;overflow:hidden}
+.screen{display:none;height:100dvh;flex-direction:column}
+.screen.on{display:flex}
+
+/* ── SETUP ── */
+#s-setup{align-items:center;justify-content:center;padding:40px 32px;background:var(--bg)}
+.su-logo{font-size:80px;margin-bottom:16px}
+.su-h{font-size:32px;font-weight:900;letter-spacing:-1.5px;text-align:center;margin-bottom:4px}
+.su-h span{color:var(--gold)}
+.su-sub{font-size:15px;color:var(--muted);text-align:center;margin-bottom:36px}
+.su-form{width:100%;max-width:460px}
+.su-rules{background:#1a1a00;border:1px solid #3a3a00;border-radius:14px;padding:16px 20px;font-size:14px;line-height:1.8;color:#c8c060;margin-bottom:24px}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
+.inp{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:14px;color:var(--text);font-size:22px;padding:16px 20px;margin-bottom:20px;outline:none;-webkit-appearance:none}
+.inp:focus{border-color:var(--gold)}
+.go{width:100%;background:var(--gold);color:#111;border:none;border-radius:16px;font-size:20px;font-weight:800;padding:18px;cursor:pointer;-webkit-appearance:none}
+.lag-btn{background:var(--card);border:2px solid var(--bdr);border-radius:14px;font-size:18px;font-weight:800;padding:16px;cursor:pointer;color:var(--text);font-family:inherit;transition:all .15s}
+.lag-btn.valgt{background:var(--gold);color:#111;border-color:var(--gold)}
+.lag-btn:active{opacity:.8}
+.go:disabled{background:#2a2a2a;color:var(--muted);cursor:default}
+
+/* ── QUESTION ── */
+#s-q{background:var(--bg);overflow:hidden}
+.q-hdr{background:#111;border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.q-hdr-l{display:flex;flex-direction:column;gap:3px}
+.q-brand{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.q-prog{font-size:18px;font-weight:900;color:var(--text)}
+.q-dots{display:flex;gap:5px;align-items:center;flex-wrap:wrap;max-width:160px}
+.qd{width:11px;height:11px;border-radius:50%;background:var(--border);flex-shrink:0}
+.qd.c{background:var(--green)}.qd.w{background:var(--red)}.qd.p{background:var(--amber)}
+.q-pen{display:flex;align-items:center;gap:10px}
+.pen-disp{font-size:12px;color:var(--amber);font-weight:700;text-align:right;max-width:100px}
+.pen-add{background:#2a0a0a;border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;-webkit-appearance:none;letter-spacing:.04em}
+.pen-add:active{background:var(--red);color:#fff}
+.q-body{flex:1;display:flex;flex-direction:column;padding:28px 28px 20px;overflow:hidden}
+.q-from{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.q-txt{font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.2;margin-bottom:28px;color:var(--text);flex-shrink:0}
+.q-opts{display:flex;flex-direction:column;gap:11px;flex:1}
+.opt{display:flex;align-items:center;gap:16px;background:var(--card);border:1.5px solid var(--border);border-radius:18px;padding:18px 22px;cursor:pointer;-webkit-appearance:none;text-align:left;transition:border-color .12s,background .12s;flex:1}
+.opt:active{background:#252525}
+.opt.correct{background:#0a2a0a;border-color:var(--green)!important}
+.opt.wrong{background:#2a0a0a;border-color:var(--red)!important}
+.opt-lbl{width:40px;height:40px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--muted);flex-shrink:0}
+.opt.correct .opt-lbl{background:var(--green);color:#fff}
+.opt.wrong .opt-lbl{background:var(--red);color:#fff}
+.opt-txt{font-size:21px;font-weight:700;color:var(--text)}
+.pass-btn{width:100%;background:transparent;border:1.5px solid var(--border);border-radius:14px;color:var(--amber);font-size:15px;font-weight:700;padding:14px;cursor:pointer;margin-top:12px;-webkit-appearance:none;flex-shrink:0}
+.pass-btn:active{background:#1a1000}
+.pass-btn:disabled{color:var(--muted);cursor:default;border-color:#222}
+
+/* ── LOCKOUT ── */
+#s-lock{background:#0a0000;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.lock-ico{font-size:72px}
+.lock-h{font-size:28px;font-weight:900;color:var(--text);text-align:center}
+.lock-sub{font-size:15px;color:var(--muted);text-align:center;max-width:340px;line-height:1.5}
+.ring-wrap{position:relative;width:220px;height:220px;margin:8px 0}
+.ring-wrap svg{transform:rotate(-90deg)}
+#r-secs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:64px;font-weight:900;color:var(--text)}
+#r-lbl{position:absolute;bottom:30px;left:0;right:0;text-align:center;font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+/* ── COMPLETE ── */
+#s-done{background:var(--bg);align-items:center;justify-content:center;padding:40px 32px}
+.done-ico{font-size:80px;margin-bottom:14px}
+.done-h{font-size:34px;font-weight:900;letter-spacing:-1.5px;margin-bottom:4px}
+.done-team{font-size:17px;color:var(--muted);margin-bottom:28px}
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px 28px;width:100%;max-width:440px;margin-bottom:16px}
+.sr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--border)}
+.sr:last-child{border-bottom:none}
+.sr-l{font-size:14px;color:var(--muted)}
+.sr-v{font-size:24px;font-weight:900}
+.g{color:var(--green)}.r{color:var(--red)}.am{color:var(--amber)}.gold{color:var(--gold)}
+.pen-box{background:#1a0a00;border:1.5px solid #4a2000;border-radius:16px;padding:16px 24px;width:100%;max-width:440px;text-align:center;margin-bottom:16px}
+.pb-lbl{font-size:12px;font-weight:700;color:var(--amber);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.pb-time{font-size:32px;font-weight:900;color:var(--amber)}
+.pb-note{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.4}
+.rev-btn{background:var(--gold);color:#111;border:none;border-radius:16px;font-size:18px;font-weight:800;padding:16px 44px;cursor:pointer;-webkit-appearance:none}
+.rev-btn:disabled{background:#2a2a2a;color:var(--muted);cursor:default;font-size:15px;letter-spacing:.02em}
+.pw-out{font-size:44px;font-weight:900;letter-spacing:.2em;color:var(--text);margin-top:16px;background:#111;border:2px dashed var(--border);border-radius:14px;padding:14px 32px;display:none}
+.restart-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:12px;font-size:14px;padding:12px 28px;cursor:pointer;margin-top:12px;-webkit-appearance:none}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div class="screen on" id="s-setup">
+  <div class="su-logo">&#127984;</div>
+  <div class="su-h">Kaštel <span>Quiz</span></div>
+  <div class="su-sub">Amazing Race Pula 2026</div>
+  <div class="su-form">
+    <div class="su-rules">
+      &#127915; Stafett &mdash; laget bestemmer rekkef&oslash;lgen selv<br>
+      &#9208; PASS eller feil svar &rarr; 60 sekunders lockout<br>
+      &#128241; Telefonene m&aring; ligge i lomma hele veien<br>
+      &#9888; Kommunikasjon = +5 min straff per gang
+    </div>
+    <label class="lbl">Velg lagnummer</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+      <button class="lag-btn" onclick="velgLag('Lag 1')">🏁 Lag 1</button>
+      <button class="lag-btn" onclick="velgLag('Lag 2')">🏁 Lag 2</button>
+      <button class="lag-btn" onclick="velgLag('Lag 3')">🏁 Lag 3</button>
+      <button class="lag-btn" onclick="velgLag('Lag 4')">🏁 Lag 4</button>
+      <button class="lag-btn" style="grid-column:1/-1" onclick="velgLag('Lag 5')">🏁 Lag 5</button>
+    </div>
+    <button class="go" id="go-btn" disabled onclick="startQuiz()">Start quiz &#8594;</button>
+  </div>
+</div>
+
+<!-- QUESTION -->
+<div class="screen" id="s-q">
+  <div class="q-hdr">
+    <div class="q-hdr-l">
+      <div class="q-brand">Amazing Race Pula 2026</div>
+      <div class="q-prog" id="q-prog">Spm 1 / 12</div>
+    </div>
+    <div class="q-dots" id="q-dots"></div>
+    <div class="q-pen">
+      <div class="pen-disp" id="pen-disp"></div>
+      <button class="pen-add" onclick="addPenalty()">&#9888; +5 min</button>
+    </div>
+  </div>
+  <div class="q-body">
+    <div class="q-from" id="q-from"></div>
+    <div class="q-txt" id="q-txt"></div>
+    <div class="q-opts" id="q-opts"></div>
+    <button class="pass-btn" id="pass-btn" onclick="doPass()">&#8626; PASS &mdash; neste person tar over</button>
+  </div>
+</div>
+
+<!-- LOCKOUT -->
+<div class="screen" id="s-lock">
+  <div class="lock-ico" id="l-ico">&#10005;</div>
+  <div class="lock-h" id="l-h">Feil svar!</div>
+  <div class="ring-wrap">
+    <svg width="220" height="220" viewBox="0 0 220 220">
+      <circle cx="110" cy="110" r="95" fill="none" stroke="#222" stroke-width="12"/>
+      <circle id="ring" cx="110" cy="110" r="95" fill="none" stroke="#e00515" stroke-width="12"
+        stroke-dasharray="597" stroke-dashoffset="0" stroke-linecap="round"/>
+    </svg>
+    <div id="r-secs">90</div>
+    <div id="r-lbl">sekunder</div>
+  </div>
+  <div class="lock-sub" id="l-sub">Skjermen l&aring;ses opp om litt.</div>
+</div>
+
+<!-- COMPLETE -->
+<div class="screen" id="s-done">
+  <div class="done-ico">&#127942;</div>
+  <div class="done-h">Quiz fullf&oslash;rt!</div>
+  <div class="done-team" id="done-team"></div>
+  <div class="score-card" id="score-card"></div>
+  <div class="pen-box" id="pen-box" style="display:none"></div>
+  <button class="rev-btn" id="rev-btn" onclick="revealPw()" style="display:none">Vis passord til neste post</button>
+  <div class="pw-out" id="pw-out">VISTA</div>
+  <button class="restart-btn" onclick="restart()" style="margin-top:20px">&#8617; Nytt lag</button>
+</div>
+
+<script>
+const QS = [
+  {q:"Hvor mange tilskuere rommer Pula Arena?",opts:["Ca. 10 000","Ca. 20 000","Ca. 30 000"],a:"Ca. 20 000",post:"Arena"},
+  {q:"Hva heter buen som ble laget for å ære en romersk familie?",opts:["Trajansbuen","Augustusbuen","Sergius-buen"],a:"Sergius-buen",post:"Sergius-buen"},
+  {q:"Hva er kroatisk for «5»?",opts:["Četiri","Pet","Osam"],a:"Pet",post:"Sergius-buen"},
+  {q:"Hva er Istrias mest berømte matprodukt?",opts:["Olivenolje","Pršut","Tartufi / trøfler"],a:"Tartufi / trøfler",post:"Markedet"},
+  {q:"Hva er kroatisk for «ost»?",opts:["Vino","Sir","Kruh"],a:"Sir",post:"Markedet"},
+  {q:"Hva er kroatisk for «okse»?",opts:["Konj","Bik","Pas"],a:"Bik",post:"Mosaikken"},
+  {q:"Hvilket år ble Kaštel-festningen ferdigstilt?",opts:["1530","1730","1630"],a:"1630",post:"Kaštel"},
+  {q:"Hva er kroatisk for «hav»?",opts:["Rijeka","Voda","More"],a:"More",post:"Havnen"},
+  {q:"Hvilket år ble Knauskoret stiftet?",opts:["1965","1985","1975"],a:"1975",post:"Knauskoret"},
+  {q:"Hvilken farge hadde Knauskoret på antrekket FØR stripene ble innført?",opts:["Mørkegrønn","Vinrød","Svart"],a:"Vinrød",post:"Knauskoret"},
+  {q:"Hva betyr «dobro jutro»?",opts:["God dag","God kveld","God morgen"],a:"God morgen",post:"Sergius-buen"},
+  {q:"Hva het den kroatiske valutaen før den ble erstattet med euro?",opts:["Dinar","Forint","Kuna"],a:"Kuna",post:"Markedet"}
+];
+
+const LOCKOUT = 60;
+const JB_URL = "https://api.jsonbin.io/v3/b/6a5dafc6f5f4af5e29a60c24";
+const JB_KEY = "$2a$10$jue8mbEpng4LHJ0RoO/YS.HXiwlcyeSwxTr.OHC2OzbnIJ6MJochK";
+let teamName="",qs=[],cur=0,answers=[],passes=0,wrongAttempts=0,passedCur=false,penalties=0,lockTimer=null,lockSecs=0,afterLock="next";
+let quizStartTid=null,sporsmalLogg=[],sporsmalStartTid=null,forsokListe=[];
+
+async function sendKastelResultat(resultat){
+  try{
+    const r1 = await fetch(JB_URL+"/latest",{headers:{"X-Master-Key":JB_KEY,"Cache-Control":"no-cache"}});
+    const data = (await r1.json()).record||{};
+    if(!data.kastel_resultater) data.kastel_resultater=[];
+    // Fjern evt. eksisterende resultat for samme lag
+    data.kastel_resultater = data.kastel_resultater.filter(r=>r.lag!==resultat.lag);
+    data.kastel_resultater.push(resultat);
+    await fetch(JB_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":JB_KEY},body:JSON.stringify(data)});
+  }catch(e){ console.error("Kunne ikke sende resultat:",e); }
+}
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+document.getElementById("tn").addEventListener("input",e=>{
+  document.getElementById("go-btn").disabled=!e.target.value.trim();
+});
+
+function velgLag(navn){
+  teamName=navn;
+  document.querySelectorAll(".lag-btn").forEach(b=>{
+    b.classList.toggle("valgt",b.textContent.trim()===("🏁 "+navn));
+  });
+  document.getElementById("go-btn").disabled=false;
+}
+function startQuiz(){
+  if(!teamName) return;
+  qs=shuffle(QS).map(q=>({...q,opts:shuffle([...q.opts])}));
+  cur=0;answers=[];passes=0;wrongAttempts=0;penalties=0;passedCur=false;
+  sporsmalLogg=[];quizStartTid=Date.now();
+  go("s-q");renderQ();
+}
+
+function go(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));document.getElementById(id).classList.add("on");}
+
+function renderQ(isRepeat){
+  if(!isRepeat){passedCur=false;forsokListe=[];}
+  sporsmalStartTid=Date.now();
+  if(cur>=qs.length){showDone();return;}
+  const q=qs[cur];
+  document.getElementById("q-prog").textContent=`Spm ${cur+1} / ${qs.length}`;
+  document.getElementById("q-from").textContent=`Fra: ${q.post}`;
+  document.getElementById("q-txt").textContent=q.q;
+  const pb=document.getElementById("pass-btn");
+  pb.disabled=passedCur;
+  pb.textContent=passedCur?"↶ PASS brukt — må svare!":"↶ PASS — neste person tar over";
+
+  const dots=document.getElementById("q-dots");
+  dots.innerHTML="";
+  for(let i=0;i<qs.length;i++){
+    const d=document.createElement("div");
+    d.className="qd"+(i<cur?" c":i===cur?" p":"");
+    dots.appendChild(d);
+  }
+  updatePenDisp();
+
+  const opts=document.getElementById("q-opts");
+  opts.innerHTML="";
+  ["A","B","C"].forEach((lbl,i)=>{
+    const btn=document.createElement("button");
+    btn.className="opt";
+    btn.innerHTML=`<span class="opt-lbl">${lbl}</span><span class="opt-txt">${q.opts[i]}</span>`;
+    btn.onclick=()=>pick(q.opts[i],btn);
+    opts.appendChild(btn);
+  });
+}
+
+function pick(val,btn){
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=null);
+  document.getElementById("pass-btn").disabled=true;
+  const correct=val===qs[cur].a;
+  if(correct){
+    btn.classList.add("correct");
+    answers.push("c");
+    forsokListe.push({svar:val,riktig:true});
+    sporsmalLogg.push({nr:cur+1,tekst:qs[cur].q,forsok:forsokListe,riktig:qs[cur].a,tid_sek:Math.round((Date.now()-sporsmalStartTid)/1000),pass:false});
+    setTimeout(()=>{cur++;renderQ();},800);
+  } else {
+    btn.classList.add("wrong");
+    document.querySelectorAll(".opt").forEach(b=>{
+      if(b.querySelector(".opt-txt").textContent===qs[cur].a)b.classList.add("correct");
+    });
+    wrongAttempts++;
+    forsokListe.push({svar:val,riktig:false});
+    afterLock="same";
+    setTimeout(()=>lockout("wrong"),900);
+  }
+}
+
+function doPass(){
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=null);
+  document.getElementById("pass-btn").disabled=true;
+  passes++;passedCur=true;
+  sporsmalLogg.push({nr:cur+1,tekst:qs[cur].q,forsok:forsokListe,riktig:qs[cur].a,tid_sek:Math.round((Date.now()-sporsmalStartTid)/1000),pass:true});
+  forsokListe=[];
+  afterLock="same";
+  lockout("pass");
+}
+
+function lockout(reason){
+  const isWrong=reason==="wrong";
+  document.getElementById("l-ico").textContent=isWrong?"✕":"↶";
+  document.getElementById("l-h").textContent=isWrong?"Feil svar!":"Passet!";
+  document.getElementById("l-sub").textContent=isWrong
+    ?"Riktig svar er vist. Spørsmålet kommer tilbake — neste person prøver!"
+    :"Neste person tar over etter nedtellingen.";
+  const ring=document.getElementById("ring");
+  ring.style.stroke=isWrong?"#e00515":"#f59e0b";
+  ring.style.strokeDashoffset="0";
+  lockSecs=LOCKOUT;
+  go("s-lock");
+  updateRing();
+  lockTimer=setInterval(()=>{
+    lockSecs--;updateRing();
+    if(lockSecs<=0){
+      clearInterval(lockTimer);
+      go("s-q");
+      if(afterLock==="next"){cur++;renderQ(false);}
+      else renderQ(true);
+    }
+  },1000);
+}
+
+function updateRing(){
+  document.getElementById("r-secs").textContent=lockSecs;
+  const c=597,elapsed=LOCKOUT-lockSecs;
+  document.getElementById("ring").style.strokeDashoffset=(elapsed/LOCKOUT)*c;
+}
+
+function addPenalty(){
+  penalties++;updatePenDisp();
+  const b=document.getElementById("pen-add");
+  b.style.background="#e00515";b.style.color="#fff";
+  setTimeout(()=>{b.style.background="";b.style.color="";},350);
+}
+
+function updatePenDisp(){
+  const d=document.getElementById("pen-disp");
+  d.textContent=penalties>0?`⚠ ${penalties}×5 = ${penalties*5} min`:"";
+}
+
+function showDone(){
+  go("s-done");
+  document.getElementById("done-team").textContent=teamName;
+  const totalTid=Math.round((Date.now()-quizStartTid)/1000);
+  const resultat={lag:teamName,tid_total:totalTid,straff_min:penalties*5,feil_forsok:wrongAttempts,antall_pass:passes,fullfort:new Date().toISOString(),sporsmal:sporsmalLogg};
+  sendKastelResultat(resultat);
+  const c=answers.filter(a=>a==="c").length;
+  const totalMin=penalties*5;
+  document.getElementById("score-card").innerHTML=`
+    <div class="sr"><span class="sr-l">Riktige svar</span><span class="sr-v g">${c} / ${qs.length}</span></div>
+    <div class="sr"><span class="sr-l">Feil forsøk</span><span class="sr-v r">${wrongAttempts}</span></div>
+    <div class="sr"><span class="sr-l">Antall pass</span><span class="sr-v am">${passes}</span></div>
+    <div class="sr"><span class="sr-l">Straffetid</span><span class="sr-v ${totalMin>0?"r":"g"}">${totalMin} min</span></div>
+  `;
+  if(totalMin>0){
+    const pb=document.getElementById("pen-box");
+    pb.style.display="";
+    pb.innerHTML=`<div class="pb-lbl">&#9888; Laget m\xe5 vente</div><div class="pb-time">${totalMin} minutter</div><div class="pb-note">Passordet l\xe5ses opp automatisk n\xe5r ventetiden er over.</div>`;
+  }
+  const revBtn=document.getElementById("rev-btn");
+  revBtn.style.display="";
+  if(totalMin>0){
+    let remaining=totalMin*60;
+    revBtn.disabled=true;
+    const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+    revBtn.textContent=`&#128274; Passord l\xe5st \u2014 ${fmt(remaining)}`;
+    const cd=setInterval(()=>{
+      remaining--;
+      revBtn.textContent=`&#128274; Passord l\xe5st \u2014 ${fmt(remaining)}`;
+      if(remaining<=0){
+        clearInterval(cd);
+        revBtn.disabled=false;
+        revBtn.textContent="Vis passord til neste post \u2192";
+      }
+    },1000);
+  }
+}
+
+function revealPw(){
+  document.getElementById("pw-out").style.display="block";
+  document.getElementById("rev-btn").style.display="none";
+}
+
+function restart(){
+  const pw=prompt("Passord:");
+  if(!pw||pw.trim().toUpperCase()!=="KOMITE")return;
+  document.getElementById("pw-out").style.display="none";
+  document.getElementById("pen-box").style.display="none";
+  document.getElementById("rev-btn").style.display="none";
+  go("s-setup");
+}
+</script>
+</body>
+</html>
