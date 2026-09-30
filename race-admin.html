@@ -820,10 +820,10 @@ async function nullstillTracker(){
 async function nullstillKastel(){
   if(!confirm("Nullstill alle Kaštel-resultater? Dette kan ikke angres.")) return;
   try{
-    const r = await fetch(BIN_URL+"/latest",{headers:{"X-Master-Key":MASTER_KEY,"Cache-Control":"no-cache"}});
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN}/latest`,{headers:{"X-Master-Key":KEY,"Cache-Control":"no-cache"}});
     const data = (await r.json()).record||{};
     data.kastel_resultater = [];
-    await fetch(BIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":MASTER_KEY},body:JSON.stringify(data)});
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN}`,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":KEY},body:JSON.stringify(data)});
     hentKastelResultater();
   }catch(e){ alert("Feil: "+e.message); }
 }
@@ -832,7 +832,7 @@ async function hentKastelResultater(){
   const wrap = document.getElementById("kastel-wrap");
   wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px">Henter...</div>';
   try{
-    const r = await fetch(BIN_URL+"/latest",{headers:{"X-Master-Key":MASTER_KEY,"Cache-Control":"no-cache"}});
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN}/latest`,{headers:{"X-Master-Key":KEY,"Cache-Control":"no-cache"}});
     const data = (await r.json()).record||{};
     const res = data.kastel_resultater||[];
 
