@@ -364,21 +364,30 @@
 
   <div id="tab-poster" style="display:none;padding:12px">
     <div style="font-size:13px;font-weight:800;color:var(--gold);margin-bottom:12px">📍 Poster og passord</div>
-    ${[
-      {post:"Pula Arena — Start",    ansvar:"Andreas",  pw:"BUEN"},
-      {post:"Sergius-buen",         ansvar:"Ingen. Godkjenn via Andreas.", pw:"MARKET"},
-      {post:"Tržnica — Green Market",ansvar:"Petter",   pw:"OKSE"},
-      {post:"Forum & Auguststempelet",ansvar:"Erik",    pw:"KASTEL"},
-      {post:"Kaštel-festningen",    ansvar:"Daniel",    pw:"VISTA"},
-      {post:"Havnepromenaden",      ansvar:"Ingvild",   pw:"BRAVO"},
-    ].map(p=>`
-      <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
-        <div>
-          <div style="font-size:13px;font-weight:800;color:#e8ddd0">${p.post}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: ${p.ansvar}</div>
-        </div>
-        <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">${p.pw}</div>
-      </div>`).join("")}
+    <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-size:13px;font-weight:800;color:#e8ddd0">Pula Arena — Start</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: Andreas</div></div>
+      <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">BUEN</div>
+    </div>
+    <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-size:13px;font-weight:800;color:#e8ddd0">Sergius-buen</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: Ingen. Godkjenn via Andreas.</div></div>
+      <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">MARKET</div>
+    </div>
+    <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-size:13px;font-weight:800;color:#e8ddd0">Tržnica — Green Market</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: Petter</div></div>
+      <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">OKSE</div>
+    </div>
+    <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-size:13px;font-weight:800;color:#e8ddd0">Forum & Auguststempelet</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: Erik</div></div>
+      <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">KASTEL</div>
+    </div>
+    <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-size:13px;font-weight:800;color:#e8ddd0">Kaštel-festningen</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: Daniel</div></div>
+      <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">VISTA</div>
+    </div>
+    <div style="background:#0C1624;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-size:13px;font-weight:800;color:#e8ddd0">Havnepromenaden</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Ansvarlig: Ingvild</div></div>
+      <div style="font-size:15px;font-weight:900;color:var(--gold);letter-spacing:.08em;flex-shrink:0">BRAVO</div>
+    </div>
     <div style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6">
       Ankomst-passord: <strong style="color:var(--gold)">NAMNAM</strong> (Tržnica/Petter) · <strong style="color:var(--gold)">TJOISES</strong> (Havnepromenaden/Ingvild)
     </div>
