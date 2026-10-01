@@ -322,7 +322,7 @@
     <button id="main-tab-gjettelek" class="main-tab-btn" onclick="bbByttHovedfane('gjettelek')">🗺️ Gjettelek</button>
   </div>
 
-  <div id="main-sec-varsler" class="main-sec" style="padding:16px 16px 0">
+  <div id="main-sec-varsler" class="main-sec" style="display:none;padding:16px 16px 0">
     <div class="card" style="margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <div>
@@ -724,6 +724,7 @@ const BOSS_PW = "GRIBB67";
 function bbFullforInnlogging(){
   document.getElementById("pw-gate").style.display = "none";
   document.getElementById("app-main").style.display = "block";
+  bbByttHovedfane("varsler");
   hentAIInnboks();
   bbHentVarsler(false);
   bbStartPolling();
