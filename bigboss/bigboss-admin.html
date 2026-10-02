@@ -1775,7 +1775,7 @@ async function sendBossSvar(til, inputId){
   if(!inp || !inp.value.trim()) return;
   const svarTxt = inp.value.trim();
   if(st) st.textContent = "Sender...";
-  const data = (await jbGet()) || {varsel:{melding:"",aktiv:false}, chat:{meldinger:[],svar:[]}};
+  const data = (await jbGet(true)) || {varsel:{melding:"",aktiv:false}, chat:{meldinger:[],svar:[]}};
   if(!data.chat) data.chat = {meldinger:[], svar:[]};
   if(!data.chat.svar) data.chat.svar = [];
   data.chat.svar.push({
@@ -1793,7 +1793,9 @@ async function sendBossSvar(til, inputId){
     setTimeout(()=>{ if(st) st.textContent=""; }, 2000);
     hentAIInnboks();
   } else {
-    if(st) st.textContent = "❌ Feil";
+    if(st) st.textContent = "❌ Lagring feilet — prøv igjen";
+    setTimeout(()=>{ if(st) st.textContent=""; }, 4000);
+    console.error("jbSave feilet i sendBossSvar", data);
   }
 }
 </script>
