@@ -375,6 +375,15 @@
   </div>
 
   <div id="main-sec-stats" class="main-sec" style="display:none;padding:16px 16px 0">
+    <div style="background:var(--card2);border-radius:12px;border:1px solid var(--border);padding:14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:800;color:var(--gold)">🍺 Literboard</div>
+        <button onclick="bbHentLiterboard()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">↻ Oppdater</button>
+      </div>
+      <div id="bb-liter-wrap">
+        <div style="font-size:12px;color:var(--muted);font-style:italic">Trykk «Oppdater» for å hente</div>
+      </div>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
       <button id="stats-tab-oversikt" class="stat-tab-btn active" onclick="statByttFane('oversikt')" style="flex:1">📊 Oversikt</button>
       <button id="stats-tab-person" class="stat-tab-btn" onclick="statByttFane('person')" style="flex:1">👤 Per person</button>
@@ -859,6 +868,52 @@ async function bbOppdaterPushStatus(){
       statusEl.textContent = "Kunne ikke sjekke status";
     }
   });
+}
+
+async function bbHentLiterboard(){
+  const wrap = document.getElementById("bb-liter-wrap");
+  if(!wrap) return;
+  wrap.innerHTML = '<div style="font-size:12px;color:var(--muted)">Henter...</div>';
+  try{
+    const data = await jbGet(true);
+    const board = data && data.literboard ? data.literboard : {};
+    const sortert = Object.entries(board).sort((a,b)=>b[1]-a[1]);
+    if(!sortert.length){
+      wrap.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic">Ingen registrerte ennå</div>';
+      return;
+    }
+    const medaljer = ["🥇","🥈","🥉"];
+    wrap.innerHTML = sortert.map(([navn,ant],i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:.5px solid var(--border)">
+        <span style="font-size:15px">${medaljer[i]||'🍺'}</span>
+        <span style="flex:1;font-size:13px;font-weight:700;color:var(--text)">${escHTML(navn)}</span>
+        <span style="font-size:15px;font-weight:900;color:var(--gold);min-width:24px;text-align:center">${ant}</span>
+        <button onclick="bbLiterJuster('${escHTML(navn)}',${ant})" style="background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">✏️</button>
+        <button onclick="bbLiterSlett('${escHTML(navn)}')" style="background:none;border:none;color:#e05050;cursor:pointer;font-size:15px;padding:2px 4px">🗑</button>
+      </div>`).join("");
+  }catch(e){
+    wrap.innerHTML = `<div style="font-size:12px;color:#e05050">Feil: ${e.message}</div>`;
+  }
+}
+async function bbLiterJuster(navn, gjeldende){
+  const nytt = parseInt(prompt(`Nytt antall for ${navn} (nå: ${gjeldende}):`, gjeldende));
+  if(isNaN(nytt)||nytt<0) return;
+  try{
+    const data = await jbGet(true);
+    if(!data.literboard) data.literboard={};
+    data.literboard[navn] = nytt;
+    await jbSave(data);
+    bbHentLiterboard();
+  }catch(e){ alert("Feil: "+e.message); }
+}
+async function bbLiterSlett(navn){
+  if(!confirm(`Fjern ${navn} fra Literboard?`)) return;
+  try{
+    const data = await jbGet(true);
+    if(data.literboard) delete data.literboard[navn];
+    await jbSave(data);
+    bbHentLiterboard();
+  }catch(e){ alert("Feil: "+e.message); }
 }
 
 async function bbSjekkDilemmaStatus(){
